@@ -3758,7 +3758,10 @@
         "weekdays": "On weekdays at {at}",
         "week": "Every {day} at {at}",
         "month": "On day {day} of every month at {at}",
-        "file": "When you upload a file"
+        "file": "When you upload a file",
+        "webhook": "When a webhook is received",
+        "new_email": "When a new email arrives",
+        "rss": "When a new RSS item appears"
       },
       "weekdays": {
         "d1": "Monday",
@@ -3775,7 +3778,15 @@
         "calendar_week": "Your calendar, the next 7 days",
         "finances_week": "Your Finances, the last 7 days",
         "finances_month": "Your Finances, the last 31 days",
-        "uploaded_file": "The file that was uploaded"
+        "uploaded_file": "The file that was uploaded",
+        "google_sheets": "Google Sheets data",
+        "website_scrape": "Website content",
+        "rss_feed": "RSS feed",
+        "last_emails": "Recent emails",
+        "database_query": "Database query",
+        "crm_contacts": "CRM contacts",
+        "social_mentions": "Social mentions",
+        "analytics_report": "Analytics report"
       },
       "condition": "If something was found, go on",
       "conditionElse": "otherwise: stops here, no charge",
@@ -3784,7 +3795,20 @@
         "send_telegram": "Sends it to your Telegram",
         "send_email": "Emails it to you",
         "notify": "A notification in the app",
-        "save_to_library": "Puts it in the Library"
+        "save_to_library": "Puts it in the Library",
+        "send_whatsapp": "Sends it on WhatsApp",
+        "send_slack": "Sends it to Slack",
+        "send_sms": "Sends it by SMS",
+        "post_instagram": "Posts on Instagram",
+        "post_facebook": "Posts on Facebook",
+        "post_twitter": "Posts on X (Twitter)",
+        "post_linkedin": "Posts on LinkedIn",
+        "sheets_write": "Writes to Google Sheets",
+        "database_write": "Writes to database",
+        "webhook_post": "Sends HTTP webhook",
+        "create_task": "Creates a task",
+        "create_event": "Creates a calendar event",
+        "create_invoice": "Creates an invoice"
       },
       "needsConnection": "Needs a connection: {name}",
       "connect": "Connect",

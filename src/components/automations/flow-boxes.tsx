@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Bell, BookOpen, Check, Clock, FileUp, Filter, Mail, PauseCircle, Send, Sparkles, Table2, CalendarDays, Timer } from "lucide-react";
+import { BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Database, FileUp, Filter, Globe, Hash, Mail, MessageCircle, MessageSquare, PauseCircle, Phone, Rss, Send, Share2, Sparkles, Table2, Timer, Webhook, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import {
   ACTIONS,
@@ -40,18 +40,38 @@ import { getProvider } from "@/lib/integrations/providers";
  * Every word is a literal key here (dashboard.automations.*), so the
  * message slicer sees them all.
  */
-export type Connected = { google_calendar: boolean; telegram: boolean };
+export type Connected = Record<string, boolean>;
 
 /** The names of what an automation connects to: brand names, the same in every language. */
-export const CONNECTION_NAME: Record<keyof Connected, string> = {
+export const CONNECTION_NAME: Record<string, string> = {
   google_calendar: String(getProvider("google_calendar")?.name),
   telegram: "Telegram",
+  whatsapp: "WhatsApp",
+  slack: "Slack",
+  instagram: "Instagram",
+  facebook: "Facebook",
+  twitter: "X (Twitter)",
+  linkedin: "LinkedIn",
+  google_sheets: "Google Sheets",
+  sms: "SMS",
+  crm: "CRM",
+  webhook: "Webhook",
 };
 
 /** Where each connection is made. */
-export const CONNECT_AT: Record<keyof Connected, string> = {
+export const CONNECT_AT: Record<string, string> = {
   google_calendar: "/dashboard/integrations",
   telegram: "/dashboard/agents",
+  whatsapp: "/dashboard/integrations",
+  slack: "/dashboard/integrations",
+  instagram: "/dashboard/integrations",
+  facebook: "/dashboard/integrations",
+  twitter: "/dashboard/integrations",
+  linkedin: "/dashboard/integrations",
+  google_sheets: "/dashboard/integrations",
+  sms: "/dashboard/integrations",
+  crm: "/dashboard/integrations",
+  webhook: "/dashboard/integrations",
 };
 
 // n8n-QUALITY NODE DESIGN. Each node is a compact card with a coloured
@@ -85,12 +105,33 @@ function useWords() {
     finances_week: t("sources.finances_week"),
     finances_month: t("sources.finances_month"),
     uploaded_file: t("sources.uploaded_file"),
+    google_sheets: t("sources.google_sheets"),
+    website_scrape: t("sources.website_scrape"),
+    rss_feed: t("sources.rss_feed"),
+    last_emails: t("sources.last_emails"),
+    database_query: t("sources.database_query"),
+    crm_contacts: t("sources.crm_contacts"),
+    social_mentions: t("sources.social_mentions"),
+    analytics_report: t("sources.analytics_report"),
   };
   const action: Record<ActionKind, string> = {
     send_telegram: t("actions.send_telegram"),
     send_email: t("actions.send_email"),
     notify: t("actions.notify"),
     save_to_library: t("actions.save_to_library"),
+    send_whatsapp: t("actions.send_whatsapp"),
+    send_slack: t("actions.send_slack"),
+    send_sms: t("actions.send_sms"),
+    post_instagram: t("actions.post_instagram"),
+    post_facebook: t("actions.post_facebook"),
+    post_twitter: t("actions.post_twitter"),
+    post_linkedin: t("actions.post_linkedin"),
+    sheets_write: t("actions.sheets_write"),
+    database_write: t("actions.database_write"),
+    webhook_post: t("actions.webhook_post"),
+    create_task: t("actions.create_task"),
+    create_event: t("actions.create_event"),
+    create_invoice: t("actions.create_invoice"),
   };
   const weekday = [t("weekdays.d1"), t("weekdays.d2"), t("weekdays.d3"), t("weekdays.d4"), t("weekdays.d5"), t("weekdays.d6"), t("weekdays.d7")];
   // «Όταν → Αν → Κάνε»: the part of the sentence each box is (lib/automations/boxes.ts SENTENCE_PART).
@@ -98,10 +139,16 @@ function useWords() {
   const needs = CONNECTION_NAME;
   function start(box: StartBox): string {
     if (box.when === "file_uploaded") return t("start.file");
-    if (box.every === "day") return t("start.day", { at: box.at });
-    if (box.every === "weekdays") return t("start.weekdays", { at: box.at });
-    if (box.every === "week") return t("start.week", { day: weekday[(box.weekday ?? 1) - 1], at: box.at });
-    return t("start.month", { day: box.monthDay ?? 1, at: box.at });
+    if (box.when === "webhook") return t("start.webhook");
+    if (box.when === "new_email") return t("start.new_email");
+    if (box.when === "rss") return t("start.rss");
+    if (box.when === "time") {
+      if (box.every === "day") return t("start.day", { at: box.at });
+      if (box.every === "weekdays") return t("start.weekdays", { at: box.at });
+      if (box.every === "week") return t("start.week", { day: weekday[(box.weekday ?? 1) - 1], at: box.at });
+      return t("start.month", { day: box.monthDay ?? 1, at: box.at });
+    }
+    return t("start.file");
   }
   function describe(box: Box): string {
     switch (box.kind) {
@@ -184,14 +231,45 @@ export function useBoxLabel(): (box: Box) => string {
 /** The icon for one box — a 20px lucide icon, white. */
 function BoxIconInner({ box }: { box: Box }) {
   const cls = "h-5 w-5 text-foreground";
-  if (box.kind === "start") return box.when === "file_uploaded" ? <FileUp className={cls} aria-hidden="true" /> : <Clock className={cls} aria-hidden="true" />;
-  if (box.kind === "read") return box.source.startsWith("calendar_") ? <CalendarDays className={cls} aria-hidden="true" /> : box.source === "uploaded_file" ? <FileUp className={cls} aria-hidden="true" /> : <Table2 className={cls} aria-hidden="true" />;
+  if (box.kind === "start") {
+    if (box.when === "file_uploaded") return <FileUp className={cls} aria-hidden="true" />;
+    if (box.when === "webhook") return <Webhook className={cls} aria-hidden="true" />;
+    if (box.when === "new_email") return <Mail className={cls} aria-hidden="true" />;
+    if (box.when === "rss") return <Rss className={cls} aria-hidden="true" />;
+    return <Clock className={cls} aria-hidden="true" />;
+  }
+  if (box.kind === "read") {
+    if (box.source.startsWith("calendar_")) return <CalendarDays className={cls} aria-hidden="true" />;
+    if (box.source === "uploaded_file") return <FileUp className={cls} aria-hidden="true" />;
+    if (box.source === "google_sheets") return <Table2 className={cls} aria-hidden="true" />;
+    if (box.source === "website_scrape") return <Globe className={cls} aria-hidden="true" />;
+    if (box.source === "rss_feed") return <Rss className={cls} aria-hidden="true" />;
+    if (box.source === "last_emails") return <Mail className={cls} aria-hidden="true" />;
+    if (box.source === "database_query") return <Database className={cls} aria-hidden="true" />;
+    if (box.source === "crm_contacts") return <BookOpen className={cls} aria-hidden="true" />;
+    if (box.source === "social_mentions") return <Hash className={cls} aria-hidden="true" />;
+    if (box.source === "analytics_report") return <BarChart3 className={cls} aria-hidden="true" />;
+    return <Table2 className={cls} aria-hidden="true" />;
+  }
   if (box.kind === "ai") return <Sparkles className={cls} aria-hidden="true" />;
   if (box.kind === "condition") return <Filter className={cls} aria-hidden="true" />;
   if (box.kind === "approval") return <PauseCircle className={cls} aria-hidden="true" />;
-  if (box.do === "send_telegram") return <Send className={cls} aria-hidden="true" />;
-  if (box.do === "send_email") return <Mail className={cls} aria-hidden="true" />;
-  if (box.do === "notify") return <Bell className={cls} aria-hidden="true" />;
+  if (box.kind === "action") {
+    if (box.do === "send_telegram") return <Send className={cls} aria-hidden="true" />;
+    if (box.do === "send_email") return <Mail className={cls} aria-hidden="true" />;
+    if (box.do === "send_whatsapp") return <MessageCircle className={cls} aria-hidden="true" />;
+    if (box.do === "send_slack") return <MessageSquare className={cls} aria-hidden="true" />;
+    if (box.do === "send_sms") return <Phone className={cls} aria-hidden="true" />;
+    if (box.do === "post_instagram" || box.do === "post_facebook" || box.do === "post_twitter") return <Share2 className={cls} aria-hidden="true" />;
+    if (box.do === "post_linkedin") return <Briefcase className={cls} aria-hidden="true" />;
+    if (box.do === "sheets_write") return <Table2 className={cls} aria-hidden="true" />;
+    if (box.do === "database_write") return <Database className={cls} aria-hidden="true" />;
+    if (box.do === "webhook_post") return <Webhook className={cls} aria-hidden="true" />;
+    if (box.do === "create_task") return <Zap className={cls} aria-hidden="true" />;
+    if (box.do === "create_event") return <Calendar className={cls} aria-hidden="true" />;
+    if (box.do === "create_invoice") return <BookOpen className={cls} aria-hidden="true" />;
+    if (box.do === "notify") return <Bell className={cls} aria-hidden="true" />;
+  }
   return <BookOpen className={cls} aria-hidden="true" />;
 }
 

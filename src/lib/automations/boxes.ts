@@ -25,9 +25,20 @@ export const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const; // Monday = 1, as in ISO
 
 export type StartBox =
   | { id: string; kind: "start"; when: "time"; every: "day" | "weekdays" | "week" | "month"; at: string; weekday?: number; monthDay?: number }
-  | { id: string; kind: "start"; when: "file_uploaded" };
+  | { id: string; kind: "start"; when: "file_uploaded" }
+  | { id: string; kind: "start"; when: "webhook" }
+  | { id: string; kind: "start"; when: "new_email" }
+  | { id: string; kind: "start"; when: "rss"; url?: string };
 
-export const READ_SOURCES = ["calendar_today", "calendar_tomorrow", "calendar_week", "finances_week", "finances_month", "uploaded_file"] as const;
+export const READ_SOURCES = [
+  // Original
+  "calendar_today", "calendar_tomorrow", "calendar_week",
+  "finances_week", "finances_month", "uploaded_file",
+  // Data sources (2026-11-21)
+  "google_sheets", "website_scrape", "rss_feed",
+  "last_emails", "database_query", "crm_contacts",
+  "social_mentions", "analytics_report",
+] as const;
 export type ReadSource = (typeof READ_SOURCES)[number];
 export type ReadBox = { id: string; kind: "read"; source: ReadSource };
 
@@ -38,7 +49,18 @@ export type ConditionBox = { id: string; kind: "condition"; test: "has_content" 
 
 export type ApprovalBox = { id: string; kind: "approval" };
 
-export const ACTIONS = ["send_telegram", "send_email", "notify", "save_to_library"] as const;
+export const ACTIONS = [
+  // Original
+  "send_telegram", "send_email", "notify", "save_to_library",
+  // Communication (2026-11-21)
+  "send_whatsapp", "send_slack", "send_sms",
+  // Social media (2026-11-21)
+  "post_instagram", "post_facebook", "post_twitter", "post_linkedin",
+  // Data (2026-11-21)
+  "sheets_write", "database_write", "webhook_post",
+  // Productivity (2026-11-21)
+  "create_task", "create_event", "create_invoice",
+] as const;
 export type ActionKind = (typeof ACTIONS)[number];
 export type ActionBox = { id: string; kind: "action"; do: ActionKind };
 
@@ -50,6 +72,9 @@ const BOX_ID = /^[a-z0-9-]{1,24}$/;
 
 function readStart(v: Record<string, unknown>, id: string): StartBox | null {
   if (v.when === "file_uploaded") return { id, kind: "start", when: "file_uploaded" };
+  if (v.when === "webhook") return { id, kind: "start", when: "webhook" };
+  if (v.when === "new_email") return { id, kind: "start", when: "new_email" };
+  if (v.when === "rss") return { id, kind: "start", when: "rss", ...(typeof v.url === "string" ? { url: v.url.slice(0, 500) } : {}) };
   if (v.when !== "time") return null;
   const every = v.every;
   if (every !== "day" && every !== "weekdays" && every !== "week" && every !== "month") return null;
@@ -138,12 +163,31 @@ export function cronFor(start: StartBox): string | null {
   }
 }
 
-/** What a box needs connected before the automation may be switched on. */
-export function connectionsNeeded(boxes: Box[]): ("google_calendar" | "telegram")[] {
-  const needs = new Set<"google_calendar" | "telegram">();
+/** What a box needs connected before the automation may be switched on.
+ *  Every integration that is not built into Ionexa itself is listed here;
+ *  the screen says "Needs a connection: X" and links to Connect. */
+export type ConnectionKey = "google_calendar" | "telegram" | "whatsapp" | "slack" | "instagram" | "facebook" | "twitter" | "linkedin" | "google_sheets" | "sms" | "crm" | "webhook";
+export function connectionsNeeded(boxes: Box[]): ConnectionKey[] {
+  const needs = new Set<ConnectionKey>();
   for (const box of boxes) {
+    if (box.kind === "start" && box.when === "webhook") needs.add("webhook");
     if (box.kind === "read" && box.source.startsWith("calendar_")) needs.add("google_calendar");
-    if (box.kind === "action" && box.do === "send_telegram") needs.add("telegram");
+    if (box.kind === "read" && box.source === "google_sheets") needs.add("google_sheets");
+    if (box.kind === "read" && box.source === "crm_contacts") needs.add("crm");
+    if (box.kind === "read" && box.source === "social_mentions") needs.add("instagram");
+    if (box.kind === "action") {
+      if (box.do === "send_telegram") needs.add("telegram");
+      if (box.do === "send_whatsapp") needs.add("whatsapp");
+      if (box.do === "send_slack") needs.add("slack");
+      if (box.do === "send_sms") needs.add("sms");
+      if (box.do === "post_instagram") needs.add("instagram");
+      if (box.do === "post_facebook") needs.add("facebook");
+      if (box.do === "post_twitter") needs.add("twitter");
+      if (box.do === "post_linkedin") needs.add("linkedin");
+      if (box.do === "sheets_write") needs.add("google_sheets");
+      if (box.do === "webhook_post") needs.add("webhook");
+      if (box.do === "create_event") needs.add("google_calendar");
+    }
   }
   return [...needs];
 }

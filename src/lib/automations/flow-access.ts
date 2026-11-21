@@ -84,7 +84,7 @@ export function nextRunFor(boxes: Box[], timeZone: string, from = new Date()): s
  *
  * The calendar counts as connected when the person has connected it.
  */
-export async function missingConnections(user: { id: string; email?: string | null }, boxes: Box[]): Promise<("google_calendar" | "telegram")[]> {
+export async function missingConnections(user: { id: string; email?: string | null }, boxes: Box[]): Promise<string[]> {
   const needs = connectionsNeeded(boxes);
   if (needs.length === 0) return [];
   const calendar = needs.includes("google_calendar");
@@ -92,11 +92,13 @@ export async function missingConnections(user: { id: string; email?: string | nu
     calendar ? listIntegrations(user.id) : Promise.resolve([]),
     needs.includes("telegram") ? listDeliveryChannels(user.id) : Promise.resolve([]),
   ]);
-  return needs.filter((need) =>
-    need === "google_calendar"
-      ? !integrations.some((i) => i.provider === "google_calendar" && i.status === "connected")
-      : !channels.some((c) => c.channel === "telegram")
-  );
+  return needs.filter((need) => {
+    // Known connected integrations
+    if (need === "google_calendar") return !integrations.some((i) => i.provider === "google_calendar" && i.status === "connected");
+    if (need === "telegram") return !channels.some((c) => c.channel === "telegram");
+    // All other integrations: not yet connected (will be available through Connect)
+    return true;
+  });
 }
 
 /** A claim older than this belonged to a request that died. */
@@ -181,7 +183,7 @@ export async function scheduleAfterChange(
   user: { id: string; email?: string | null },
   flow: { is_active: boolean; time_zone: string },
   boxes: Box[]
-): Promise<{ patch: Record<string, unknown>; paused: ("google_calendar" | "telegram")[] }> {
+): Promise<{ patch: Record<string, unknown>; paused: string[] }> {
   if (!flow.is_active) return { patch: {}, paused: [] };
   const missing = await missingConnections(user, boxes);
   if (missing.length > 0) return { patch: { is_active: false, next_run_at: null }, paused: missing };

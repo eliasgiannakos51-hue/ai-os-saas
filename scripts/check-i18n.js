@@ -1121,6 +1121,9 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "projects.notes.heading",
   // "Ionexa Payments" is a brand name — identical in every language.
   "pricing.rows.ionexaPayments",
+  // "RSS feed" is the technical term, used unchanged in el/de/es/it/pt
+  // (the same way "email" or "online" is — ja/zh/ar use it too).
+  "dashboard.automations.sources.rss_feed",
   // "Social → Post" on the Automation landing (2026-11-20): "Social"
   // is the English tech term used unchanged in de/it/pt/fr/es, and the
   // arrow + "Post" follow the same pattern as the template group names

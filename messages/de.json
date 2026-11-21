@@ -3758,7 +3758,10 @@
         "weekdays": "Werktags um {at}",
         "week": "Jeden {day} um {at}",
         "month": "Am {day}. jedes Monats um {at}",
-        "file": "Wenn du eine Datei hochlädst"
+        "file": "Wenn du eine Datei hochlädst",
+        "webhook": "Bei eingehendem Webhook",
+        "new_email": "Bei neuer E-Mail",
+        "rss": "Bei neuem RSS-Eintrag"
       },
       "weekdays": {
         "d1": "Montag",
@@ -3775,7 +3778,15 @@
         "calendar_week": "Dein Kalender, die nächsten 7 Tage",
         "finances_week": "Deine Finanzen, die letzten 7 Tage",
         "finances_month": "Deine Finanzen, die letzten 31 Tage",
-        "uploaded_file": "Die hochgeladene Datei"
+        "uploaded_file": "Die hochgeladene Datei",
+        "google_sheets": "Google Sheets-Daten",
+        "website_scrape": "Website-Inhalt",
+        "rss_feed": "RSS-Feed",
+        "last_emails": "Letzte E-Mails",
+        "database_query": "Datenbankabfrage",
+        "crm_contacts": "CRM-Kontakte",
+        "social_mentions": "Social-Media-Erwähnungen",
+        "analytics_report": "Analysebericht"
       },
       "condition": "Wenn etwas gefunden wurde, weitermachen",
       "conditionElse": "sonst: stoppt hier, keine Kosten",
@@ -3784,7 +3795,20 @@
         "send_telegram": "Schickt es an dein Telegram",
         "send_email": "Schickt es dir per E-Mail",
         "notify": "Eine Benachrichtigung in der App",
-        "save_to_library": "Legt es in die Bibliothek"
+        "save_to_library": "Legt es in die Bibliothek",
+        "send_whatsapp": "Sendet per WhatsApp",
+        "send_slack": "Sendet an Slack",
+        "send_sms": "Sendet per SMS",
+        "post_instagram": "Postet auf Instagram",
+        "post_facebook": "Postet auf Facebook",
+        "post_twitter": "Postet auf X (Twitter)",
+        "post_linkedin": "Postet auf LinkedIn",
+        "sheets_write": "Schreibt in Google Sheets",
+        "database_write": "Schreibt in Datenbank",
+        "webhook_post": "Sendet HTTP-Webhook",
+        "create_task": "Erstellt Aufgabe",
+        "create_event": "Erstellt Kalenderereignis",
+        "create_invoice": "Erstellt Rechnung"
       },
       "needsConnection": "Braucht eine Verbindung: {name}",
       "connect": "Verbinden",

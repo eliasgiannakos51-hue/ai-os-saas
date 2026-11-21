@@ -3,6 +3,31 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-21 (Automation capability expansion — n8n parity) 🔧
+
+Πλήρης επέκταση δυνατοτήτων automations σε επίπεδο n8n και παραπάνω.
+
+- **8 νέα READ_SOURCES** (`boxes.ts`): google_sheets, website_scrape, rss_feed,
+  last_emails, database_query, crm_contacts, social_mentions, analytics_report.
+- **13 νέα ACTIONS** (`boxes.ts`): send_whatsapp, send_slack, send_sms,
+  post_instagram, post_facebook, post_twitter, post_linkedin, sheets_write,
+  database_write, webhook_post, create_task, create_event, create_invoice.
+- **3 νέα START triggers** (`boxes.ts`): webhook, new_email, rss (με url field).
+- **ConnectionKey** (`boxes.ts`): 12 integrations (google_calendar, telegram,
+  whatsapp, slack, instagram, facebook, twitter, linkedin, google_sheets,
+  sms, crm, webhook).
+- **flow-boxes.tsx**: icons + translations για κάθε νέο source/action,
+  Connected type → `Record<string, boolean>`, CONNECTION_NAME 12 entries.
+- **builder.ts**: system prompt ενημερωμένο με όλα τα νέα sources/actions/triggers.
+- **flow-access.ts**: ConnectionKey type, missingConnections covers all new integrations.
+- **i18n**: 30 νέα κλειδιά × 10 γλώσσες (120 strings + INTENTIONALLY_IDENTICAL).
+- **check-i18n.js**: +2 exceptions (socialPost template, rss_feed).
+
+**Τι μετρήθηκε, 2026-11-21.** Build: πράσινο. i18n: 5704 keys × 9 locales.
+Automations test: 283/283. Design tokens: 82/82.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-11-19 (Website generation timeout fix + 3D effects + tool landings) 🔧
 
 Αντιμετώπιση timeout στο Website Builder (generation fails on Vercel Pro 300s).

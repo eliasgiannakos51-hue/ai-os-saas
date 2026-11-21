@@ -3758,7 +3758,10 @@
         "weekdays": "Τις καθημερινές στις {at}",
         "week": "Κάθε {day} στις {at}",
         "month": "Στις {day} κάθε μήνα, ώρα {at}",
-        "file": "Όταν ανεβάζεις αρχείο"
+        "file": "Όταν ανεβάζεις αρχείο",
+        "webhook": "Όταν ληφθεί webhook",
+        "new_email": "Όταν φτάσει νέο email",
+        "rss": "Όταν εμφανιστεί νέο RSS"
       },
       "weekdays": {
         "d1": "Δευτέρα",
@@ -3775,7 +3778,15 @@
         "calendar_week": "Το ημερολόγιό σου, τις επόμενες 7 μέρες",
         "finances_week": "Τα Οικονομικά σου, τις τελευταίες 7 μέρες",
         "finances_month": "Τα Οικονομικά σου, τις τελευταίες 31 μέρες",
-        "uploaded_file": "Το αρχείο που ανέβηκε"
+        "uploaded_file": "Το αρχείο που ανέβηκε",
+        "google_sheets": "Δεδομένα Google Sheets",
+        "website_scrape": "Περιεχόμενο ιστοσελίδας",
+        "rss_feed": "RSS feed",
+        "last_emails": "Πρόσφατα email",
+        "database_query": "Ερώτημα βάσης δεδομένων",
+        "crm_contacts": "Επαφές CRM",
+        "social_mentions": "Αναφορές social media",
+        "analytics_report": "Αναφορά analytics"
       },
       "condition": "Αν βρέθηκε κάτι, συνέχισε",
       "conditionElse": "αλλιώς: σταματά εδώ, χωρίς χρέωση",
@@ -3784,7 +3795,20 @@
         "send_telegram": "Το στέλνει στο Telegram σου",
         "send_email": "Σου το στέλνει με email",
         "notify": "Ειδοποίηση μέσα στην εφαρμογή",
-        "save_to_library": "Το βάζει στη Βιβλιοθήκη"
+        "save_to_library": "Το βάζει στη Βιβλιοθήκη",
+        "send_whatsapp": "Στέλνει στο WhatsApp",
+        "send_slack": "Στέλνει στο Slack",
+        "send_sms": "Στέλνει SMS",
+        "post_instagram": "Δημοσιεύει στο Instagram",
+        "post_facebook": "Δημοσιεύει στο Facebook",
+        "post_twitter": "Δημοσιεύει στο X (Twitter)",
+        "post_linkedin": "Δημοσιεύει στο LinkedIn",
+        "sheets_write": "Γράφει στο Google Sheets",
+        "database_write": "Γράφει στη βάση δεδομένων",
+        "webhook_post": "Στέλνει HTTP webhook",
+        "create_task": "Δημιουργεί εργασία",
+        "create_event": "Δημιουργεί συμβάν ημερολογίου",
+        "create_invoice": "Δημιουργεί τιμολόγιο"
       },
       "needsConnection": "Χρειάζεται σύνδεση: {name}",
       "connect": "Σύνδεση",

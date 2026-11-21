@@ -3758,7 +3758,10 @@
         "weekdays": "في أيام العمل الساعة {at}",
         "week": "كل {day} الساعة {at}",
         "month": "في اليوم {day} من كل شهر الساعة {at}",
-        "file": "عندما ترفع ملفًا"
+        "file": "عندما ترفع ملفًا",
+        "webhook": "عند استلام webhook",
+        "new_email": "عند وصول بريد جديد",
+        "rss": "عند ظهور عنصر RSS جديد"
       },
       "weekdays": {
         "d1": "الاثنين",
@@ -3775,7 +3778,15 @@
         "calendar_week": "تقويمك، الأيام السبعة القادمة",
         "finances_week": "مالياتك، آخر 7 أيام",
         "finances_month": "مالياتك، آخر 31 يومًا",
-        "uploaded_file": "الملف الذي تم رفعه"
+        "uploaded_file": "الملف الذي تم رفعه",
+        "google_sheets": "بيانات Google Sheets",
+        "website_scrape": "محتوى الموقع",
+        "rss_feed": "تغذية RSS",
+        "last_emails": "رسائل بريد حديثة",
+        "database_query": "استعلام قاعدة البيانات",
+        "crm_contacts": "جهات اتصال CRM",
+        "social_mentions": "إشارات اجتماعية",
+        "analytics_report": "تقرير التحليلات"
       },
       "condition": "إذا وُجد شيء، تابع",
       "conditionElse": "وإلا: تتوقف هنا، دون رسوم",
@@ -3784,7 +3795,20 @@
         "send_telegram": "ترسلها إلى Telegram الخاص بك",
         "send_email": "ترسلها إليك بالبريد الإلكتروني",
         "notify": "إشعار في التطبيق",
-        "save_to_library": "تضعها في المكتبة"
+        "save_to_library": "تضعها في المكتبة",
+        "send_whatsapp": "يرسل على واتساب",
+        "send_slack": "يرسل إلى Slack",
+        "send_sms": "يرسل رسالة SMS",
+        "post_instagram": "ينشر على إنستغرام",
+        "post_facebook": "ينشر على فيسبوك",
+        "post_twitter": "ينشر على X (تويتر)",
+        "post_linkedin": "ينشر على لينكدإن",
+        "sheets_write": "يكتب في Google Sheets",
+        "database_write": "يكتب في قاعدة البيانات",
+        "webhook_post": "يرسل webhook HTTP",
+        "create_task": "ينشئ مهمة",
+        "create_event": "ينشئ حدثاً",
+        "create_invoice": "ينشئ فاتورة"
       },
       "needsConnection": "تحتاج إلى اتصال: {name}",
       "connect": "اتصال",

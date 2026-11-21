@@ -3758,7 +3758,10 @@
         "weekdays": "De lunes a viernes a las {at}",
         "week": "Cada {day} a las {at}",
         "month": "El día {day} de cada mes a las {at}",
-        "file": "Cuando subes un archivo"
+        "file": "Cuando subes un archivo",
+        "webhook": "Al recibir un webhook",
+        "new_email": "Al recibir un email",
+        "rss": "Al aparecer nuevo RSS"
       },
       "weekdays": {
         "d1": "lunes",
@@ -3775,7 +3778,15 @@
         "calendar_week": "Tu calendario, los próximos 7 días",
         "finances_week": "Tus Finanzas, los últimos 7 días",
         "finances_month": "Tus Finanzas, los últimos 31 días",
-        "uploaded_file": "El archivo que se subió"
+        "uploaded_file": "El archivo que se subió",
+        "google_sheets": "Datos de Google Sheets",
+        "website_scrape": "Contenido web",
+        "rss_feed": "Feed RSS",
+        "last_emails": "Emails recientes",
+        "database_query": "Consulta de base de datos",
+        "crm_contacts": "Contactos CRM",
+        "social_mentions": "Menciones sociales",
+        "analytics_report": "Informe de analytics"
       },
       "condition": "Si se encontró algo, continúa",
       "conditionElse": "si no: se detiene aquí, sin coste",
@@ -3784,7 +3795,20 @@
         "send_telegram": "Lo envía a tu Telegram",
         "send_email": "Te lo envía por correo",
         "notify": "Una notificación en la app",
-        "save_to_library": "Lo pone en la Biblioteca"
+        "save_to_library": "Lo pone en la Biblioteca",
+        "send_whatsapp": "Envía por WhatsApp",
+        "send_slack": "Envía a Slack",
+        "send_sms": "Envía SMS",
+        "post_instagram": "Publica en Instagram",
+        "post_facebook": "Publica en Facebook",
+        "post_twitter": "Publica en X (Twitter)",
+        "post_linkedin": "Publica en LinkedIn",
+        "sheets_write": "Escribe en Google Sheets",
+        "database_write": "Escribe en base de datos",
+        "webhook_post": "Envía webhook HTTP",
+        "create_task": "Crea tarea",
+        "create_event": "Crea evento de calendario",
+        "create_invoice": "Crea factura"
       },
       "needsConnection": "Necesita una conexión: {name}",
       "connect": "Conectar",

@@ -33,7 +33,8 @@ const BOX_SCHEMA = {
   properties: {
     id: { type: "string", description: "Short id: b1, b2, …" },
     kind: { type: "string", enum: ["start", "read", "ai", "condition", "approval", "action"] },
-    when: { type: "string", enum: ["time", "file_uploaded"], description: "start only" },
+    when: { type: "string", enum: ["time", "file_uploaded", "webhook", "new_email", "rss"], description: "start only" },
+    url: { type: "string", description: "start with when=rss: the RSS feed URL" },
     every: { type: "string", enum: ["day", "weekdays", "week", "month"], description: "start with when=time only" },
     at: { type: "string", description: "start with when=time: HH:MM, 24-hour, in the person's time zone" },
     weekday: { type: "integer", description: "start with every=week: 1 Monday … 7 Sunday" },
@@ -49,14 +50,14 @@ const BOX_SCHEMA = {
 const SYSTEM = `You turn one sentence into an automation: a row of boxes that runs on the person's own data.
 
 THE BOXES, top to bottom:
-- start (exactly one, first): when=time with every (day|weekdays|week|month) and at (HH:MM, the person's time), weekday for every=week (1 Monday … 7 Sunday), monthDay for every=month; or when=file_uploaded.
-- read: calendar_today, calendar_tomorrow, calendar_week (their Google Calendar), finances_week, finances_month (their income and expense entries), uploaded_file (only when start is file_uploaded).
-- ai: one instruction, in the person's language, saying what to make of what was read (summarise, list, report …).
+- start (exactly one, first): when=time with every (day|weekdays|week|month) and at (HH:MM, the person's time), weekday for every=week (1 Monday … 7 Sunday), monthDay for every=month; or when=file_uploaded; or when=webhook (triggered by an external HTTP call); or when=new_email (triggered when a new email arrives); or when=rss (triggered by new RSS feed items, with optional url field).
+- read: calendar_today, calendar_tomorrow, calendar_week (Google Calendar), finances_week, finances_month (income/expense entries), uploaded_file (only when start=file_uploaded), google_sheets (read from a connected Google Sheet), website_scrape (read content from a URL), rss_feed (read latest RSS items), last_emails (read recent emails), database_query (read from a connected database), crm_contacts (read CRM contacts/leads), social_mentions (read social media mentions), analytics_report (read analytics data).
+- ai: one instruction, in the person's language, saying what to do with the data (summarise, analyse, classify, translate, write, report, extract, compare, format, score…).
 - condition: has_content — go on only if what came before is not empty; otherwise stop quietly.
-- approval: stop and wait until the person approves what was made. Put it before an action whenever they say "after I approve", "αφού την εγκρίνω", or the action sends something on their behalf they asked to check.
-- action: send_telegram (to the person's own Telegram), send_email (to the person's own address), notify (inside the app), save_to_library (as a document in their Library).
+- approval: stop and wait until the person approves. Put before actions that send on their behalf.
+- action: send_telegram, send_email, notify (in-app), save_to_library, send_whatsapp, send_slack, send_sms, post_instagram, post_facebook, post_twitter, post_linkedin, sheets_write (write to Google Sheets), database_write, webhook_post (HTTP POST to a URL), create_task (create a project task), create_event (create calendar event), create_invoice.
 
-RULES. At most ${MAX_BOXES} boxes. Nothing that sends to anyone but the person. If the sentence does not say WHEN or WHAT TO DO and you cannot reasonably tell, ask ONE short question in the person's language instead of boxes. Never invent data sources that are not in the list; if they ask for one, say so in "unsupported".
+RULES. At most ${MAX_BOXES} boxes. If the sentence does not say WHEN or WHAT TO DO and you cannot reasonably tell, ask ONE short question in the person's language instead of boxes. Never invent data sources or actions that are not in the list above; if they ask for one, say so in "unsupported".
 
 COMPLEX DESCRIPTIONS. When the person writes a long description with multiple steps, break it into boxes. Use all the box types that fit. A description that says "do X and also Y" with the same trigger is ONE automation with multiple actions. Prefer MORE boxes (read + ai + condition + multiple actions) over fewer. Always try to produce boxes rather than asking a question — only ask when the sentence truly cannot be parsed. ONE automation has ONE start; if the person describes two separate schedules, pick the one that fits best and note the other in "unsupported".`;
 

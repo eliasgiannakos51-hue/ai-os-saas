@@ -3758,7 +3758,10 @@
         "weekdays": "工作日 {at}",
         "week": "每{day} {at}",
         "month": "每月 {day} 日 {at}",
-        "file": "当你上传文件时"
+        "file": "当你上传文件时",
+        "webhook": "收到webhook时",
+        "new_email": "收到新邮件时",
+        "rss": "出现新RSS项目时"
       },
       "weekdays": {
         "d1": "周一",
@@ -3775,7 +3778,15 @@
         "calendar_week": "你的日历,未来 7 天",
         "finances_week": "你的财务,过去 7 天",
         "finances_month": "你的财务,过去 31 天",
-        "uploaded_file": "上传的文件"
+        "uploaded_file": "上传的文件",
+        "google_sheets": "Google Sheets数据",
+        "website_scrape": "网站内容",
+        "rss_feed": "RSS订阅",
+        "last_emails": "最近邮件",
+        "database_query": "数据库查询",
+        "crm_contacts": "CRM联系人",
+        "social_mentions": "社交媒体提及",
+        "analytics_report": "分析报告"
       },
       "condition": "如果找到了内容,就继续",
       "conditionElse": "否则:在这里停止,不收费",
@@ -3784,7 +3795,20 @@
         "send_telegram": "发送到你的 Telegram",
         "send_email": "通过电子邮件发给你",
         "notify": "应用内通知",
-        "save_to_library": "放进资料库"
+        "save_to_library": "放进资料库",
+        "send_whatsapp": "发送到WhatsApp",
+        "send_slack": "发送到Slack",
+        "send_sms": "发送短信",
+        "post_instagram": "发布到Instagram",
+        "post_facebook": "发布到Facebook",
+        "post_twitter": "发布到X (Twitter)",
+        "post_linkedin": "发布到LinkedIn",
+        "sheets_write": "写入Google Sheets",
+        "database_write": "写入数据库",
+        "webhook_post": "发送HTTP webhook",
+        "create_task": "创建任务",
+        "create_event": "创建日历事件",
+        "create_invoice": "创建发票"
       },
       "needsConnection": "需要连接:{name}",
       "connect": "连接",

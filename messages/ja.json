@@ -3758,7 +3758,10 @@
         "weekdays": "平日 {at}",
         "week": "毎週{day} {at}",
         "month": "毎月{day}日 {at}",
-        "file": "ファイルをアップロードしたとき"
+        "file": "ファイルをアップロードしたとき",
+        "webhook": "Webhook受信時",
+        "new_email": "新しいメール受信時",
+        "rss": "新しいRSS項目出現時"
       },
       "weekdays": {
         "d1": "月曜日",
@@ -3775,7 +3778,15 @@
         "calendar_week": "カレンダー(今後7日間)",
         "finances_week": "財務(過去7日間)",
         "finances_month": "財務(過去31日間)",
-        "uploaded_file": "アップロードされたファイル"
+        "uploaded_file": "アップロードされたファイル",
+        "google_sheets": "Google Sheetsデータ",
+        "website_scrape": "ウェブサイトの内容",
+        "rss_feed": "RSSフィード",
+        "last_emails": "最近のメール",
+        "database_query": "データベースクエリ",
+        "crm_contacts": "CRM連絡先",
+        "social_mentions": "ソーシャルメンション",
+        "analytics_report": "アナリティクスレポート"
       },
       "condition": "何か見つかったら続ける",
       "conditionElse": "見つからなければ:ここで停止、料金なし",
@@ -3784,7 +3795,20 @@
         "send_telegram": "Telegramに送ります",
         "send_email": "メールで送ります",
         "notify": "アプリ内の通知",
-        "save_to_library": "ライブラリに入れます"
+        "save_to_library": "ライブラリに入れます",
+        "send_whatsapp": "WhatsAppで送信",
+        "send_slack": "Slackに送信",
+        "send_sms": "SMSで送信",
+        "post_instagram": "Instagramに投稿",
+        "post_facebook": "Facebookに投稿",
+        "post_twitter": "X (Twitter)に投稿",
+        "post_linkedin": "LinkedInに投稿",
+        "sheets_write": "Google Sheetsに書込",
+        "database_write": "データベースに書込",
+        "webhook_post": "HTTPウェブフック送信",
+        "create_task": "タスク作成",
+        "create_event": "カレンダーイベント作成",
+        "create_invoice": "請求書作成"
       },
       "needsConnection": "接続が必要です:{name}",
       "connect": "接続",

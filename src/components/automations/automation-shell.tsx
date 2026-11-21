@@ -782,55 +782,60 @@ export function AutomationShell({
           ],
           extra: (
             <div className="flex w-full max-w-md flex-col items-center gap-6">
-              {/* n8n-style flow diagram — matching the actual node cards */}
+              {/* n8n-style flow diagram — clickable nodes that set a
+               *  template in the composer so the person sees what each
+               *  kind does and starts from one press. */}
               <div className="flex w-full max-w-[420px] flex-col items-center gap-0">
-                {/* Row 1: Start → Read → AI (horizontal, with SVG connectors) */}
+                {/* Row 1: Start → Read → AI */}
                 <div className="flex items-center gap-0">
                   {[
-                    { icon: <Zap className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.start"), bg: "rgb(var(--foreground) / 0.14)" },
-                    { icon: <FileUp className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.read"), bg: "rgb(var(--foreground) / 0.08)" },
-                    { icon: <Sparkles className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.ai"), bg: "rgb(var(--foreground) / 0.18)" },
+                    { icon: <Zap className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.start"), bg: "rgb(var(--foreground) / 0.14)", hint: t("landing.tpl.scheduleReport") },
+                    { icon: <FileUp className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.read"), bg: "rgb(var(--foreground) / 0.08)", hint: t("landing.tpl.formSheet") },
+                    { icon: <Sparkles className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.ai"), bg: "rgb(var(--foreground) / 0.18)", hint: t("landing.tpl.aiClassify") },
                   ].map((node, idx) => (
                     <div key={node.label} className="flex items-center">
                       {idx > 0 && <svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true" className="text-border"><circle cx="2" cy="6" r="2" fill="currentColor" /><line x1="4" y1="6" x2="16" y2="6" stroke="currentColor" strokeWidth="1.5" /><circle cx="18" cy="6" r="2" fill="currentColor" /></svg>}
-                      <div className="flex overflow-hidden rounded-card" style={{ border: "1px solid rgb(var(--border) / 0.5)" }}>
+                      <button type="button" onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }} className="flex overflow-hidden rounded-card transition-all hover:ring-1 hover:ring-foreground/30" style={{ border: "1px solid rgb(var(--border) / 0.5)" }}>
                         <div className="flex h-[52px] w-11 items-center justify-center" style={{ background: node.bg }}>{node.icon}</div>
-                        <div className="flex h-[52px] items-center bg-panel px-3"><span className="text-[10px] font-semibold uppercase tracking-widest text-muted">{node.label}</span></div>
-                      </div>
+                        <div className="flex h-[52px] items-center bg-panel px-3 hover:bg-panel-hover"><span className="text-[10px] font-semibold uppercase tracking-widest text-muted">{node.label}</span></div>
+                      </button>
                     </div>
                   ))}
                 </div>
-                {/* Vertical SVG connector */}
+                {/* Vertical connector */}
                 <svg width="12" height="24" viewBox="0 0 12 24" aria-hidden="true" className="text-border"><circle cx="6" cy="2" r="2" fill="currentColor" /><line x1="6" y1="4" x2="6" y2="20" stroke="currentColor" strokeWidth="1.5" /><circle cx="6" cy="22" r="2" fill="currentColor" /></svg>
                 {/* Row 2: Condition → Action */}
                 <div className="flex items-center gap-0">
                   {[
-                    { icon: <svg width="18" height="18" viewBox="0 0 20 20" className="text-foreground" aria-hidden="true"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>, label: t("kinds.condition"), bg: "rgb(var(--foreground) / 0.06)" },
-                    { icon: <ArrowRight className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.action"), bg: "rgb(var(--foreground) / 0.12)" },
+                    { icon: <svg width="18" height="18" viewBox="0 0 20 20" className="text-foreground" aria-hidden="true"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>, label: t("kinds.condition"), bg: "rgb(var(--foreground) / 0.06)", hint: t("landing.tpl.leadEmail") },
+                    { icon: <ArrowRight className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.action"), bg: "rgb(var(--foreground) / 0.12)", hint: t("landing.tpl.orderSlack") },
                   ].map((node, idx) => (
                     <div key={node.label} className="flex items-center">
                       {idx > 0 && <svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true" className="text-border"><circle cx="2" cy="6" r="2" fill="currentColor" /><line x1="4" y1="6" x2="16" y2="6" stroke="currentColor" strokeWidth="1.5" /><circle cx="18" cy="6" r="2" fill="currentColor" /></svg>}
-                      <div className="flex overflow-hidden rounded-card" style={{ border: "1px solid rgb(var(--border) / 0.5)" }}>
+                      <button type="button" onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }} className="flex overflow-hidden rounded-card transition-all hover:ring-1 hover:ring-foreground/30" style={{ border: "1px solid rgb(var(--border) / 0.5)" }}>
                         <div className="flex h-[52px] w-11 items-center justify-center" style={{ background: node.bg }}>{node.icon}</div>
-                        <div className="flex h-[52px] items-center bg-panel px-3"><span className="text-[10px] font-semibold uppercase tracking-widest text-muted">{node.label}</span></div>
-                      </div>
+                        <div className="flex h-[52px] items-center bg-panel px-3 hover:bg-panel-hover"><span className="text-[10px] font-semibold uppercase tracking-widest text-muted">{node.label}</span></div>
+                      </button>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Context inputs — files, links, paste */}
+              {/* Context inputs — files (real picker), links, paste */}
               <div className="flex w-full max-w-[340px] gap-2">
-                {[
-                  { icon: <FileUp className="h-4 w-4" aria-hidden="true" />, label: "Files", onClick: () => {} },
-                  { icon: <Link2 className="h-4 w-4" aria-hidden="true" />, label: "Links", onClick: () => { composerRef.current?.setText?.("https://"); composerRef.current?.focus(); } },
-                  { icon: <ClipboardPaste className="h-4 w-4" aria-hidden="true" />, label: t("landing.paste"), onClick: () => composerRef.current?.focus() },
-                ].map((item) => (
-                  <button key={item.label} type="button" onClick={item.onClick} className="flex flex-1 flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.5)", border: "1px solid rgb(var(--border) / 0.3)" }}>
-                    {item.icon}
-                    <span className="text-[10px] font-medium">{item.label}</span>
-                  </button>
-                ))}
+                <label className="flex flex-1 cursor-pointer flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.5)", border: "1px solid rgb(var(--border) / 0.3)" }}>
+                  <FileUp className="h-4 w-4" aria-hidden="true" />
+                  <span className="text-[10px] font-medium">Files</span>
+                  <input type="file" multiple className="hidden" onChange={(e) => { if (e.target.files?.length) composerRef.current?.focus(); e.target.value = ""; }} />
+                </label>
+                <button type="button" onClick={() => { composerRef.current?.setText?.("https://"); composerRef.current?.focus(); }} className="flex flex-1 flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.5)", border: "1px solid rgb(var(--border) / 0.3)" }}>
+                  <Link2 className="h-4 w-4" aria-hidden="true" />
+                  <span className="text-[10px] font-medium">Links</span>
+                </button>
+                <button type="button" onClick={() => composerRef.current?.focus()} className="flex flex-1 flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.5)", border: "1px solid rgb(var(--border) / 0.3)" }}>
+                  <ClipboardPaste className="h-4 w-4" aria-hidden="true" />
+                  <span className="text-[10px] font-medium">{t("landing.paste")}</span>
+                </button>
               </div>
 
               {/* Simple | Premium */}

@@ -67,9 +67,9 @@ OPEN-ENDED. This system can automate ANYTHING. The named sources and actions abo
 - Combine read (http_request) → ai → action (webhook_post) for custom API-to-API workflows.
 NEVER say something is unsupported just because it is not a named integration. Build it with http_request, website_scrape, webhook_post, and ai boxes instead. Only say "unsupported" when no combination of boxes can achieve it.
 
-RULES. At most ${MAX_BOXES} boxes. If the sentence does not say WHEN or WHAT TO DO and you cannot reasonably tell, ask ONE short question in the person's language instead of boxes.
+RULES. At most ${MAX_BOXES} boxes. ALWAYS PRODUCE BOXES. Never ask a question unless the sentence is completely empty or truly impossible to interpret. If WHEN is missing, default to every day at 09:00. If WHERE TO SEND is missing, default to send_email. If WHAT DATA is missing, pick the most likely source from the sentence context. GUESS rather than ask. The person can always change any box after creation.
 
-COMPLEX DESCRIPTIONS. When the person writes a long description with multiple steps, break it into boxes. Use all the box types that fit. A description that says "do X and also Y" with the same trigger is ONE automation with multiple actions. Prefer MORE boxes (read + ai + condition + multiple actions) over fewer. Always try to produce boxes rather than asking a question — only ask when the sentence truly cannot be parsed. ONE automation has ONE start; if the person describes two separate schedules, pick the one that fits best and note the other in "unsupported".`;
+COMPLEX DESCRIPTIONS. When the person writes a long description with multiple steps, break it into boxes. Use all the box types that fit. A description that says "do X and also Y" with the same trigger is ONE automation with multiple actions. Prefer MORE boxes (read + ai + condition + multiple actions) over fewer. ONE automation has ONE start; if the person describes two separate schedules, pick the one that fits best and note the other in "unsupported".`;
 
 const BUILD_TOOL: AiToolSpec = {
   name: "set_automation",

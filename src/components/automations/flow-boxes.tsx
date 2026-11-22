@@ -103,19 +103,34 @@ export const CONNECT_AT: Record<string, string> = {
   s3: INTEGRATIONS, typeform: INTEGRATIONS, google_forms: INTEGRATIONS,
 };
 
-// n8n-QUALITY NODE DESIGN. Vivid accent colours per kind — not washed-out
-// foreground-with-opacity. Each node is a COMPACT card (max 300px) with a
-// coloured left border (4px, like n8n), a tinted icon circle in that same
-// hue, a subtle shadow to feel "floating on a canvas", and the kind label
-// + description. Cards are CENTERED in the panel and connected by thin
-// vertical lines, creating a visual flow diagram.
-const NODE_COLOR: Record<Box["kind"], { accent: string; iconBg: string; iconText: string }> = {
-  start:     { accent: "#10b981", iconBg: "rgba(16,185,129,0.15)", iconText: "#10b981" },   // green — triggers
-  read:      { accent: "#3b82f6", iconBg: "rgba(59,130,246,0.15)", iconText: "#3b82f6" },   // blue — data
-  ai:        { accent: "#8b5cf6", iconBg: "rgba(139,92,246,0.15)", iconText: "#8b5cf6" },   // purple — AI
-  condition: { accent: "#f59e0b", iconBg: "rgba(245,158,11,0.15)", iconText: "#f59e0b" },   // amber — logic
-  approval:  { accent: "#f97316", iconBg: "rgba(249,115,22,0.15)", iconText: "#f97316" },   // orange — wait
-  action:    { accent: "#ef4444", iconBg: "rgba(239,68,68,0.15)",  iconText: "#ef4444" },   // red — output
+/**
+ * n8n NODE DESIGN — rebuilt from scratch to match n8n's visual language.
+ *
+ * n8n nodes have:
+ * 1. A solid-coloured ICON PANEL on the left (not just a border or circle)
+ * 2. White/dark content area to the right
+ * 3. Rounded corners, subtle shadow
+ * 4. Port handles (small circles) above and below each node
+ * 5. After execution: green border = success, red = failure
+ * 6. The whole thing sits on a dot-grid canvas
+ *
+ * NODE_THEME maps each kind to: the solid colour for the icon panel,
+ * a lighter tint for hover, and a text colour inside that panel.
+ */
+const NODE_THEME: Record<Box["kind"], { bg: string; bgHover: string; text: string; border: string }> = {
+  start:     { bg: "#059669", bgHover: "#047857", text: "#ffffff", border: "#10b981" },   // emerald — triggers
+  read:      { bg: "#2563eb", bgHover: "#1d4ed8", text: "#ffffff", border: "#3b82f6" },   // blue — data input
+  ai:        { bg: "#7c3aed", bgHover: "#6d28d9", text: "#ffffff", border: "#8b5cf6" },   // violet — AI
+  condition: { bg: "#d97706", bgHover: "#b45309", text: "#ffffff", border: "#f59e0b" },   // amber — logic
+  approval:  { bg: "#ea580c", bgHover: "#c2410c", text: "#ffffff", border: "#f97316" },   // orange — wait
+  action:    { bg: "#dc2626", bgHover: "#b91c1c", text: "#ffffff", border: "#ef4444" },   // red — output
+};
+
+/** Status → border highlight on the WHOLE node after a run. */
+const STATE_BORDER: Record<string, string | undefined> = {
+  done: "#10b981",    // green
+  failed: "#ef4444",  // red
+  active: "#8b5cf6",  // purple pulse
 };
 
 function useWords() {
@@ -382,34 +397,37 @@ function BoxIconInner({ box }: { box: Box }) {
   return <BookOpen className={cls} aria-hidden="true" />;
 }
 
-/** SVG connector between two nodes — a curved bezier path with small
- *  port circles at each end, like n8n's canvas handles. */
+/** SVG connector — a vertical bezier with n8n-style port handles.
+ *  The output port (top) and input port (bottom) are small filled
+ *  circles that sit at the node edge, exactly like n8n. */
 function NodeConnector() {
   return (
-    <div aria-hidden="true" className="flex justify-center" style={{ height: 36 }}>
-      <svg width="14" height="36" viewBox="0 0 14 36">
-        {/* Top port */}
-        <circle cx="7" cy="3" r="3" fill="#4b5563" stroke="#6b7280" strokeWidth="1" />
-        {/* Bezier curve */}
-        <path d="M7 6 C7 14, 7 22, 7 30" stroke="#6b7280" strokeWidth="1.5" fill="none" />
-        {/* Bottom port */}
-        <circle cx="7" cy="33" r="3" fill="#4b5563" stroke="#6b7280" strokeWidth="1" />
+    <div aria-hidden="true" className="flex justify-center" style={{ height: 40 }}>
+      <svg width="20" height="40" viewBox="0 0 20 40">
+        {/* Output port (from node above) */}
+        <circle cx="10" cy="4" r="4" fill="#374151" stroke="#4b5563" strokeWidth="1.5" />
+        <circle cx="10" cy="4" r="1.5" fill="#9ca3af" />
+        {/* Curved line */}
+        <path d="M10 8 C10 16, 10 24, 10 32" stroke="#4b5563" strokeWidth="2" fill="none" />
+        {/* Input port (to node below) */}
+        <circle cx="10" cy="36" r="4" fill="#374151" stroke="#4b5563" strokeWidth="1.5" />
+        <circle cx="10" cy="36" r="1.5" fill="#9ca3af" />
       </svg>
     </div>
   );
 }
 
-/** Canvas-like wrapper with dot-grid background — gives the flow area
- *  an n8n "infinite canvas" feel. */
+/** Canvas wrapper — dot-grid background like n8n's infinite canvas. */
 function FlowCanvas({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative rounded-xl py-8"
+      className="relative overflow-hidden rounded-xl px-4 py-10"
       style={{
-        background: "rgb(var(--panel) / 0.3)",
-        backgroundImage: "radial-gradient(circle, rgb(var(--foreground) / 0.07) 1px, transparent 1px)",
-        backgroundSize: "20px 20px",
+        background: "rgb(var(--panel) / 0.4)",
+        backgroundImage: "radial-gradient(circle, rgb(var(--foreground) / 0.06) 1px, transparent 1px)",
+        backgroundSize: "16px 16px",
         border: "1px solid rgb(var(--border) / 0.3)",
+        minHeight: 200,
       }}
     >
       {children}
@@ -442,60 +460,68 @@ export function BoxRow({
         const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
         const state = progress?.boxes[box.id] ?? "idle";
         const failed = progress?.failed?.box === box.id ? progress.failed : null;
-        const c = NODE_COLOR[box.kind];
-        const mark = chosen === box.id ? "ring-2 ring-foreground" : state === "failed" ? "ring-1 ring-danger" : state === "active" ? "ring-1 ring-foreground/50" : "";
+        const theme = NODE_THEME[box.kind];
+        const stateBorder = STATE_BORDER[state];
+        const isChosen = chosen === box.id;
         return (
-          <li key={box.id} className="relative flex w-full flex-col items-center" style={{ maxWidth: 300 }}>
+          <li key={box.id} className="relative flex w-full flex-col items-center" style={{ maxWidth: 280 }}>
             {/* SVG connector between nodes */}
             {i > 0 && (progress
               ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
               : <NodeConnector />
             )}
-            {/* n8n-STYLE NODE CARD — compact, vivid left border, shadow */}
+            {/* ── n8n NODE ──
+             *  Two-panel card: solid-coloured ICON PANEL on the left,
+             *  content area on the right. Rounded corners, shadow, port
+             *  handles implied by the connector dots above/below. After a
+             *  run the whole card gets a coloured border (green/red). */}
             <button
               type="button"
               onClick={() => onChoose(box.id)}
-              aria-pressed={chosen === box.id}
+              aria-pressed={isChosen}
               data-testid="flow-box"
               data-kind={box.kind}
               data-state={progress ? state : undefined}
-              className={`flex w-full items-center gap-3 rounded-lg bg-panel px-3 py-2.5 text-start transition-all hover:bg-panel-hover ${mark}`}
+              className="flex w-full overflow-hidden rounded-xl text-start transition-all"
               style={{
-                border: "1px solid rgb(var(--border))",
-                borderLeftWidth: 4,
-                borderLeftColor: c.accent,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)",
+                boxShadow: isChosen
+                  ? `0 0 0 2px ${theme.border}, 0 4px 12px rgba(0,0,0,0.2)`
+                  : stateBorder
+                    ? `0 0 0 2px ${stateBorder}, 0 4px 12px rgba(0,0,0,0.15)`
+                    : "0 2px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)",
               }}
             >
-              {/* Icon circle — vivid colour per kind */}
+              {/* LEFT: solid colour icon panel (n8n signature) */}
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-                style={{ background: c.iconBg }}
+                className="flex w-12 shrink-0 items-center justify-center"
+                style={{ background: theme.bg, color: theme.text }}
               >
-                <span style={{ color: c.iconText }}><BoxIconInner box={box} /></span>
+                <BoxIconInner box={box} />
               </div>
-              {/* Content */}
-              <span className="min-w-0 flex-1">
-                <span className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: c.accent }}>{kind[box.kind]}</span>
-                <span className="mt-0.5 block break-words text-[12px] leading-snug text-foreground">{describe(box)}</span>
-              </span>
-              {/* Run status badges — n8n shows these ON the node */}
-              {state === "active" && (
-                <span className="shrink-0">
-                  <ThinkingIndicator size="sm" />
-                  <span className="sr-only">{t("runStatus.running")}</span>
+              {/* RIGHT: content area */}
+              <div className="flex min-w-0 flex-1 items-center gap-2 bg-panel px-3 py-2.5">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.border }}>{kind[box.kind]}</span>
+                  <span className="mt-0.5 block break-words text-[12px] leading-snug text-foreground">{describe(box)}</span>
                 </span>
-              )}
-              {state === "done" && (
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ background: "rgba(16,185,129,0.2)" }}>
-                  <Check className="h-3.5 w-3.5" style={{ color: "#10b981" }} aria-hidden="true" />
-                </span>
-              )}
-              {state === "failed" && (
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444" }}>
-                  ✕
-                </span>
-              )}
+                {/* Status badge */}
+                {state === "active" && (
+                  <span className="shrink-0">
+                    <ThinkingIndicator size="sm" />
+                    <span className="sr-only">{t("runStatus.running")}</span>
+                  </span>
+                )}
+                {state === "done" && (
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: "#dcfce7" }}>
+                    <Check className="h-3 w-3" style={{ color: "#16a34a" }} aria-hidden="true" />
+                  </span>
+                )}
+                {state === "failed" && (
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold" style={{ background: "#fee2e2", color: "#dc2626" }}>
+                    ✕
+                  </span>
+                )}
+              </div>
             </button>
             {box.kind === "condition" && (
               <span data-testid="flow-branch" className="mt-1 text-[11px] text-muted">
@@ -571,36 +597,33 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
       <ol data-testid="flow-steps" className="flex flex-col items-center gap-0">
         {boxes.map((box, i) => {
           const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
-          const c = NODE_COLOR[box.kind];
+          const theme = NODE_THEME[box.kind];
           return (
-            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full flex-col items-center" style={{ maxWidth: 300 }}>
-              {/* n8n-STYLE COMPACT NODE CARDS — same design as BoxRow */}
+            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full flex-col items-center" style={{ maxWidth: 280 }}>
+              {/* n8n NODE — same two-panel card as BoxRow */}
               {i > 0 && <NodeConnector />}
               <div
                 data-testid="flow-box"
                 data-kind={box.kind}
-                className="flex w-full items-center gap-3 rounded-lg bg-panel px-3 py-2.5"
-                style={{
-                  border: "1px solid rgb(var(--border))",
-                  borderLeftWidth: 4,
-                  borderLeftColor: c.accent,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)",
-                }}
+                className="flex w-full overflow-hidden rounded-xl"
+                style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)" }}
               >
-                {/* Icon circle — vivid colour per kind */}
+                {/* LEFT: solid colour icon panel */}
                 <div
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-                  style={{ background: c.iconBg }}
+                  className="flex w-12 shrink-0 items-center justify-center"
+                  style={{ background: theme.bg, color: theme.text }}
                 >
-                  <span style={{ color: c.iconText }}><BoxIconInner box={box} /></span>
+                  <BoxIconInner box={box} />
                 </div>
-                {/* Content */}
-                <span className="min-w-0 flex-1">
-                  <span data-testid="flow-step-part" className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: c.accent }}>{part[partOf(box)]} · {kind[box.kind]}</span>
-                  <span title={preview && box.kind === "ai" ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} mt-0.5 break-words text-[12px] leading-snug text-foreground`}>
-                    {sentence(box)}
+                {/* RIGHT: content */}
+                <div className="flex min-w-0 flex-1 items-center bg-panel px-3 py-2.5">
+                  <span className="min-w-0 flex-1">
+                    <span data-testid="flow-step-part" className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.border }}>{part[partOf(box)]} · {kind[box.kind]}</span>
+                    <span title={preview && box.kind === "ai" ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} mt-0.5 break-words text-[12px] leading-snug text-foreground`}>
+                      {sentence(box)}
+                    </span>
                   </span>
-                </span>
+                </div>
               </div>
               {missing.map((need) => (
                 <p key={need} data-testid="flow-needs" className="mt-1 flex flex-wrap items-center gap-2 text-xs text-warning">

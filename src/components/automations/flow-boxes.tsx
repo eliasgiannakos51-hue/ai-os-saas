@@ -382,17 +382,37 @@ function BoxIconInner({ box }: { box: Box }) {
   return <BookOpen className={cls} aria-hidden="true" />;
 }
 
-/** SVG connector between two nodes — a thin vertical line with small
- *  port dots, like n8n's canvas handles. Intentionally subtle so the
- *  vivid node cards dominate. */
+/** SVG connector between two nodes — a curved bezier path with small
+ *  port circles at each end, like n8n's canvas handles. */
 function NodeConnector() {
   return (
-    <div aria-hidden="true" className="flex justify-center" style={{ height: 32 }}>
-      <svg width="10" height="32" viewBox="0 0 10 32">
-        <circle cx="5" cy="3" r="2.5" fill="#6b7280" />
-        <line x1="5" y1="5.5" x2="5" y2="26.5" stroke="#6b7280" strokeWidth="1.5" strokeDasharray="3 2" />
-        <circle cx="5" cy="29" r="2.5" fill="#6b7280" />
+    <div aria-hidden="true" className="flex justify-center" style={{ height: 36 }}>
+      <svg width="14" height="36" viewBox="0 0 14 36">
+        {/* Top port */}
+        <circle cx="7" cy="3" r="3" fill="#4b5563" stroke="#6b7280" strokeWidth="1" />
+        {/* Bezier curve */}
+        <path d="M7 6 C7 14, 7 22, 7 30" stroke="#6b7280" strokeWidth="1.5" fill="none" />
+        {/* Bottom port */}
+        <circle cx="7" cy="33" r="3" fill="#4b5563" stroke="#6b7280" strokeWidth="1" />
       </svg>
+    </div>
+  );
+}
+
+/** Canvas-like wrapper with dot-grid background — gives the flow area
+ *  an n8n "infinite canvas" feel. */
+function FlowCanvas({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="relative rounded-xl py-8"
+      style={{
+        background: "rgb(var(--panel) / 0.3)",
+        backgroundImage: "radial-gradient(circle, rgb(var(--foreground) / 0.07) 1px, transparent 1px)",
+        backgroundSize: "20px 20px",
+        border: "1px solid rgb(var(--border) / 0.3)",
+      }}
+    >
+      {children}
     </div>
   );
 }
@@ -416,6 +436,7 @@ export function BoxRow({
   const { t, kind, needs, describe } = useWords();
   const noteWords = useNoteWords();
   return (
+    <FlowCanvas>
     <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
       {boxes.map((box, i) => {
         const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
@@ -458,13 +479,23 @@ export function BoxRow({
                 <span className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: c.accent }}>{kind[box.kind]}</span>
                 <span className="mt-0.5 block break-words text-[12px] leading-snug text-foreground">{describe(box)}</span>
               </span>
+              {/* Run status badges — n8n shows these ON the node */}
               {state === "active" && (
                 <span className="shrink-0">
                   <ThinkingIndicator size="sm" />
                   <span className="sr-only">{t("runStatus.running")}</span>
                 </span>
               )}
-              {state === "done" && <Check className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />}
+              {state === "done" && (
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ background: "rgba(16,185,129,0.2)" }}>
+                  <Check className="h-3.5 w-3.5" style={{ color: "#10b981" }} aria-hidden="true" />
+                </span>
+              )}
+              {state === "failed" && (
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444" }}>
+                  ✕
+                </span>
+              )}
             </button>
             {box.kind === "condition" && (
               <span data-testid="flow-branch" className="mt-1 text-[11px] text-muted">
@@ -488,6 +519,7 @@ export function BoxRow({
         );
       })}
     </ol>
+    </FlowCanvas>
   );
 }
 
@@ -535,6 +567,7 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
   }
   return (
     <div>
+      <FlowCanvas>
       <ol data-testid="flow-steps" className="flex flex-col items-center gap-0">
         {boxes.map((box, i) => {
           const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
@@ -581,6 +614,7 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
           );
         })}
       </ol>
+      </FlowCanvas>
       {!preview && <p className="mt-3 text-center text-xs text-muted">{t("simple.hint")}</p>}
     </div>
   );

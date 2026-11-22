@@ -320,19 +320,17 @@ check("both words are on screen at once, and neither is ever shortened",
   /\{ mode: "simple", label: t\("mode\.simple"\) \}/.test(shellWork) &&
   /\{ mode: "pro", label: t\("mode\.pro"\) \}/.test(shellWork));
 
-// BOTH LEVELS READ THE SAME ARRAY. This is the interchangeability rule as
-// a property of the code rather than a promise: there is one `boxes`, so a
-// step cannot exist in one level and not the other, and nothing has to be
-// copied across when either changes.
-const simpleCall = /<FlowSteps boxes=\{(shown\.boxes)\}/.exec(shell);
-const proCall = /<BoxRow boxes=\{(shown\.boxes)\}/.exec(shell);
+// ONE VISUAL: BoxRow (n8n-style cards) is used in BOTH Simple and Pro.
+// FlowSteps still exists for template preview cards but the main flow
+// always shows BoxRow. The editor opens when you click a box in either mode.
+const boxRowCall = /<BoxRow boxes=\{(shown\.boxes)\}/.exec(shell);
 check("Simple and Pro are drawn from the same boxes, not two stores",
-  Boolean(simpleCall) && Boolean(proCall) && simpleCall[1] === proCall[1]);
+  Boolean(boxRowCall) && boxRowCall[1] === "shown.boxes");
 check("Simple shows EVERY step: it maps the array whole, with no filter and no cap",
   /boxes\.map\(\(box, i\) => \{/.test(flowBoxes.slice(flowBoxes.indexOf("export function FlowSteps"))) &&
   !/boxes\.(filter|slice)\(/.test(flowBoxes.slice(flowBoxes.indexOf("export function FlowSteps"), flowBoxes.indexOf("export function BoxEditor"))));
 check("Pro keeps the boxes AND the per-box editor it always had",
-  /level === "pro" &&\s*\(chosenBox \?/.test(shell) && /<BoxEditor key=/.test(shell));
+  /chosenBox \?/.test(shell) && /<BoxEditor key=/.test(shell));
 
 // WITHOUT THE SWITCH THE SCREEN IS WHAT IT WAS. `level` is Pro whenever
 // the reader does not have the flag, so a half-built Simple can never

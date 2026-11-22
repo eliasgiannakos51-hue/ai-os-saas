@@ -584,17 +584,14 @@ export function AutomationShell({
 
               {shown.boxes.length === 0 ? (
                 <p className="text-xs text-warning">{t("errors.broken")}</p>
-              ) : level === "simple" ? (
-                <FlowSteps boxes={shown.boxes} connected={connected} />
               ) : (
                 <BoxRow boxes={shown.boxes} chosen={chosen} onChoose={(id) => setChosen((c) => (c === id ? null : id))} connected={connected} progress={progress} />
               )}
-              {level === "pro" &&
-                (chosenBox ? (
-                  <BoxEditor key={`${shown.id}-${shown.version}-${chosenBox.id}`} box={chosenBox} saving={running === "save"} onSave={(next) => void saveByHand(shown, next)} />
-                ) : (
-                  shown.boxes.length > 0 && <p className="text-xs text-muted">{t("choose")}</p>
-                ))}
+              {chosenBox ? (
+                <BoxEditor key={`${shown.id}-${shown.version}-${chosenBox.id}`} box={chosenBox} saving={running === "save"} onSave={(next) => void saveByHand(shown, next)} />
+              ) : (
+                shown.boxes.length > 0 && <p className="text-xs text-muted">{t("choose")}</p>
+              )}
 
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
@@ -804,8 +801,9 @@ export function AutomationShell({
                       )}
                       <button
                         type="button"
-                        onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }}
-                        className="flex overflow-hidden rounded-card transition-all hover:ring-2 hover:ring-foreground/30"
+                        disabled={running !== null}
+                        onClick={() => send(node.hint)}
+                        className="flex overflow-hidden rounded-card transition-all hover:ring-2 hover:ring-foreground/30 disabled:opacity-60"
                         style={{ border: "1px solid rgb(var(--border) / 0.5)" }}
                       >
                         <div className="flex h-[56px] w-12 shrink-0 items-center justify-center" style={{ background: `rgb(var(--foreground) / ${node.opacity})` }}>
@@ -840,8 +838,9 @@ export function AutomationShell({
                       )}
                       <button
                         type="button"
-                        onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }}
-                        className="flex overflow-hidden rounded-card transition-all hover:ring-2 hover:ring-foreground/30"
+                        disabled={running !== null}
+                        onClick={() => send(node.hint)}
+                        className="flex overflow-hidden rounded-card transition-all hover:ring-2 hover:ring-foreground/30 disabled:opacity-60"
                         style={{ border: "1px solid rgb(var(--border) / 0.5)" }}
                       >
                         <div className="flex h-[56px] w-12 shrink-0 items-center justify-center" style={{ background: `rgb(var(--foreground) / ${node.opacity})` }}>
@@ -894,7 +893,7 @@ export function AutomationShell({
                     { emoji: "🤖", label: t("landing.tpl.aiClassify") },
                     { emoji: "📱", label: t("landing.tpl.socialPost") },
                   ].map(({ emoji, label }) => (
-                    <button key={label} type="button" onClick={() => { composerRef.current?.setText?.(label); composerRef.current?.focus(); }} className="rounded-full px-3.5 py-2 text-[11px] font-medium text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
+                    <button key={label} type="button" disabled={running !== null} onClick={() => send(label)} className="rounded-full px-3.5 py-2 text-[11px] font-medium text-muted transition-colors hover:bg-panel-hover hover:text-foreground disabled:opacity-60" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
                       {emoji} {label}
                     </button>
                   ))}

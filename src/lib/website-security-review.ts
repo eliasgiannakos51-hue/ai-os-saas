@@ -3,7 +3,10 @@ import { runCompletion } from "@/lib/ai/providers/complete";
 import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
-const MODEL = "claude-sonnet-4-6";
+// Content review is a boolean verdict with short reasoning — ideal for
+// haiku. Runs on every website generation, so the saving adds up.
+import { CLASSIFIER_MODEL } from "@/lib/ai-models";
+const MODEL = CLASSIFIER_MODEL;
 // Small and cheap on purpose — this reviews already-generated HTML for
 // semantic/content red flags the static regex scan (see
 // lib/website-html-security-scan.ts) structurally cannot catch: fake

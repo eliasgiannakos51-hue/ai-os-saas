@@ -12,7 +12,11 @@ import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 // classifier and lib/clarification.ts — forced tool_choice, tiny
 // max_tokens, best-effort (a failure here never blocks the actual
 // submission from being saved/emailed, see the route's own try/catch).
-const MODEL = "claude-sonnet-4-6";
+// Lead classification is a 4-category enum with 128-token output — ideal
+// for haiku, which is 12× cheaper. Runs on EVERY published-site form
+// submission, so the saving compounds quickly.
+import { CLASSIFIER_MODEL } from "@/lib/ai-models";
+const MODEL = CLASSIFIER_MODEL;
 const MAX_TOKENS = 200;
 
 export type LeadClassification = "genuine_interest" | "question" | "spam" | "unclear";

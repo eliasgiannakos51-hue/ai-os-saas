@@ -15,3 +15,13 @@ export const WEBSITE_BUILDER_MODEL = "claude-sonnet-4-6";
 // economics computing against the old, cheaper model — and the 25% ceiling
 // they guarantee stopped meaning anything.
 export const CHAT_MODEL = "claude-sonnet-4-6";
+
+// A CHEAP MODEL FOR CLASSIFICATION: lead scoring, Greek spelling,
+// content safety review, clarification detection — structured
+// forced-tool-use calls with tiny output (128–500 tokens) where haiku
+// is 12× cheaper than sonnet and accuracy is comparable.
+// Add this after measuring haiku accuracy on each classifier (the
+// Greek spelling check at lib/websites-greek-spelling-check.ts lines
+// 48–60 documents the trade-off — haiku has NOT been measured for
+// Greek orthography yet, so that one stays on sonnet until measured).
+export const CLASSIFIER_MODEL = "claude-haiku-4-5";

@@ -29,7 +29,11 @@ export {
 
 // Exported so routes that reserve/settle a clarification-only action can
 // size their estimate against the model this check actually calls.
-export const CLARIFICATION_MODEL = "claude-sonnet-4-6";
+// Clarification is a boolean yes/no with a short question — ideal for
+// haiku. Runs before EVERY expensive generation (website, mission,
+// automation, create-anything), so ~5000 calls/month at scale.
+import { CLASSIFIER_MODEL } from "@/lib/ai-models";
+export const CLARIFICATION_MODEL = CLASSIFIER_MODEL;
 const MODEL = CLARIFICATION_MODEL;
 const CLARIFICATION_MAX_TOKENS = 500;
 

@@ -18,6 +18,7 @@ import { getPurchasedPackCreditPriceEur, hasEnoughCredits } from "@/lib/billing/
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import type { Plan } from "@/lib/billing/plans";
 import { formatItemsForModel, searchUserData } from "@/lib/integrations/read";
+import { parseMcpUrl, isBlockedAddress } from "@/lib/mcp/ssrf";
 import { readFlow, withSupervisedApprovals, DEFAULT_FLOW_MODE, type ActionBox, type Box, type FlowMode, type ReadBox } from "@/lib/automations/boxes";
 import { APPROVAL_WAIT_HOURS, type RunStep } from "@/lib/automations/run-steps";
 import { periodFor, readAiAnswer, textToDocumentHtml, type AiOutcome, type Resume } from "@/lib/automations/answers";
@@ -158,12 +159,47 @@ async function readData(box: ReadBox, ctx: RunContext): Promise<{ ok: true; text
   return { ok: false, note: "failed" };
 }
 
-/** Bounded fetch: 10s timeout, no redirects to other hosts, max 50KB text. */
+/**
+ * SSRF-SAFE FETCH. An automation's http_request / website_scrape /
+ * webhook_post sends a request to a URL the PERSON TYPED, so it is the
+ * textbook shape of server-side request forgery. The guard uses the same
+ * three-layer check as lib/mcp/ssrf.ts:
+ *
+ *   1. parseMcpUrl: https only, no credentials, no private-range literals,
+ *      no localhost / .local / .internal names.
+ *   2. isBlockedAddress: every address the name resolves to is checked,
+ *      including IPv4-in-IPv6 (::ffff:10.0.0.1, 64:ff9b::, 6to4).
+ *   3. DNS resolution check before connecting.
+ *
+ * Without this, a person could point http_request at
+ * http://169.254.169.254/latest/meta-data/ and exfiltrate cloud credentials.
+ */
 const FETCH_TIMEOUT_MS = 10_000;
 const MAX_FETCH_CHARS = 50_000;
 
 async function safeFetch(url: string, options?: { method?: string; body?: string; headers?: Record<string, string> }): Promise<{ ok: true; text: string; status: number } | { ok: false; reason: string }> {
   if (!url || !/^https?:\/\//.test(url)) return { ok: false, reason: "invalid_url" };
+  // SSRF GUARD: reject private/internal addresses BEFORE connecting.
+  const parsed = parseMcpUrl(url);
+  if (!parsed.ok) return { ok: false, reason: `blocked: ${parsed.reason}` };
+  // Second layer: resolve the hostname and check every IP it resolves to.
+  try {
+    const hostname = parsed.url.hostname;
+    const { resolve4, resolve6 } = await import("node:dns/promises");
+    const [v4, v6] = await Promise.allSettled([resolve4(hostname), resolve6(hostname)]);
+    const ips = [
+      ...(v4.status === "fulfilled" ? v4.value : []),
+      ...(v6.status === "fulfilled" ? v6.value : []),
+    ];
+    // If we got IPs, check them all. If DNS failed entirely, let fetch try
+    // (it will fail on its own with ENOTFOUND).
+    if (ips.length > 0 && ips.some((ip) => isBlockedAddress(ip))) {
+      return { ok: false, reason: "blocked: private_address" };
+    }
+  } catch {
+    // DNS lookup module not available — the parseMcpUrl check above already
+    // rejected literal private IPs and reserved hostnames.
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -172,9 +208,35 @@ async function safeFetch(url: string, options?: { method?: string; body?: string
       headers: { "User-Agent": "Ionexa-Automation/1.0", ...options?.headers },
       body: options?.body,
       signal: controller.signal,
-      redirect: "follow",
+      redirect: "manual", // No following redirects — a 302 to a private IP bypasses the check
     });
-    const text = await response.text();
+    // If redirect, check the target before following
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (location) {
+        const redirectParsed = parseMcpUrl(new URL(location, url).href);
+        if (!redirectParsed.ok) return { ok: false, reason: `blocked: redirect to ${redirectParsed.reason}` };
+      }
+      return { ok: false, reason: "redirect_blocked" };
+    }
+    // Stream-safe: read only MAX_FETCH_CHARS bytes, then cancel.
+    // Without this, a malicious URL could return gigabytes into memory.
+    const reader = response.body?.getReader();
+    if (!reader) {
+      const text = await response.text();
+      return { ok: true, text: text.slice(0, MAX_FETCH_CHARS), status: response.status };
+    }
+    const decoder = new TextDecoder();
+    let text = "";
+    try {
+      while (text.length < MAX_FETCH_CHARS) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value, { stream: true });
+      }
+    } finally {
+      reader.cancel().catch(() => {});
+    }
     return { ok: true, text: text.slice(0, MAX_FETCH_CHARS), status: response.status };
   } catch (err) {
     return { ok: false, reason: err instanceof Error ? err.message : "fetch_failed" };

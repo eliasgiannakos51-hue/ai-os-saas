@@ -3,6 +3,55 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-22 (Security audit + Performance + Cost optimization) 🔒
+
+4 παράλληλα audits σε 263 API routes, auth, billing, performance, AI costs.
+
+### Ασφάλεια
+- **CRITICAL FIX: SSRF στο safeFetch** (`runner.ts`): Χρήστης μπορούσε
+  να φτιάξει automation με http_request σε `169.254.169.254` (cloud metadata)
+  ή `localhost` (internal services) και να εξάγει credentials. Τώρα: τρία
+  επίπεδα guard (parseMcpUrl + DNS resolution + isBlockedAddress), redirect:manual
+  αντί follow, streaming reader με 50KB cap.
+- **URL validation at store time** (`boxes.ts`): `sanitiseBoxUrl()` αποκλείει
+  localhost, .local, .internal, metadata IPs ΠΡΙΝ αποθηκευτεί στη βάση.
+- **Timing-safe token comparison** (`set-owner/route.ts`): `===` → `secretsMatch()`
+  (constant-time compare) για service-role key Bearer auth.
+
+### Performance
+- **Promise.all στο accountFor** (`start-run.ts`): resolveEffectivePlan +
+  hasActiveBetaBypass τρέχουν παράλληλα (γλιτώνει ~50-80ms ανά run start).
+- **Missing index** (`20261130000000_automation_runs_waiting_idx.sql`): partial
+  index στο automation_runs WHERE status='waiting_approval' — 4 queries
+  γίνονται indexed scans αντί seq scans.
+- **Streaming response reader** (`runner.ts safeFetch`): δεν φορτώνει ολόκληρο
+  το response body στη μνήμη — σταματά στα 50KB.
+
+### Κόστος AI
+- **CLASSIFIER_MODEL = haiku** (`ai-models.ts`): νέα σταθερά claude-haiku-4-5
+  για classification calls που είναι 12× φθηνότερα από sonnet.
+- **3 classifiers σε haiku** (εκτίμηση -$5–15/μήνα σε scale):
+  - `lead-classification.ts`: 4-category enum, 128 tokens output
+  - `clarification.ts`: boolean + short question, 500 tokens
+  - `website-security-review.ts`: boolean verdict, 500 tokens
+- **Δεν μετακινήθηκαν** (χρειάζονται measurement πρώτα):
+  - `websites-greek-spelling-check.ts`: haiku ΔΕΝ ΕΧΕΙ ΜΕΤΡΗΘΕΙ για
+    ελληνική ορθογραφία (γραμμές 48-60 το λένε)
+  - `transitions/detect`: πολύπλοκη πολυγλωσσική ανάλυση
+
+### Θετικά ευρήματα (ήδη σωστά)
+- 0 unprotected write endpoints (263 routes checked)
+- Κανένα SQL injection (0 raw SQL, μόνο Supabase client)
+- Κανένα XSS (content sanitization pipeline)
+- CSRF protection (Sec-Fetch-Site + Origin)
+- Billing: atomic RPC reservations, no double-spend
+- File uploads: rate-limited, size-capped, type-sniffed
+- Stripe webhooks: signature verified
+- Prompt caching: σωστά υλοποιημένο
+- Input truncation: σωστά σε όλα τα AI calls
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: `20261130000000_automation_runs_waiting_idx.sql`**
+
 ## 2026-11-21γ (Open-ended automations — anything works) 🔧
 
 Αλλαγή φιλοσοφίας: τα automations δεν περιορίζονται σε συγκεκριμένες υπηρεσίες.

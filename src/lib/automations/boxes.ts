@@ -21,6 +21,26 @@
 export const MAX_BOXES = 8;
 export const MAX_INSTRUCTION_CHARS = 600;
 
+/** A URL a box may carry must be https and not point anywhere private.
+ *  Validated at STORE time so a malicious URL is never persisted. */
+function sanitiseBoxUrl(raw: string): string | undefined {
+  const url = raw.trim().slice(0, 500);
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return undefined;
+    // Block obvious private/metadata targets at store time; the runner
+    // does a full SSRF check at fetch time too (lib/mcp/ssrf.ts).
+    const host = parsed.hostname.toLowerCase();
+    if (host === "localhost" || host === "127.0.0.1" || host === "::1") return undefined;
+    if (host.endsWith(".local") || host.endsWith(".internal")) return undefined;
+    if (host === "169.254.169.254" || host === "metadata.google.internal") return undefined;
+    return url;
+  } catch {
+    return undefined;
+  }
+}
+
 export const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const; // Monday = 1, as in ISO 8601
 
 export type StartBox =
@@ -127,8 +147,11 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
   switch (v.kind) {
     case "start":
       return readStart(v, id);
-    case "read":
-      return (READ_SOURCES as readonly unknown[]).includes(v.source) ? { id, kind: "read", source: v.source as ReadSource, ...(typeof v.url === "string" ? { url: v.url.slice(0, 500) } : {}) } : null;
+    case "read": {
+      if (!(READ_SOURCES as readonly unknown[]).includes(v.source)) return null;
+      const readUrl = typeof v.url === "string" ? sanitiseBoxUrl(v.url) : undefined;
+      return { id, kind: "read", source: v.source as ReadSource, ...(readUrl ? { url: readUrl } : {}) };
+    }
     case "ai": {
       const instruction = typeof v.instruction === "string" ? v.instruction.trim().slice(0, MAX_INSTRUCTION_CHARS) : "";
       return instruction.length >= 3 ? { id, kind: "ai", instruction } : null;
@@ -137,8 +160,11 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
       return { id, kind: "condition", test: "has_content" };
     case "approval":
       return { id, kind: "approval" };
-    case "action":
-      return (ACTIONS as readonly unknown[]).includes(v.do) ? { id, kind: "action", do: v.do as ActionKind, ...(typeof v.url === "string" ? { url: v.url.slice(0, 500) } : {}) } : null;
+    case "action": {
+      if (!(ACTIONS as readonly unknown[]).includes(v.do)) return null;
+      const actUrl = typeof v.url === "string" ? sanitiseBoxUrl(v.url) : undefined;
+      return { id, kind: "action", do: v.do as ActionKind, ...(actUrl ? { url: actUrl } : {}) };
+    }
     default:
       return null;
   }

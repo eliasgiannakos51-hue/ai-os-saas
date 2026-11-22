@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail, isAdminOrOwner } from "@/lib/auth/admin-emails";
+import { secretsMatch } from "@/lib/cron-auth";
 import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 import { logApiError } from "@/lib/log-error";
 
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
 
     const authHeader = request.headers.get("authorization");
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const isBearerAuth = authHeader && serviceKey && authHeader === `Bearer ${serviceKey}`;
+    const isBearerAuth = authHeader && serviceKey && secretsMatch(authHeader, `Bearer ${serviceKey}`);
 
     // Either a signed-in admin/owner or a valid service-role Bearer token.
     if (!user && !isBearerAuth) {

@@ -201,7 +201,11 @@ export function AutomationShell({
   const level: ShellMode = simplePro ? mode : "pro";
 
   const shown = flows.find((f) => f.id === openId) ?? null;
-  const chosenBox = level === "pro" && shown && chosen ? shown.boxes.find((b) => b.id === chosen) ?? null : null;
+  // BoxEditor opens in BOTH Simple and Pro — the user expects to click a
+  // node and edit it regardless of which tab they are on. The only
+  // difference Simple makes is in the ToolShell's work-area header; the
+  // boxes themselves (BoxRow) are always interactive.
+  const chosenBox = shown && chosen ? shown.boxes.find((b) => b.id === chosen) ?? null : null;
   const runPrice = shown ? prices.step * aiBoxCount(shown.boxes) : 0;
   const names = CONNECTION_NAME;
 
@@ -214,7 +218,9 @@ export function AutomationShell({
   // every box (lib/automations/runner.ts), and while the run is going this
   // screen reads them back once a second. When it is not going, nothing
   // is asked and nothing moves.
-  const alive = simplePro && level === "pro";
+  // Live run progress works in BOTH modes — the user should see which
+  // box is running regardless of Simple/Pro.
+  const alive = true;
   const shownRuns = shown ? runs.filter((r) => r.flowId === shown.id) : [];
   const followed = shown ? followedRun(shownRuns, watch && watch.flowId === shown.id ? watch : null) : null;
   const progress = shown && alive ? runProgress(shown.boxes, followed) : null;

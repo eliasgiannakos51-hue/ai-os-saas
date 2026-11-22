@@ -801,9 +801,8 @@ export function AutomationShell({
                       )}
                       <button
                         type="button"
-                        disabled={running !== null}
-                        onClick={() => send(node.hint)}
-                        className="flex overflow-hidden rounded-card transition-all hover:ring-2 hover:ring-foreground/30 disabled:opacity-60"
+                        onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }}
+                        className="flex overflow-hidden rounded-card transition-all hover:ring-2 hover:ring-foreground/30"
                         style={{ border: "1px solid rgb(var(--border) / 0.5)" }}
                       >
                         <div className="flex h-[56px] w-12 shrink-0 items-center justify-center" style={{ background: `rgb(var(--foreground) / ${node.opacity})` }}>
@@ -838,9 +837,8 @@ export function AutomationShell({
                       )}
                       <button
                         type="button"
-                        disabled={running !== null}
-                        onClick={() => send(node.hint)}
-                        className="flex overflow-hidden rounded-card transition-all hover:ring-2 hover:ring-foreground/30 disabled:opacity-60"
+                        onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }}
+                        className="flex overflow-hidden rounded-card transition-all hover:ring-2 hover:ring-foreground/30"
                         style={{ border: "1px solid rgb(var(--border) / 0.5)" }}
                       >
                         <div className="flex h-[56px] w-12 shrink-0 items-center justify-center" style={{ background: `rgb(var(--foreground) / ${node.opacity})` }}>

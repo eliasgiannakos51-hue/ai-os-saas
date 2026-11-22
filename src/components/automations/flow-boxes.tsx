@@ -103,11 +103,11 @@ export const CONNECT_AT: Record<string, string> = {
   s3: INTEGRATIONS, typeform: INTEGRATIONS, google_forms: INTEGRATIONS,
 };
 
-// n8n-QUALITY NODE DESIGN. Each node is a compact card with a coloured
-// icon panel on the inline-start side (like n8n's square icon area),
-// then the kind label + description to its right. The icon panel bg
-// uses foreground at different opacities per kind — the same token at
-// six weights. The card border is the design system's --border.
+// n8n-QUALITY NODE DESIGN. Each node is a COMPACT card (max 360px) with a
+// 3px coloured top-border per kind (like n8n's accent line), a 40px icon
+// circle, and the kind label + description. Cards are CENTERED in the
+// panel and connected by thin vertical lines, creating a visual flow
+// diagram rather than a list of full-width boxes.
 const ICON_BG: Record<Box["kind"], string> = {
   start: "rgb(var(--foreground) / 0.14)",
   read: "rgb(var(--foreground) / 0.08)",
@@ -115,6 +115,15 @@ const ICON_BG: Record<Box["kind"], string> = {
   condition: "rgb(var(--foreground) / 0.06)",
   approval: "rgb(var(--foreground) / 0.10)",
   action: "rgb(var(--foreground) / 0.12)",
+};
+/** n8n-style top-border accent colour per box kind. */
+const ACCENT: Record<Box["kind"], string> = {
+  start: "rgb(var(--foreground) / 0.5)",
+  read: "rgb(var(--foreground) / 0.3)",
+  ai: "rgb(var(--foreground) / 0.6)",
+  condition: "rgb(var(--foreground) / 0.25)",
+  approval: "rgb(var(--foreground) / 0.35)",
+  action: "rgb(var(--foreground) / 0.4)",
 };
 
 function useWords() {
@@ -414,56 +423,52 @@ export function BoxRow({
   const { t, kind, needs, describe } = useWords();
   const noteWords = useNoteWords();
   return (
-    <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="space-y-0">
+    <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
       {boxes.map((box, i) => {
         const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
         const state = progress?.boxes[box.id] ?? "idle";
         const failed = progress?.failed?.box === box.id ? progress.failed : null;
         const mark = chosen === box.id ? "ring-2 ring-foreground" : state === "failed" ? "ring-1 ring-danger" : state === "active" ? "ring-1 ring-foreground/50" : "";
         return (
-          <li key={box.id} className="relative">
+          <li key={box.id} className="relative flex w-full max-w-sm flex-col items-center">
             {/* SVG connector between nodes */}
             {i > 0 && (progress
               ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
               : <NodeConnector />
             )}
-            {/* n8n-STYLE NODE CARD — icon panel left, content right */}
-            <div className="flex items-start gap-2">
-              <button
-                type="button"
-                onClick={() => onChoose(box.id)}
-                aria-pressed={chosen === box.id}
-                data-testid="flow-box"
-                data-kind={box.kind}
-                data-state={progress ? state : undefined}
-                className={`flex w-full overflow-hidden rounded-card text-start transition-all ${mark}`}
-                style={{ border: "1px solid rgb(var(--border))" }}
-              >
-                {/* Icon panel — coloured square, like n8n */}
-                <div className="flex w-12 shrink-0 items-center justify-center self-stretch" style={{ background: ICON_BG[box.kind] }}>
-                  <BoxIconInner box={box} />
-                </div>
-                {/* Content */}
-                <div className="flex min-w-0 flex-1 items-center gap-2 bg-panel px-3 py-2.5 hover:bg-panel-hover">
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted">{kind[box.kind]}</span>
-                    <span className="mt-0.5 block break-words text-[13px] leading-snug text-foreground">{describe(box)}</span>
-                  </span>
-                  {state === "active" && (
-                    <span className="shrink-0">
-                      <ThinkingIndicator size="sm" />
-                      <span className="sr-only">{t("runStatus.running")}</span>
-                    </span>
-                  )}
-                  {state === "done" && <Check className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />}
-                </div>
-              </button>
-              {box.kind === "condition" && (
-                <span data-testid="flow-branch" className="mt-4 shrink-0 text-[11px] text-muted">
-                  {t("conditionElse")}
+            {/* n8n-STYLE NODE CARD — compact, centered, with accent top border */}
+            <button
+              type="button"
+              onClick={() => onChoose(box.id)}
+              aria-pressed={chosen === box.id}
+              data-testid="flow-box"
+              data-kind={box.kind}
+              data-state={progress ? state : undefined}
+              className={`flex w-full items-center gap-3 rounded-card bg-panel px-4 py-3 text-start transition-all hover:bg-panel-hover ${mark}`}
+              style={{ border: "1px solid rgb(var(--border))", borderTopWidth: "3px", borderTopColor: ACCENT[box.kind] }}
+            >
+              {/* Icon circle */}
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ background: ICON_BG[box.kind] }}>
+                <BoxIconInner box={box} />
+              </div>
+              {/* Content */}
+              <span className="min-w-0 flex-1">
+                <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted">{kind[box.kind]}</span>
+                <span className="mt-0.5 block break-words text-[13px] leading-snug text-foreground">{describe(box)}</span>
+              </span>
+              {state === "active" && (
+                <span className="shrink-0">
+                  <ThinkingIndicator size="sm" />
+                  <span className="sr-only">{t("runStatus.running")}</span>
                 </span>
               )}
-            </div>
+              {state === "done" && <Check className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />}
+            </button>
+            {box.kind === "condition" && (
+              <span data-testid="flow-branch" className="mt-1 text-[11px] text-muted">
+                {t("conditionElse")}
+              </span>
+            )}
             {failed && (
               <p data-testid="flow-failed" className="mt-1 ps-3 text-xs text-danger">
                 {t("failedHere", { reason: noteWords({ box: failed.box, status: "failed", note: failed.note }) })}
@@ -527,39 +532,34 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
     }
   }
   return (
-    <div className="space-y-0">
-      <ol data-testid="flow-steps" className="space-y-0">
+    <div>
+      <ol data-testid="flow-steps" className="flex flex-col items-center gap-0">
         {boxes.map((box, i) => {
           const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
           return (
-            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative">
-              {/* n8n-STYLE NODE CARDS ALSO IN SIMPLE — same visual language as
-               *  BoxRow (Pro mode), but read-only. The user sees the same
-               *  icon panel + description cards whether they're in Simple or
-               *  Pro. Simple just doesn't let you click to edit a box. */}
+            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full max-w-sm flex-col items-center">
+              {/* n8n-STYLE COMPACT NODE CARDS — same design as BoxRow */}
               {i > 0 && <NodeConnector />}
               <div
                 data-testid="flow-box"
                 data-kind={box.kind}
-                className="flex w-full overflow-hidden rounded-card"
-                style={{ border: "1px solid rgb(var(--border))" }}
+                className="flex w-full items-center gap-3 rounded-card bg-panel px-4 py-3"
+                style={{ border: "1px solid rgb(var(--border))", borderTopWidth: "3px", borderTopColor: ACCENT[box.kind] }}
               >
-                {/* Icon panel */}
-                <div className="flex w-12 shrink-0 items-center justify-center self-stretch" style={{ background: ICON_BG[box.kind] }}>
+                {/* Icon circle */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ background: ICON_BG[box.kind] }}>
                   <BoxIconInner box={box} />
                 </div>
                 {/* Content */}
-                <div className="flex min-w-0 flex-1 items-center gap-2 bg-panel px-3 py-2.5">
-                  <span className="min-w-0 flex-1">
-                    <span data-testid="flow-step-part" className="block text-[10px] font-semibold uppercase tracking-widest text-muted">{part[partOf(box)]} · {kind[box.kind]}</span>
-                    <span title={preview && box.kind === "ai" ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} mt-0.5 break-words text-[13px] leading-snug text-foreground`}>
-                      {sentence(box)}
-                    </span>
+                <span className="min-w-0 flex-1">
+                  <span data-testid="flow-step-part" className="block text-[10px] font-semibold uppercase tracking-widest text-muted">{part[partOf(box)]} · {kind[box.kind]}</span>
+                  <span title={preview && box.kind === "ai" ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} mt-0.5 break-words text-[13px] leading-snug text-foreground`}>
+                    {sentence(box)}
                   </span>
-                </div>
+                </span>
               </div>
               {missing.map((need) => (
-                <p key={need} data-testid="flow-needs" className="mt-1 flex flex-wrap items-center gap-2 ps-3 text-xs text-warning">
+                <p key={need} data-testid="flow-needs" className="mt-1 flex flex-wrap items-center gap-2 text-xs text-warning">
                   {t("needsConnection", { name: needs[need] })}
                   <Link href={CONNECT_AT[need]} className="inline-flex min-h-[44px] items-center text-foreground underline underline-offset-2">
                     {t("connect")}
@@ -570,7 +570,7 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
           );
         })}
       </ol>
-      {!preview && <p className="mt-3 text-xs text-muted">{t("simple.hint")}</p>}
+      {!preview && <p className="mt-3 text-center text-xs text-muted">{t("simple.hint")}</p>}
     </div>
   );
 }

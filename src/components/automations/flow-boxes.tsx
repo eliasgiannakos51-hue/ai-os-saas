@@ -103,27 +103,19 @@ export const CONNECT_AT: Record<string, string> = {
   s3: INTEGRATIONS, typeform: INTEGRATIONS, google_forms: INTEGRATIONS,
 };
 
-// n8n-QUALITY NODE DESIGN. Each node is a COMPACT card (max 360px) with a
-// 3px coloured top-border per kind (like n8n's accent line), a 40px icon
-// circle, and the kind label + description. Cards are CENTERED in the
-// panel and connected by thin vertical lines, creating a visual flow
-// diagram rather than a list of full-width boxes.
-const ICON_BG: Record<Box["kind"], string> = {
-  start: "rgb(var(--foreground) / 0.14)",
-  read: "rgb(var(--foreground) / 0.08)",
-  ai: "rgb(var(--foreground) / 0.18)",
-  condition: "rgb(var(--foreground) / 0.06)",
-  approval: "rgb(var(--foreground) / 0.10)",
-  action: "rgb(var(--foreground) / 0.12)",
-};
-/** n8n-style top-border accent colour per box kind. */
-const ACCENT: Record<Box["kind"], string> = {
-  start: "rgb(var(--foreground) / 0.5)",
-  read: "rgb(var(--foreground) / 0.3)",
-  ai: "rgb(var(--foreground) / 0.6)",
-  condition: "rgb(var(--foreground) / 0.25)",
-  approval: "rgb(var(--foreground) / 0.35)",
-  action: "rgb(var(--foreground) / 0.4)",
+// n8n-QUALITY NODE DESIGN. Vivid accent colours per kind — not washed-out
+// foreground-with-opacity. Each node is a COMPACT card (max 300px) with a
+// coloured left border (4px, like n8n), a tinted icon circle in that same
+// hue, a subtle shadow to feel "floating on a canvas", and the kind label
+// + description. Cards are CENTERED in the panel and connected by thin
+// vertical lines, creating a visual flow diagram.
+const NODE_COLOR: Record<Box["kind"], { accent: string; iconBg: string; iconText: string }> = {
+  start:     { accent: "#10b981", iconBg: "rgba(16,185,129,0.15)", iconText: "#10b981" },   // green — triggers
+  read:      { accent: "#3b82f6", iconBg: "rgba(59,130,246,0.15)", iconText: "#3b82f6" },   // blue — data
+  ai:        { accent: "#8b5cf6", iconBg: "rgba(139,92,246,0.15)", iconText: "#8b5cf6" },   // purple — AI
+  condition: { accent: "#f59e0b", iconBg: "rgba(245,158,11,0.15)", iconText: "#f59e0b" },   // amber — logic
+  approval:  { accent: "#f97316", iconBg: "rgba(249,115,22,0.15)", iconText: "#f97316" },   // orange — wait
+  action:    { accent: "#ef4444", iconBg: "rgba(239,68,68,0.15)",  iconText: "#ef4444" },   // red — output
 };
 
 function useWords() {
@@ -318,9 +310,9 @@ export function useBoxLabel(): (box: Box) => string {
   return (box) => kind[box.kind];
 }
 
-/** The icon for one box — a 20px lucide icon, white. */
+/** The icon for one box — a 20px lucide icon, coloured by kind. */
 function BoxIconInner({ box }: { box: Box }) {
-  const cls = "h-5 w-5 text-foreground";
+  const cls = "h-5 w-5";
   if (box.kind === "start") {
     if (box.when === "file_uploaded") return <FileUp className={cls} aria-hidden="true" />;
     if (box.when === "webhook") return <Webhook className={cls} aria-hidden="true" />;
@@ -390,15 +382,16 @@ function BoxIconInner({ box }: { box: Box }) {
   return <BookOpen className={cls} aria-hidden="true" />;
 }
 
-/** SVG connector between two nodes — a vertical line with rounded port
- *  dots at each end, like n8n's handles. */
+/** SVG connector between two nodes — a thin vertical line with small
+ *  port dots, like n8n's canvas handles. Intentionally subtle so the
+ *  vivid node cards dominate. */
 function NodeConnector() {
   return (
-    <div aria-hidden="true" className="flex justify-center py-0.5" style={{ paddingInlineStart: "1.5rem" }}>
-      <svg width="12" height="28" viewBox="0 0 12 28" className="text-border">
-        <circle cx="6" cy="3" r="3" fill="currentColor" />
-        <line x1="6" y1="6" x2="6" y2="22" stroke="currentColor" strokeWidth="2" />
-        <circle cx="6" cy="25" r="3" fill="currentColor" />
+    <div aria-hidden="true" className="flex justify-center" style={{ height: 32 }}>
+      <svg width="10" height="32" viewBox="0 0 10 32">
+        <circle cx="5" cy="3" r="2.5" fill="#6b7280" />
+        <line x1="5" y1="5.5" x2="5" y2="26.5" stroke="#6b7280" strokeWidth="1.5" strokeDasharray="3 2" />
+        <circle cx="5" cy="29" r="2.5" fill="#6b7280" />
       </svg>
     </div>
   );
@@ -428,15 +421,16 @@ export function BoxRow({
         const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
         const state = progress?.boxes[box.id] ?? "idle";
         const failed = progress?.failed?.box === box.id ? progress.failed : null;
+        const c = NODE_COLOR[box.kind];
         const mark = chosen === box.id ? "ring-2 ring-foreground" : state === "failed" ? "ring-1 ring-danger" : state === "active" ? "ring-1 ring-foreground/50" : "";
         return (
-          <li key={box.id} className="relative flex w-full max-w-sm flex-col items-center">
+          <li key={box.id} className="relative flex w-full flex-col items-center" style={{ maxWidth: 300 }}>
             {/* SVG connector between nodes */}
             {i > 0 && (progress
               ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
               : <NodeConnector />
             )}
-            {/* n8n-STYLE NODE CARD — compact, centered, with accent top border */}
+            {/* n8n-STYLE NODE CARD — compact, vivid left border, shadow */}
             <button
               type="button"
               onClick={() => onChoose(box.id)}
@@ -444,17 +438,25 @@ export function BoxRow({
               data-testid="flow-box"
               data-kind={box.kind}
               data-state={progress ? state : undefined}
-              className={`flex w-full items-center gap-3 rounded-card bg-panel px-4 py-3 text-start transition-all hover:bg-panel-hover ${mark}`}
-              style={{ border: "1px solid rgb(var(--border))", borderTopWidth: "3px", borderTopColor: ACCENT[box.kind] }}
+              className={`flex w-full items-center gap-3 rounded-lg bg-panel px-3 py-2.5 text-start transition-all hover:bg-panel-hover ${mark}`}
+              style={{
+                border: "1px solid rgb(var(--border))",
+                borderLeftWidth: 4,
+                borderLeftColor: c.accent,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)",
+              }}
             >
-              {/* Icon circle */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ background: ICON_BG[box.kind] }}>
-                <BoxIconInner box={box} />
+              {/* Icon circle — vivid colour per kind */}
+              <div
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                style={{ background: c.iconBg }}
+              >
+                <span style={{ color: c.iconText }}><BoxIconInner box={box} /></span>
               </div>
               {/* Content */}
               <span className="min-w-0 flex-1">
-                <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted">{kind[box.kind]}</span>
-                <span className="mt-0.5 block break-words text-[13px] leading-snug text-foreground">{describe(box)}</span>
+                <span className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: c.accent }}>{kind[box.kind]}</span>
+                <span className="mt-0.5 block break-words text-[12px] leading-snug text-foreground">{describe(box)}</span>
               </span>
               {state === "active" && (
                 <span className="shrink-0">
@@ -536,24 +538,33 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
       <ol data-testid="flow-steps" className="flex flex-col items-center gap-0">
         {boxes.map((box, i) => {
           const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
+          const c = NODE_COLOR[box.kind];
           return (
-            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full max-w-sm flex-col items-center">
+            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full flex-col items-center" style={{ maxWidth: 300 }}>
               {/* n8n-STYLE COMPACT NODE CARDS — same design as BoxRow */}
               {i > 0 && <NodeConnector />}
               <div
                 data-testid="flow-box"
                 data-kind={box.kind}
-                className="flex w-full items-center gap-3 rounded-card bg-panel px-4 py-3"
-                style={{ border: "1px solid rgb(var(--border))", borderTopWidth: "3px", borderTopColor: ACCENT[box.kind] }}
+                className="flex w-full items-center gap-3 rounded-lg bg-panel px-3 py-2.5"
+                style={{
+                  border: "1px solid rgb(var(--border))",
+                  borderLeftWidth: 4,
+                  borderLeftColor: c.accent,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)",
+                }}
               >
-                {/* Icon circle */}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ background: ICON_BG[box.kind] }}>
-                  <BoxIconInner box={box} />
+                {/* Icon circle — vivid colour per kind */}
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                  style={{ background: c.iconBg }}
+                >
+                  <span style={{ color: c.iconText }}><BoxIconInner box={box} /></span>
                 </div>
                 {/* Content */}
                 <span className="min-w-0 flex-1">
-                  <span data-testid="flow-step-part" className="block text-[10px] font-semibold uppercase tracking-widest text-muted">{part[partOf(box)]} · {kind[box.kind]}</span>
-                  <span title={preview && box.kind === "ai" ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} mt-0.5 break-words text-[13px] leading-snug text-foreground`}>
+                  <span data-testid="flow-step-part" className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: c.accent }}>{part[partOf(box)]} · {kind[box.kind]}</span>
+                  <span title={preview && box.kind === "ai" ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} mt-0.5 break-words text-[12px] leading-snug text-foreground`}>
                     {sentence(box)}
                   </span>
                 </span>

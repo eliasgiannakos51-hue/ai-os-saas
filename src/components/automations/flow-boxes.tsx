@@ -509,7 +509,7 @@ export function BoxRow({
  * same press to the connection).
  */
 export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[]; connected: Connected; /** A template's card (components/automations/template-gallery.tsx): the same steps, without the line that says Pro is where to change them. */ preview?: boolean }) {
-  const { t, part, needs, describe } = useWords();
+  const { t, kind, part, needs, describe } = useWords();
   function sentence(box: Box): string {
     switch (box.kind) {
       case "read":
@@ -527,45 +527,50 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
     }
   }
   return (
-    <div className="space-y-2">
-      <ol data-testid="flow-steps" className="space-y-2">
+    <div className="space-y-0">
+      <ol data-testid="flow-steps" className="space-y-0">
         {boxes.map((box, i) => {
           const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
           return (
-            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="flex items-start gap-3">
-              {/* «ΌΤΑΝ → ΑΝ → ΚΆΝΕ» (the owner, 2026-11-05): each step says
-                  which part of the sentence it is, so the list reads top to
-                  bottom as one — «Όταν κάθε μέρα στις 08:30 / Κάνε: διαβάζει…
-                  / Αν βρέθηκε κάτι / Κάνε: το στέλνει». A word, not the
-                  number it replaced: the order is the list's own, and the
-                  number said nothing a person could act on. Read aloud
-                  before the sentence, so a screen reader hears it too. */}
-              <span data-testid="flow-step-part" data-index={i} className="mt-px inline-flex min-h-[1.5rem] min-w-[3.5rem] shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-tag px-2 text-[11px] font-medium text-foreground">
-                {part[partOf(box)]}
-              </span>
-              <span className="min-w-0 flex-1 space-y-1">
-                {/* ON A TEMPLATE'S CARD an AI step's words are the whole
-                    instruction the model gets, and four lines of it drown
-                    the shape of the automation the card is showing: two
-                    lines there, the rest one hover away and the whole of
-                    it in the automation once made. */}
-                <span title={preview ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} break-words text-sm leading-relaxed text-body`}>
-                  {sentence(box)}
-                </span>
-                {missing.map((need) => (
-                  <span key={need} data-testid="flow-needs" className="flex flex-wrap items-center gap-2 text-xs text-warning">
-                    {t("needsConnection", { name: needs[need] })}
-                    <Link href={CONNECT_AT[need]} className="inline-flex min-h-[44px] items-center text-foreground underline underline-offset-2">
-                      {t("connect")}
-                    </Link>
+            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative">
+              {/* n8n-STYLE NODE CARDS ALSO IN SIMPLE — same visual language as
+               *  BoxRow (Pro mode), but read-only. The user sees the same
+               *  icon panel + description cards whether they're in Simple or
+               *  Pro. Simple just doesn't let you click to edit a box. */}
+              {i > 0 && <NodeConnector />}
+              <div
+                data-testid="flow-box"
+                data-kind={box.kind}
+                className="flex w-full overflow-hidden rounded-card"
+                style={{ border: "1px solid rgb(var(--border))" }}
+              >
+                {/* Icon panel */}
+                <div className="flex w-12 shrink-0 items-center justify-center self-stretch" style={{ background: ICON_BG[box.kind] }}>
+                  <BoxIconInner box={box} />
+                </div>
+                {/* Content */}
+                <div className="flex min-w-0 flex-1 items-center gap-2 bg-panel px-3 py-2.5">
+                  <span className="min-w-0 flex-1">
+                    <span data-testid="flow-step-part" className="block text-[10px] font-semibold uppercase tracking-widest text-muted">{part[partOf(box)]} · {kind[box.kind]}</span>
+                    <span title={preview && box.kind === "ai" ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} mt-0.5 break-words text-[13px] leading-snug text-foreground`}>
+                      {sentence(box)}
+                    </span>
                   </span>
-                ))}
-              </span>
+                </div>
+              </div>
+              {missing.map((need) => (
+                <p key={need} data-testid="flow-needs" className="mt-1 flex flex-wrap items-center gap-2 ps-3 text-xs text-warning">
+                  {t("needsConnection", { name: needs[need] })}
+                  <Link href={CONNECT_AT[need]} className="inline-flex min-h-[44px] items-center text-foreground underline underline-offset-2">
+                    {t("connect")}
+                  </Link>
+                </p>
+              ))}
             </li>
           );
         })}
       </ol>
-      {!preview && <p className="text-xs text-muted">{t("simple.hint")}</p>}
+      {!preview && <p className="mt-3 text-xs text-muted">{t("simple.hint")}</p>}
     </div>
   );
 }

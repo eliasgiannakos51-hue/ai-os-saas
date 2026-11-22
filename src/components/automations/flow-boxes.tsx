@@ -7,13 +7,16 @@ import { BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Cl
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import {
   ACTIONS,
+  ACTION_CONFIG,
   FLOW_MODES,
   MAX_INSTRUCTION_CHARS,
   READ_SOURCES,
+  SOURCE_CONFIG,
   connectionsNeeded,
   partOf,
   type ActionKind,
   type Box,
+  type ConfigField,
   type FlowMode,
   type ReadSource,
   type SentencePart,
@@ -648,11 +651,49 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
  * through PATCH /api/automations/flows/[id] as a new version — free, and
  * taken back by «Αναίρεση» like a change with words.
  */
+/** Render config fields for a box — n8n-style per-node settings. */
+function ConfigFields({ fields, config, onChange }: { fields: ConfigField[]; config: Record<string, string>; onChange: (cfg: Record<string, string>) => void }) {
+  const fieldCls = "mt-1 block min-h-[44px] w-full rounded-item bg-panel px-3 text-sm text-foreground";
+  const labelCls = "block text-xs text-muted";
+  return (
+    <div className="mt-3 space-y-2 border-t pt-3" style={{ borderColor: "rgb(var(--border) / 0.3)" }}>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted">⚙ Settings</p>
+      {fields.map((f) => (
+        <label key={f.key} className={labelCls}>
+          {f.label}{f.required && <span className="text-danger"> *</span>}
+          {f.type === "textarea" ? (
+            <textarea
+              className={`${fieldCls} min-h-[66px] py-2`}
+              placeholder={f.placeholder}
+              value={config[f.key] ?? ""}
+              onChange={(e) => onChange({ ...config, [f.key]: e.target.value })}
+            />
+          ) : (
+            <input
+              type={f.type === "password" ? "password" : f.type === "email" ? "email" : f.type === "url" ? "url" : "text"}
+              className={fieldCls}
+              placeholder={f.placeholder}
+              value={config[f.key] ?? ""}
+              onChange={(e) => onChange({ ...config, [f.key]: e.target.value })}
+            />
+          )}
+        </label>
+      ))}
+    </div>
+  );
+}
+
 export function BoxEditor({ box, saving, onSave }: { box: Box; saving: boolean; onSave: (next: Box) => void }) {
   const { t, source, action, weekday } = useWords();
   const [draft, setDraft] = useState<Box>(box);
   const field = "mt-1 block min-h-[44px] w-full rounded-item bg-panel px-3 text-sm text-foreground";
   const label = "block text-xs text-muted";
+
+  // Per-type config fields (n8n-style node settings)
+  const configFields: ConfigField[] =
+    draft.kind === "action" ? (ACTION_CONFIG[draft.do] ?? []) :
+    draft.kind === "read" ? (SOURCE_CONFIG[draft.source] ?? []) : [];
+  const currentConfig = (draft.kind === "action" || draft.kind === "read") ? (draft.config ?? {}) : {};
 
   let body: React.ReactNode = null;
   if (draft.kind === "start") {
@@ -709,16 +750,21 @@ export function BoxEditor({ box, saving, onSave }: { box: Box; saving: boolean; 
   } else if (draft.kind === "read") {
     const read = draft;
     body = (
-      <label className={label}>
-        {t("edit.source")}
-        <select className={field} value={read.source} onChange={(e) => setDraft({ ...read, source: e.target.value as ReadSource })}>
-          {READ_SOURCES.map((s) => (
-            <option key={s} value={s}>
-              {source[s]}
-            </option>
-          ))}
-        </select>
-      </label>
+      <>
+        <label className={label}>
+          {t("edit.source")}
+          <select className={field} value={read.source} onChange={(e) => setDraft({ ...read, source: e.target.value as ReadSource, config: undefined })}>
+            {READ_SOURCES.map((s) => (
+              <option key={s} value={s}>
+                {source[s]}
+              </option>
+            ))}
+          </select>
+        </label>
+        {configFields.length > 0 && (
+          <ConfigFields fields={configFields} config={currentConfig} onChange={(cfg) => setDraft({ ...read, config: cfg })} />
+        )}
+      </>
     );
   } else if (draft.kind === "ai") {
     const ai = draft;
@@ -736,16 +782,21 @@ export function BoxEditor({ box, saving, onSave }: { box: Box; saving: boolean; 
   } else if (draft.kind === "action") {
     const act = draft;
     body = (
-      <label className={label}>
-        {t("edit.do")}
-        <select className={field} value={act.do} onChange={(e) => setDraft({ ...act, do: e.target.value as ActionKind })}>
-          {ACTIONS.map((a) => (
-            <option key={a} value={a}>
-              {action[a]}
-            </option>
-          ))}
-        </select>
-      </label>
+      <>
+        <label className={label}>
+          {t("edit.do")}
+          <select className={field} value={act.do} onChange={(e) => setDraft({ ...act, do: e.target.value as ActionKind, config: undefined })}>
+            {ACTIONS.map((a) => (
+              <option key={a} value={a}>
+                {action[a]}
+              </option>
+            ))}
+          </select>
+        </label>
+        {configFields.length > 0 && (
+          <ConfigFields fields={configFields} config={currentConfig} onChange={(cfg) => setDraft({ ...act, config: cfg })} />
+        )}
+      </>
     );
   } else {
     body = <p className="text-xs text-muted">{t("edit.nothing")}</p>;

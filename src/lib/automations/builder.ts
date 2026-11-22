@@ -44,6 +44,7 @@ const BOX_SCHEMA = {
     instruction: { type: "string", description: `ai only: what to do with what was read, in the person's language, at most ${MAX_INSTRUCTION_CHARS} characters` },
     test: { type: "string", enum: ["has_content"], description: "condition only: go on only if what came before is not empty" },
     do: { type: "string", enum: [...ACTIONS], description: "action only" },
+    config: { type: "object", description: "Per-node settings as key-value pairs. For send_telegram: {bot_token, chat_id}. For http_request: {url, method, headers}. For send_slack: {webhook_url}. For send_discord: {webhook_url}. For website_scrape: {url}. For rss_feed: {url}. Only when the person provides specific credentials or URLs in their sentence.", additionalProperties: { type: "string" } },
   },
   required: ["id", "kind"],
 } as const;

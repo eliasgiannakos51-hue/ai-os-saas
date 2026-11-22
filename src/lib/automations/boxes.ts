@@ -71,7 +71,7 @@ export const READ_SOURCES = [
   "stripe_payments", "typeform_responses", "google_forms",
 ] as const;
 export type ReadSource = (typeof READ_SOURCES)[number];
-export type ReadBox = { id: string; kind: "read"; source: ReadSource; url?: string };
+export type ReadBox = { id: string; kind: "read"; source: ReadSource; url?: string; config?: Record<string, string> };
 
 export type AiBox = { id: string; kind: "ai"; instruction: string };
 
@@ -104,7 +104,7 @@ export const ACTIONS = [
   "redis_set", "mqtt_publish", "s3_upload",
 ] as const;
 export type ActionKind = (typeof ACTIONS)[number];
-export type ActionBox = { id: string; kind: "action"; do: ActionKind; url?: string };
+export type ActionBox = { id: string; kind: "action"; do: ActionKind; url?: string; config?: Record<string, string> };
 
 export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox;
 export type BoxKind = Box["kind"];
@@ -139,6 +139,117 @@ function readStart(v: Record<string, unknown>, id: string): StartBox | null {
   return { id, kind: "start", when: "time", every, at };
 }
 
+/** Read a config object defensively — at most 10 string→string pairs,
+ *  each key ≤ 50 chars and value ≤ 2000 chars (enough for API tokens,
+ *  URLs, chat IDs, subjects, templates). */
+function readConfig(raw: unknown): Record<string, string> | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const out: Record<string, string> = {};
+  let count = 0;
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof k !== "string" || typeof v !== "string") continue;
+    if (k.length > 50 || v.length > 2000) continue;
+    out[k] = v;
+    if (++count >= 10) break;
+  }
+  return count > 0 ? out : undefined;
+}
+
+/**
+ * PER-TYPE CONFIGURATION FIELDS: what each action/source type lets the
+ * user configure directly in the node editor, like n8n's node settings.
+ * Each field has a key (stored in box.config), a label, an input type,
+ * and a placeholder. Sensitive fields (type "password") are shown as
+ * masked inputs. Fields are shown in order.
+ */
+export type ConfigField = {
+  key: string;
+  label: string;
+  type: "text" | "password" | "email" | "url" | "textarea";
+  placeholder?: string;
+  required?: boolean;
+};
+export const ACTION_CONFIG: Partial<Record<ActionKind, ConfigField[]>> = {
+  send_telegram: [
+    { key: "bot_token", label: "Bot Token", type: "password", placeholder: "123456:ABC-DEF1234...", required: true },
+    { key: "chat_id", label: "Chat ID", type: "text", placeholder: "-100123456789", required: true },
+  ],
+  send_email: [
+    { key: "to", label: "To", type: "email", placeholder: "recipient@example.com" },
+    { key: "subject", label: "Subject", type: "text", placeholder: "Daily Report — {date}" },
+  ],
+  send_slack: [
+    { key: "webhook_url", label: "Webhook URL", type: "url", placeholder: "https://hooks.slack.com/services/...", required: true },
+    { key: "channel", label: "Channel", type: "text", placeholder: "#general" },
+  ],
+  send_discord: [
+    { key: "webhook_url", label: "Webhook URL", type: "url", placeholder: "https://discord.com/api/webhooks/...", required: true },
+  ],
+  send_whatsapp: [
+    { key: "phone", label: "Phone Number", type: "text", placeholder: "+30 69..." },
+  ],
+  webhook_post: [
+    { key: "url", label: "Webhook URL", type: "url", placeholder: "https://example.com/webhook", required: true },
+    { key: "headers", label: "Headers (JSON)", type: "textarea", placeholder: '{"Authorization": "Bearer ..."}' },
+  ],
+  http_request: [
+    { key: "url", label: "URL", type: "url", placeholder: "https://api.example.com/...", required: true },
+    { key: "method", label: "Method", type: "text", placeholder: "POST" },
+    { key: "headers", label: "Headers (JSON)", type: "textarea", placeholder: '{"Content-Type": "application/json"}' },
+  ],
+  notion_write: [
+    { key: "api_key", label: "Notion API Key", type: "password", placeholder: "ntn_...", required: true },
+    { key: "page_id", label: "Page ID", type: "text", placeholder: "abc123..." },
+  ],
+  google_drive_upload: [
+    { key: "folder_id", label: "Folder ID", type: "text", placeholder: "1abc..." },
+  ],
+  github_create: [
+    { key: "token", label: "GitHub Token", type: "password", placeholder: "ghp_...", required: true },
+    { key: "repo", label: "Repository", type: "text", placeholder: "owner/repo", required: true },
+  ],
+  sheets_write: [
+    { key: "spreadsheet_id", label: "Spreadsheet ID", type: "text", placeholder: "1BxiM...", required: true },
+    { key: "range", label: "Range", type: "text", placeholder: "Sheet1!A1" },
+  ],
+};
+
+export const SOURCE_CONFIG: Partial<Record<ReadSource, ConfigField[]>> = {
+  http_request: [
+    { key: "url", label: "URL", type: "url", placeholder: "https://api.example.com/data", required: true },
+    { key: "headers", label: "Headers (JSON)", type: "textarea", placeholder: '{"Authorization": "Bearer ..."}' },
+  ],
+  website_scrape: [
+    { key: "url", label: "URL to scrape", type: "url", placeholder: "https://example.com/page", required: true },
+  ],
+  rss_feed: [
+    { key: "url", label: "RSS Feed URL", type: "url", placeholder: "https://example.com/feed.xml", required: true },
+  ],
+  google_sheets: [
+    { key: "spreadsheet_id", label: "Spreadsheet ID", type: "text", placeholder: "1BxiM...", required: true },
+    { key: "range", label: "Range", type: "text", placeholder: "Sheet1!A1:D100" },
+  ],
+  notion_pages: [
+    { key: "api_key", label: "Notion API Key", type: "password", placeholder: "ntn_...", required: true },
+    { key: "database_id", label: "Database ID", type: "text", placeholder: "abc123..." },
+  ],
+  database_query: [
+    { key: "connection_string", label: "Connection String", type: "password", placeholder: "postgresql://...", required: true },
+    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM ...", required: true },
+  ],
+  discord_messages: [
+    { key: "bot_token", label: "Bot Token", type: "password", placeholder: "MTIz...", required: true },
+    { key: "channel_id", label: "Channel ID", type: "text", placeholder: "123456789", required: true },
+  ],
+  github_issues: [
+    { key: "token", label: "GitHub Token", type: "password", placeholder: "ghp_...", required: true },
+    { key: "repo", label: "Repository", type: "text", placeholder: "owner/repo", required: true },
+  ],
+  stripe_payments: [
+    { key: "api_key", label: "Stripe Secret Key", type: "password", placeholder: "sk_live_...", required: true },
+  ],
+};
+
 /** One box, read defensively: anything not exactly a box is null. */
 export function readBox(raw: unknown, fallbackId: string): Box | null {
   if (!raw || typeof raw !== "object") return null;
@@ -150,7 +261,8 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
     case "read": {
       if (!(READ_SOURCES as readonly unknown[]).includes(v.source)) return null;
       const readUrl = typeof v.url === "string" ? sanitiseBoxUrl(v.url) : undefined;
-      return { id, kind: "read", source: v.source as ReadSource, ...(readUrl ? { url: readUrl } : {}) };
+      const readCfg = readConfig(v.config);
+      return { id, kind: "read", source: v.source as ReadSource, ...(readUrl ? { url: readUrl } : {}), ...(readCfg ? { config: readCfg } : {}) };
     }
     case "ai": {
       const instruction = typeof v.instruction === "string" ? v.instruction.trim().slice(0, MAX_INSTRUCTION_CHARS) : "";
@@ -163,7 +275,8 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
     case "action": {
       if (!(ACTIONS as readonly unknown[]).includes(v.do)) return null;
       const actUrl = typeof v.url === "string" ? sanitiseBoxUrl(v.url) : undefined;
-      return { id, kind: "action", do: v.do as ActionKind, ...(actUrl ? { url: actUrl } : {}) };
+      const actCfg = readConfig(v.config);
+      return { id, kind: "action", do: v.do as ActionKind, ...(actUrl ? { url: actUrl } : {}), ...(actCfg ? { config: actCfg } : {}) };
     }
     default:
       return null;

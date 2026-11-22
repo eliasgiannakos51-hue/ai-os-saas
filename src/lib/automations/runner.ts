@@ -273,7 +273,7 @@ async function readExternalSource(
 
   // --- HTTP_REQUEST: fetch ANY URL, return raw response. No connection needed. ---
   if (source === "http_request") {
-    const url = box?.url;
+    const url = box?.url || box?.config?.url;
     if (!url) return { ok: false, note: "failed" };
     const result = await safeFetch(url);
     if (!result.ok) {
@@ -285,7 +285,7 @@ async function readExternalSource(
 
   // --- WEBSITE_SCRAPE: fetch a web page, strip HTML, return text. No connection needed. ---
   if (source === "website_scrape") {
-    const url = box?.url;
+    const url = box?.url || box?.config?.url;
     if (!url) return { ok: false, note: "failed" };
     const result = await safeFetch(url);
     if (!result.ok) {
@@ -298,7 +298,7 @@ async function readExternalSource(
 
   // --- RSS_FEED: fetch an RSS feed, extract items. No connection needed. ---
   if (source === "rss_feed") {
-    const url = box?.url;
+    const url = box?.url || box?.config?.url;
     if (!url) return { ok: false, note: "failed" };
     const result = await safeFetch(url);
     if (!result.ok) return { ok: false, note: "failed" };
@@ -419,7 +419,87 @@ async function act(box: ActionBox, text: string, ctx: RunContext): Promise<RunSt
     return { box: box.id, status: "ok", note: "saved" };
   }
 
-  // --- MESSAGING ACTIONS: telegram, email, whatsapp, slack, sms, discord, notify. ---
+  // --- DIRECT SEND VIA BOX CONFIG (n8n-style inline credentials) ---
+  // When the user configured credentials directly in the node, use them
+  // instead of going through the connection system. This lets automations
+  // work without setting up integrations, like n8n's per-node credentials.
+  const cfg = box.config ?? {};
+
+  // Telegram: bot_token + chat_id in box config → direct API call
+  if (box.do === "send_telegram" && cfg.bot_token && cfg.chat_id) {
+    try {
+      const res = await fetch(
+        `https://api.telegram.org/bot${encodeURIComponent(cfg.bot_token)}/sendMessage`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: cfg.chat_id, text: text.slice(0, 4096), parse_mode: "HTML" }),
+          signal: AbortSignal.timeout(15_000),
+        }
+      );
+      if (res.ok) return { box: box.id, status: "ok", note: "sent", via: "telegram" };
+      const body = await res.text().catch(() => "");
+      logApiError("automations:run", new Error(`Telegram ${res.status}: ${body.slice(0, 200)}`), { stage: "telegram_direct" });
+      return { box: box.id, status: "failed", note: res.status === 401 || res.status === 403 ? "not_connected" : "delivery", via: "telegram" };
+    } catch (err) {
+      logApiError("automations:run", err, { stage: "telegram_direct" });
+      return { box: box.id, status: "failed", note: "delivery", via: "telegram" };
+    }
+  }
+
+  // Slack: webhook_url in box config → direct webhook POST
+  if (box.do === "send_slack" && cfg.webhook_url) {
+    try {
+      const res = await fetch(cfg.webhook_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.slice(0, 40000), ...(cfg.channel ? { channel: cfg.channel } : {}) }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      return res.ok
+        ? { box: box.id, status: "ok", note: "sent", via: "slack" }
+        : { box: box.id, status: "failed", note: "delivery", via: "slack" };
+    } catch (err) {
+      logApiError("automations:run", err, { stage: "slack_direct" });
+      return { box: box.id, status: "failed", note: "delivery", via: "slack" };
+    }
+  }
+
+  // Discord: webhook_url in box config → direct webhook POST
+  if (box.do === "send_discord" && cfg.webhook_url) {
+    try {
+      const res = await fetch(cfg.webhook_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: text.slice(0, 2000) }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      return res.ok
+        ? { box: box.id, status: "ok", note: "sent", via: "discord" }
+        : { box: box.id, status: "failed", note: "delivery", via: "discord" };
+    } catch (err) {
+      logApiError("automations:run", err, { stage: "discord_direct" });
+      return { box: box.id, status: "failed", note: "delivery", via: "discord" };
+    }
+  }
+
+  // Email: 'to' in box config → pass as target to deliverAgentResult
+  if (box.do === "send_email" && cfg.to) {
+    const outcome = await deliverAgentResult({
+      userId: ctx.user.id,
+      email: ctx.user.email ?? "",
+      method: "email",
+      target: cfg.to,
+      agentName: cfg.subject ? `${ctx.flow.name}: ${cfg.subject}` : ctx.flow.name,
+      output: text,
+      language: await emailLocaleFor(ctx.user.id),
+    });
+    return outcome.delivered
+      ? { box: box.id, status: "ok", note: "sent", via: "email" }
+      : { box: box.id, status: "failed", note: "delivery", via: "email" };
+  }
+
+  // --- FALLBACK: MESSAGING ACTIONS via existing connection system ---
   const deliveryMethod = DELIVERY_METHOD[box.do];
   if (deliveryMethod) {
     const outcome = await deliverAgentResult({

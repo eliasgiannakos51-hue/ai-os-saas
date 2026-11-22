@@ -370,9 +370,29 @@ const ACTION_CONNECTION: Partial<Record<ActionKind, ConnectionKey>> = {
   mqtt_publish: "mqtt", s3_upload: "s3",
 };
 
+/** When a box carries inline config with the essential fields filled,
+ *  it does NOT need the connection system — the runner uses the config
+ *  directly (n8n-style per-node credentials). */
+function hasInlineConfig(box: Box): boolean {
+  if (box.kind === "action" && box.config) {
+    if (box.do === "send_telegram" && box.config.bot_token && box.config.chat_id) return true;
+    if (box.do === "send_slack" && box.config.webhook_url) return true;
+    if (box.do === "send_discord" && box.config.webhook_url) return true;
+    if (box.do === "send_email" && box.config.to) return true;
+  }
+  if (box.kind === "read" && box.config) {
+    if (box.source === "http_request" && box.config.url) return true;
+    if (box.source === "website_scrape" && box.config.url) return true;
+    if (box.source === "rss_feed" && box.config.url) return true;
+  }
+  return false;
+}
+
 export function connectionsNeeded(boxes: Box[]): ConnectionKey[] {
   const needs = new Set<ConnectionKey>();
   for (const box of boxes) {
+    // Skip connection requirement when the box has inline config.
+    if (hasInlineConfig(box)) continue;
     // Webhook start does NOT need a connection — it's an incoming HTTP call.
     if (box.kind === "start" && box.when === "app_event") {
       // Generic app event — the specific connection depends on the app field

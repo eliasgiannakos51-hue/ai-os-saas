@@ -3899,7 +3899,9 @@
         "instruction": "O que a AI faz",
         "do": "O que ela faz",
         "save": "Salvar",
-        "nothing": "Esta caixa não tem nada para ajustar. Mude-a com palavras ou desfaça."
+        "nothing": "Esta caixa não tem nada para ajustar. Mude-a com palavras ou desfaça.",
+        "delete": "Remover passo",
+        "add": "Adicionar passo"
       },
       "history": "Histórico",
       "historyEmpty": "Ainda não foi executada. Toque em “Testar sem enviar” para ver o que ela faria.",

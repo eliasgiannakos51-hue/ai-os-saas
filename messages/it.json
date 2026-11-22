@@ -3899,7 +3899,9 @@
         "instruction": "Cosa fa l’AI",
         "do": "Cosa fa",
         "save": "Salva",
-        "nothing": "Questa casella non ha niente da impostare. Cambiala con le parole o annulla."
+        "nothing": "Questa casella non ha niente da impostare. Cambiala con le parole o annulla.",
+        "delete": "Rimuovi passaggio",
+        "add": "Aggiungi passaggio"
       },
       "history": "Cronologia",
       "historyEmpty": "Non è ancora stata eseguita. Tocca «Prova senza inviare» per vedere cosa farebbe.",

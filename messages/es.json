@@ -3899,7 +3899,9 @@
         "instruction": "Qué hace la AI",
         "do": "Qué hace",
         "save": "Guardar",
-        "nothing": "Esta casilla no tiene nada que ajustar. Cámbiala con palabras o deshaz."
+        "nothing": "Esta casilla no tiene nada que ajustar. Cámbiala con palabras o deshaz.",
+        "delete": "Eliminar paso",
+        "add": "Añadir paso"
       },
       "history": "Historial",
       "historyEmpty": "Todavía no se ha ejecutado. Pulsa «Probar sin enviar» para ver lo que haría.",

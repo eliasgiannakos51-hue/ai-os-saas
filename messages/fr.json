@@ -3899,7 +3899,9 @@
         "instruction": "Ce que fait l’AI",
         "do": "Ce qu’elle fait",
         "save": "Enregistrer",
-        "nothing": "Cette case n’a rien à régler. Modifie-la avec des mots, ou annule."
+        "nothing": "Cette case n’a rien à régler. Modifie-la avec des mots, ou annule.",
+        "delete": "Supprimer cette étape",
+        "add": "Ajouter une étape"
       },
       "history": "Historique",
       "historyEmpty": "Elle n’a pas encore tourné. Appuie sur « Tester sans envoyer » pour voir ce qu’elle ferait.",

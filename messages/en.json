@@ -3899,7 +3899,9 @@
         "instruction": "What the AI does",
         "do": "What it does",
         "save": "Save",
-        "nothing": "This box has nothing to set. Change it with words, or undo."
+        "nothing": "This box has nothing to set. Change it with words, or undo.",
+        "delete": "Remove this step",
+        "add": "Add a step"
       },
       "history": "History",
       "historyEmpty": "It has not run yet. Press “Try without sending” to see what it would do.",

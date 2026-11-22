@@ -591,7 +591,37 @@ export function AutomationShell({
               {shown.boxes.length === 0 ? (
                 <p className="text-xs text-warning">{t("errors.broken")}</p>
               ) : (
-                <BoxRow boxes={shown.boxes} chosen={chosen} onChoose={(id) => setChosen((c) => (c === id ? null : id))} connected={connected} progress={progress} />
+                <BoxRow
+                  boxes={shown.boxes}
+                  chosen={chosen}
+                  onChoose={(id) => setChosen((c) => (c === id ? null : id))}
+                  connected={connected}
+                  progress={progress}
+                  onAdd={(afterIndex) => {
+                    // n8n-style: insert a new AI box after the given index
+                    const newId = `b${Date.now().toString(36)}`;
+                    const newBox: Box = { id: newId, kind: "ai", instruction: "Summarise" };
+                    const boxes = [...shown.boxes];
+                    boxes.splice(afterIndex + 1, 0, newBox);
+                    void saveByHand(shown, newBox).then(() => {
+                      // Actually save the full boxes array
+                    });
+                    // Directly save the new boxes array via PATCH
+                    void (async () => {
+                      const data = await call(`/api/automations/flows/${shown.id}`, "PATCH", { boxes }, "save");
+                      if (data) { placeFlow(data.flow); setChosen(newId); }
+                    })();
+                  }}
+                  onDelete={(boxId) => {
+                    const boxes = shown.boxes.filter((b) => b.id !== boxId);
+                    if (boxes.length < 2) return; // Keep at least start + 1
+                    setChosen(null);
+                    void (async () => {
+                      const data = await call(`/api/automations/flows/${shown.id}`, "PATCH", { boxes }, "save");
+                      if (data) placeFlow(data.flow);
+                    })();
+                  }}
+                />
               )}
               {chosenBox ? (
                 <BoxEditor key={`${shown.id}-${shown.version}-${chosenBox.id}`} box={chosenBox} saving={running === "save"} onSave={(next) => void saveByHand(shown, next)} />

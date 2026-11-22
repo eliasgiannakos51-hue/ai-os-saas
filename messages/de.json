@@ -3899,7 +3899,9 @@
         "instruction": "Was die AI macht",
         "do": "Was passiert",
         "save": "Speichern",
-        "nothing": "In diesem Kästchen gibt es nichts einzustellen. Ändere es mit Worten oder mach es rückgängig."
+        "nothing": "In diesem Kästchen gibt es nichts einzustellen. Ändere es mit Worten oder mach es rückgängig.",
+        "delete": "Schritt entfernen",
+        "add": "Schritt hinzufügen"
       },
       "history": "Verlauf",
       "historyEmpty": "Sie ist noch nicht gelaufen. Tippe auf „Ausprobieren ohne Senden“, um zu sehen, was sie tun würde.",

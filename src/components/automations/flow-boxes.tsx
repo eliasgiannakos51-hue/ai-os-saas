@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Cloud, CreditCard, Database, DollarSign, FileOutput, FileText, FileUp, Filter, FolderUp, FormInput, GitBranch, Globe, Hash, Image, Layers, Mail, MessageCircle, MessageSquare, Package, PauseCircle, Phone, Play, Rss, Send, Share2, ShoppingCart, Sparkles, Table2, Timer, Video, Webhook, Zap } from "lucide-react";
+import { BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Cloud, CreditCard, Database, DollarSign, FileOutput, FileText, FileUp, Filter, FolderUp, FormInput, GitBranch, Globe, Hash, Image, Layers, Mail, MessageCircle, MessageSquare, Package, PauseCircle, Phone, Play, Plus, Rss, Send, Share2, ShoppingCart, Sparkles, Table2, Timer, Trash2, Video, Webhook, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import {
   ACTIONS,
@@ -444,6 +444,8 @@ export function BoxRow({
   onChoose,
   connected,
   progress,
+  onAdd,
+  onDelete,
 }: {
   boxes: Box[];
   chosen: string | null;
@@ -453,6 +455,10 @@ export function BoxRow({
    *  the readers "agents-automations-pro" is open to. Omitted, the row is
    *  drawn exactly as it was before: a short still line, nothing marked. */
   progress?: RunProgress | null;
+  /** n8n-style: add a new box AFTER the given index. */
+  onAdd?: (afterIndex: number) => void;
+  /** Delete a box by id (start cannot be deleted). */
+  onDelete?: (boxId: string) => void;
 }) {
   const { t, kind, needs, describe } = useWords();
   const noteWords = useNoteWords();
@@ -526,6 +532,19 @@ export function BoxRow({
                 )}
               </div>
             </button>
+            {/* Delete button (not for start — every flow needs one) */}
+            {onDelete && box.kind !== "start" && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onDelete(box.id); }}
+                data-testid="flow-box-delete"
+                className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-panel text-muted opacity-0 shadow transition-opacity hover:text-danger group-hover:opacity-100 [li:hover>&]:opacity-100"
+                style={{ border: "1px solid rgb(var(--border))" }}
+                title={t("edit.delete")}
+              >
+                <Trash2 className="h-3 w-3" aria-hidden="true" />
+              </button>
+            )}
             {box.kind === "condition" && (
               <span data-testid="flow-branch" className="mt-1 text-[11px] text-muted">
                 {t("conditionElse")}
@@ -544,9 +563,37 @@ export function BoxRow({
                 </Link>
               </p>
             ))}
+            {/* n8n-style "+" button to add a node AFTER this one */}
+            {onAdd && i < boxes.length - 1 && (
+              <button
+                type="button"
+                onClick={() => onAdd(i)}
+                data-testid="flow-add"
+                className="mt-1 flex h-6 w-6 items-center justify-center rounded-full text-muted opacity-0 transition-opacity hover:bg-panel hover:text-foreground [li:hover>&]:opacity-100"
+                style={{ border: "1px dashed rgb(var(--border))" }}
+                title={t("edit.add")}
+              >
+                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            )}
           </li>
         );
       })}
+      {/* "+" at the bottom to append a new node */}
+      {onAdd && (
+        <li className="flex justify-center pt-2">
+          <button
+            type="button"
+            onClick={() => onAdd(boxes.length - 1)}
+            data-testid="flow-add-end"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition-all hover:bg-panel hover:text-foreground"
+            style={{ border: "1px dashed rgb(var(--border))" }}
+            title={t("edit.add")}
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </li>
+      )}
     </ol>
     </FlowCanvas>
   );

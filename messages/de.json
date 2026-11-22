@@ -4088,12 +4088,12 @@
         "premiumHint": "Erweiterte Flows mit Bedingungen und Integrationen",
         "templates": "Schnellstart",
         "tpl": {
-          "leadEmail": "Neuer Lead → E-Mail",
-          "formSheet": "Formular → Sheets",
-          "orderSlack": "Bestellung → Slack",
-          "scheduleReport": "Zeitplan → Bericht",
-          "aiClassify": "AI klassifiz. → Route",
-          "socialPost": "Social → Post"
+          "leadEmail": "Jeden Tag um 9, lese meine neuen E-Mails, finde Leads und sende mir eine Zusammenfassung per E-Mail",
+          "formSheet": "Wenn ein Formular eingereicht wird, extrahiere die Daten und schreibe sie in Google Sheets",
+          "orderSlack": "Jeden Tag um 10, prüfe Shopify-Bestellungen und sende einen Bericht an Slack",
+          "scheduleReport": "Jeden Montag um 8:30, prüfe die Finanzen der Woche und sende einen Bericht an Telegram",
+          "aiClassify": "Wenn eine neue E-Mail eintrifft, klassifiziere sie als dringend oder nicht, und benachrichtige mich bei Dringend",
+          "socialPost": "Jeden Tag um 12, lese die neuesten RSS-Nachrichten und erstelle einen Social-Media-Post"
         },
         "paste": "Alles einfügen"
       }

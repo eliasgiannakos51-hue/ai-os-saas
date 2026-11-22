@@ -884,15 +884,15 @@ export function AutomationShell({
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">{t("landing.templates")}</span>
                 <div className="flex flex-wrap justify-center gap-1.5">
                   {[
-                    { emoji: "📧", label: t("landing.tpl.leadEmail") },
-                    { emoji: "📋", label: t("landing.tpl.formSheet") },
-                    { emoji: "🔔", label: t("landing.tpl.orderSlack") },
-                    { emoji: "📅", label: t("landing.tpl.scheduleReport") },
-                    { emoji: "🤖", label: t("landing.tpl.aiClassify") },
-                    { emoji: "📱", label: t("landing.tpl.socialPost") },
-                  ].map(({ emoji, label }) => (
-                    <button key={label} type="button" disabled={running !== null} onClick={() => send(label)} className="rounded-full px-3.5 py-2 text-[11px] font-medium text-muted transition-colors hover:bg-panel-hover hover:text-foreground disabled:opacity-60" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
-                      {emoji} {label}
+                    { emoji: "📧", short: "Emails → Leads", key: "leadEmail" as const },
+                    { emoji: "📋", short: "Form → Sheets", key: "formSheet" as const },
+                    { emoji: "🔔", short: "Orders → Slack", key: "orderSlack" as const },
+                    { emoji: "📅", short: "Finance → Telegram", key: "scheduleReport" as const },
+                    { emoji: "🤖", short: "Email → Classify", key: "aiClassify" as const },
+                    { emoji: "📱", short: "RSS → Social", key: "socialPost" as const },
+                  ].map(({ emoji, short, key }) => (
+                    <button key={key} type="button" disabled={running !== null} onClick={() => send(t(`landing.tpl.${key}`))} className="rounded-full px-3.5 py-2 text-[11px] font-medium text-muted transition-colors hover:bg-panel-hover hover:text-foreground disabled:opacity-60" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
+                      {emoji} {short}
                     </button>
                   ))}
                 </div>

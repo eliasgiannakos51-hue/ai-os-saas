@@ -4088,12 +4088,12 @@
         "premiumHint": "条件と承認を含む高度なフロー",
         "templates": "クイックスタート",
         "tpl": {
-          "leadEmail": "新規リード → メール",
-          "formSheet": "フォーム → Sheets",
-          "orderSlack": "注文 → Slack",
-          "scheduleReport": "スケジュール → レポート",
-          "aiClassify": "AI分類 → ルート",
-          "socialPost": "ソーシャル → 投稿"
+          "leadEmail": "毎日9時に新しいメールを読み、リードを見つけ、メールでサマリーを送って",
+          "formSheet": "フォームが送信されたら、データを抽出してGoogle Sheetsに書き込んで",
+          "orderSlack": "毎日10時にShopifyの注文を確認し、Slackにレポートを送って",
+          "scheduleReport": "毎週月曜8:30に今週の財務を確認し、Telegramにレポートを送って",
+          "aiClassify": "新しいメールが届いたら、緊急か否か分類し、緊急なら通知して",
+          "socialPost": "毎日12時にRSSの最新ニュースを読み、SNS投稿を作成して"
         },
         "paste": "何でも貼り付け"
       }

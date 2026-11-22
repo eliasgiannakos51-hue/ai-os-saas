@@ -4088,12 +4088,12 @@
         "premiumHint": "包含条件和审批的高级流程",
         "templates": "快速开始",
         "tpl": {
-          "leadEmail": "新线索 → 邮件",
-          "formSheet": "表单 → Sheets",
-          "orderSlack": "订单 → Slack",
-          "scheduleReport": "定时 → 报告",
-          "aiClassify": "AI分类 → 路由",
-          "socialPost": "社交 → 发布"
+          "leadEmail": "每天9点读取我的新邮件，找到潜在客户，并通过邮件发送摘要给我",
+          "formSheet": "当表单提交时，提取数据并写入Google Sheets",
+          "orderSlack": "每天10点检查Shopify订单并向Slack发送报告",
+          "scheduleReport": "每周一8:30查看本周财务并向Telegram发送报告",
+          "aiClassify": "当新邮件到达时，分类为紧急或非紧急，如果紧急则通知我",
+          "socialPost": "每天12点阅读RSS最新新闻并创建社交媒体帖子"
         },
         "paste": "粘贴任何内容"
       }

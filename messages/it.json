@@ -4088,12 +4088,12 @@
         "premiumHint": "Flussi avanzati con condizioni e approvazioni",
         "templates": "Avvio rapido",
         "tpl": {
-          "leadEmail": "Nuovo lead → Email",
-          "formSheet": "Modulo → Sheets",
-          "orderSlack": "Ordine → Slack",
-          "scheduleReport": "Pianificazione → Report",
-          "aiClassify": "AI classifica → Rotta",
-          "socialPost": "Social → Post"
+          "leadEmail": "Ogni giorno alle 9, leggi le mie nuove email, trova i lead e inviami un riepilogo via email",
+          "formSheet": "Quando viene inviato un modulo, estrai i dati e scrivili su Google Sheets",
+          "orderSlack": "Ogni giorno alle 10, controlla gli ordini Shopify e invia un report su Slack",
+          "scheduleReport": "Ogni lunedì alle 8:30, controlla le finanze della settimana e invia un report su Telegram",
+          "aiClassify": "Quando arriva una nuova email, classificala come urgente o no, e avvisami se urgente",
+          "socialPost": "Ogni giorno alle 12, leggi le ultime notizie RSS e crea un post per i social media"
         },
         "paste": "Incolla qualsiasi cosa"
       }

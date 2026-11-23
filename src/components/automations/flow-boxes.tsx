@@ -107,26 +107,23 @@ export const CONNECT_AT: Record<string, string> = {
 };
 
 /**
- * n8n NODE DESIGN — rebuilt from scratch to match n8n's visual language.
+ * n8n NODE DESIGN — BLUE/GRAY minimal palette, like actual n8n.
  *
- * n8n nodes have:
- * 1. A solid-coloured ICON PANEL on the left (not just a border or circle)
- * 2. White/dark content area to the right
- * 3. Rounded corners, subtle shadow
- * 4. Port handles (small circles) above and below each node
- * 5. After execution: green border = success, red = failure
- * 6. The whole thing sits on a dot-grid canvas
+ * n8n nodes are mostly NEUTRAL — gray card with a small coloured icon.
+ * The card itself is not vivid; only the icon circle carries the accent.
+ * The whole scheme is blue-gray, clean and professional.
  *
- * NODE_THEME maps each kind to: the solid colour for the icon panel,
- * a lighter tint for hover, and a text colour inside that panel.
+ * NODE_THEME: `icon` is the small coloured circle background,
+ * `iconText` its foreground, `label` the kind label text colour.
+ * The card itself is always the same neutral bg-panel.
  */
-const NODE_THEME: Record<Box["kind"], { bg: string; bgHover: string; text: string; border: string }> = {
-  start:     { bg: "#059669", bgHover: "#047857", text: "#ffffff", border: "#10b981" },   // emerald — triggers
-  read:      { bg: "#2563eb", bgHover: "#1d4ed8", text: "#ffffff", border: "#3b82f6" },   // blue — data input
-  ai:        { bg: "#7c3aed", bgHover: "#6d28d9", text: "#ffffff", border: "#8b5cf6" },   // violet — AI
-  condition: { bg: "#d97706", bgHover: "#b45309", text: "#ffffff", border: "#f59e0b" },   // amber — logic
-  approval:  { bg: "#ea580c", bgHover: "#c2410c", text: "#ffffff", border: "#f97316" },   // orange — wait
-  action:    { bg: "#dc2626", bgHover: "#b91c1c", text: "#ffffff", border: "#ef4444" },   // red — output
+const NODE_THEME: Record<Box["kind"], { icon: string; iconText: string; label: string; bg: string; bgHover: string; text: string; border: string }> = {
+  start:     { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  read:      { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  ai:        { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  condition: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  approval:  { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  action:    { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
 };
 
 /** Status → border highlight on the WHOLE node after a run. */
@@ -481,10 +478,10 @@ export function BoxRow({
               ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
               : <NodeConnector />
             )}
-            {/* ── n8n NODE — COMPACT ──
-             *  Small two-panel card: 40px icon square on the left,
-             *  1-line truncated title on the right. Description is only
-             *  shown when you click to open the editor — just like n8n. */}
+            {/* ── n8n NODE — BLUE/GRAY MINIMAL ──
+             *  Neutral gray card with a small coloured icon circle.
+             *  Like actual n8n: the card is uniform, the icon carries
+             *  the accent. Clean, professional, blue-gray. */}
             <button
               type="button"
               onClick={() => onChoose(box.id)}
@@ -492,47 +489,37 @@ export function BoxRow({
               data-testid="flow-box"
               data-kind={box.kind}
               data-state={progress ? state : undefined}
-              className="flex w-full overflow-hidden rounded-lg text-start transition-all"
+              className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2 text-start transition-all"
               style={{
-                boxShadow: isChosen
-                  ? `0 0 0 2px ${theme.border}, 0 3px 10px rgba(0,0,0,0.2)`
+                border: isChosen
+                  ? `2px solid ${theme.border}`
                   : stateBorder
-                    ? `0 0 0 2px ${stateBorder}, 0 3px 10px rgba(0,0,0,0.15)`
-                    : "0 1px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)",
+                    ? `2px solid ${stateBorder}`
+                    : "1px solid rgb(var(--border) / 0.5)",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
               }}
             >
-              {/* LEFT: 40×40 solid colour icon (n8n signature) */}
+              {/* Small coloured icon circle — the only colour on the node */}
               <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center"
-                style={{ background: theme.bg, color: theme.text }}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                style={{ background: theme.icon }}
               >
-                <BoxIconInner box={box} />
+                <span style={{ color: theme.iconText }}><BoxIconInner box={box} /></span>
               </div>
-              {/* RIGHT: compact content — kind label + 1-line description */}
-              <div className="flex min-w-0 flex-1 items-center gap-1.5 bg-panel px-2.5 py-1.5">
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[9px] font-bold uppercase tracking-wider" style={{ color: theme.border }}>{kind[box.kind]}</span>
-                  <span className="mt-0.5 block truncate text-[11px] leading-tight text-foreground" title={describe(box)}>{describe(box)}</span>
-                  {/* Run result — 1 line */}
-                  {lastStep && !progress?.live && (
-                    <span className={`block truncate text-[9px] ${lastStep.status === "failed" ? "text-danger" : lastStep.status === "ok" ? "text-success" : "text-muted"}`}>
-                      {noteWords(lastStep)}
-                    </span>
-                  )}
-                </span>
-                {/* Status badge — smaller */}
-                {state === "active" && (
-                  <span className="shrink-0"><ThinkingIndicator size="sm" /><span className="sr-only">{t("runStatus.running")}</span></span>
-                )}
-                {state === "done" && (
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full" style={{ background: "#dcfce7" }}>
-                    <Check className="h-2.5 w-2.5" style={{ color: "#16a34a" }} aria-hidden="true" />
+              {/* Text: kind label + 1-line description */}
+              <span className="min-w-0 flex-1">
+                <span className="block text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
+                <span className="mt-0.5 block truncate text-[11px] leading-tight text-foreground" title={describe(box)}>{describe(box)}</span>
+                {lastStep && !progress?.live && (
+                  <span className={`block truncate text-[9px] ${lastStep.status === "failed" ? "text-danger" : lastStep.status === "ok" ? "text-success" : "text-muted"}`}>
+                    {noteWords(lastStep)}
                   </span>
                 )}
-                {state === "failed" && (
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8px] font-bold" style={{ background: "#fee2e2", color: "#dc2626" }}>✕</span>
-                )}
-              </div>
+              </span>
+              {/* Status badge */}
+              {state === "active" && <span className="shrink-0"><ThinkingIndicator size="sm" /><span className="sr-only">{t("runStatus.running")}</span></span>}
+              {state === "done" && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full" style={{ background: "rgba(16,185,129,0.2)" }}><Check className="h-2.5 w-2.5" style={{ color: "#10b981" }} aria-hidden="true" /></span>}
+              {state === "failed" && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8px] font-bold" style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444" }}>✕</span>}
             </button>
             {/* Delete button (not for start — every flow needs one) */}
             {onDelete && box.kind !== "start" && (
@@ -710,25 +697,23 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
               <div
                 data-testid="flow-box"
                 data-kind={box.kind}
-                className="flex w-full overflow-hidden rounded-lg"
-                style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)" }}
+                className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2"
+                style={{ border: "1px solid rgb(var(--border) / 0.5)", boxShadow: "0 1px 3px rgba(0,0,0,0.12)" }}
               >
-                {/* LEFT: 40×40 solid colour icon */}
+                {/* Small coloured icon circle */}
                 <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center"
-                  style={{ background: theme.bg, color: theme.text }}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                  style={{ background: theme.icon }}
                 >
-                  <BoxIconInner box={box} />
+                  <span style={{ color: theme.iconText }}><BoxIconInner box={box} /></span>
                 </div>
-                {/* RIGHT: compact — kind + 1-line description */}
-                <div className="flex min-w-0 flex-1 items-center bg-panel px-2.5 py-1.5">
-                  <span className="min-w-0 flex-1">
-                    <span data-testid="flow-step-part" className="block text-[9px] font-bold uppercase tracking-wider" style={{ color: theme.border }}>{kind[box.kind]}</span>
-                    <span title={sentence(box)} className="mt-0.5 block truncate text-[11px] leading-tight text-foreground">
-                      {sentence(box)}
-                    </span>
+                {/* Text */}
+                <span className="min-w-0 flex-1">
+                  <span data-testid="flow-step-part" className="block text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
+                  <span title={sentence(box)} className="mt-0.5 block truncate text-[11px] leading-tight text-foreground">
+                    {sentence(box)}
                   </span>
-                </div>
+                </span>
               </div>
               {missing.map((need) => (
                 <p key={need} data-testid="flow-needs" className="mt-1 flex flex-wrap items-center gap-2 text-xs text-warning">

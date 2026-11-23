@@ -868,9 +868,9 @@ export function AutomationShell({
                 {/* Row 1: START → READ → AI STEP */}
                 <div className="flex items-center justify-center gap-0">
                   {([
-                    { icon: <Zap className="h-4 w-4" aria-hidden="true" />, label: t("kinds.start"), bg: "#059669", border: "#10b981", hint: t("landing.tpl.scheduleReport") },
-                    { icon: <FileUp className="h-4 w-4" aria-hidden="true" />, label: t("kinds.read"), bg: "#2563eb", border: "#3b82f6", hint: t("landing.tpl.formSheet") },
-                    { icon: <Sparkles className="h-4 w-4" aria-hidden="true" />, label: t("kinds.ai"), bg: "#7c3aed", border: "#8b5cf6", hint: t("landing.tpl.aiClassify") },
+                    { icon: <Zap className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.start"), bg: "#1e3a5f", color: "#60a5fa", hint: t("landing.tpl.scheduleReport") },
+                    { icon: <FileUp className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.read"), bg: "#1e3a5f", color: "#60a5fa", hint: t("landing.tpl.formSheet") },
+                    { icon: <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.ai"), bg: "#2d1b69", color: "#a78bfa", hint: t("landing.tpl.aiClassify") },
                   ] as const).map((node, idx) => (
                     <div key={node.label} className="flex items-center">
                       {idx > 0 && (
@@ -884,29 +884,27 @@ export function AutomationShell({
                         type="button"
                         onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }}
                         className="flex overflow-hidden rounded-lg transition-all hover:ring-2 hover:ring-foreground/30"
-                        style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }}
+                        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.12)", border: "1px solid rgb(var(--border) / 0.4)" }}
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center text-white" style={{ background: node.bg }}>
-                          {node.icon}
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md" style={{ background: node.bg }}>
+                          <span style={{ color: node.color }}>{node.icon}</span>
                         </div>
-                        <div className="flex h-9 items-center bg-panel px-2.5">
-                          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: node.border }}>{node.label}</span>
-                        </div>
+                        <span className="px-2 text-[9px] font-semibold uppercase tracking-wider" style={{ color: node.color }}>{node.label}</span>
                       </button>
                     </div>
                   ))}
                 </div>
                 {/* Vertical connector */}
-                <svg width="14" height="24" viewBox="0 0 14 24" aria-hidden="true">
-                  <circle cx="7" cy="3" r="2.5" fill="#374151" stroke="#4b5563" strokeWidth="1" />
-                  <path d="M7 5.5 C7 10, 7 14, 7 18.5" stroke="#4b5563" strokeWidth="1.5" fill="none" />
-                  <circle cx="7" cy="21" r="2.5" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+                <svg width="14" height="22" viewBox="0 0 14 22" aria-hidden="true">
+                  <circle cx="7" cy="3" r="2" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+                  <path d="M7 5 C7 9, 7 13, 7 17" stroke="#4b5563" strokeWidth="1.5" fill="none" />
+                  <circle cx="7" cy="19" r="2" fill="#374151" stroke="#4b5563" strokeWidth="1" />
                 </svg>
                 {/* Row 2: CONDITION → ACTION */}
                 <div className="flex items-center justify-center gap-0">
                   {([
-                    { icon: <svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>, label: t("kinds.condition"), bg: "#d97706", border: "#f59e0b", hint: t("landing.tpl.leadEmail") },
-                    { icon: <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.action"), bg: "#dc2626", border: "#ef4444", hint: t("landing.tpl.orderSlack") },
+                    { icon: <svg width="12" height="12" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>, label: t("kinds.condition"), bg: "#1e3a5f", color: "#60a5fa", hint: t("landing.tpl.leadEmail") },
+                    { icon: <ArrowRight className="h-3 w-3" aria-hidden="true" />, label: t("kinds.action"), bg: "#1e3a5f", color: "#60a5fa", hint: t("landing.tpl.orderSlack") },
                   ] as const).map((node, idx) => (
                     <div key={node.label} className="flex items-center">
                       {idx > 0 && (
@@ -919,15 +917,13 @@ export function AutomationShell({
                       <button
                         type="button"
                         onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }}
-                        className="flex overflow-hidden rounded-lg transition-all hover:ring-2 hover:ring-foreground/30"
-                        style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }}
+                        className="flex items-center gap-1.5 rounded-lg bg-panel px-2.5 py-1.5 transition-all hover:ring-2 hover:ring-foreground/30"
+                        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.12)", border: "1px solid rgb(var(--border) / 0.4)" }}
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center text-white" style={{ background: node.bg }}>
-                          {node.icon}
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md" style={{ background: node.bg }}>
+                          <span style={{ color: node.color }}>{node.icon}</span>
                         </div>
-                        <div className="flex h-9 items-center bg-panel px-2.5">
-                          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: node.border }}>{node.label}</span>
-                        </div>
+                        <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: node.color }}>{node.label}</span>
                       </button>
                     </div>
                   ))}

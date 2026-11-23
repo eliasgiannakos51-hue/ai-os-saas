@@ -400,21 +400,15 @@ function BoxIconInner({ box }: { box: Box }) {
   return <BookOpen className={cls} aria-hidden="true" />;
 }
 
-/** SVG connector — a vertical bezier with n8n-style port handles.
- *  The output port (top) and input port (bottom) are small filled
- *  circles that sit at the node edge, exactly like n8n. */
+/** SVG connector — a curved bezier with n8n-style port handles.
+ *  Shorter and tighter than before to match compact node size. */
 function NodeConnector() {
   return (
-    <div aria-hidden="true" className="flex justify-center" style={{ height: 40 }}>
-      <svg width="20" height="40" viewBox="0 0 20 40">
-        {/* Output port (from node above) */}
-        <circle cx="10" cy="4" r="4" fill="#374151" stroke="#4b5563" strokeWidth="1.5" />
-        <circle cx="10" cy="4" r="1.5" fill="#9ca3af" />
-        {/* Curved line */}
-        <path d="M10 8 C10 16, 10 24, 10 32" stroke="#4b5563" strokeWidth="2" fill="none" />
-        {/* Input port (to node below) */}
-        <circle cx="10" cy="36" r="4" fill="#374151" stroke="#4b5563" strokeWidth="1.5" />
-        <circle cx="10" cy="36" r="1.5" fill="#9ca3af" />
+    <div aria-hidden="true" className="flex justify-center" style={{ height: 28 }}>
+      <svg width="14" height="28" viewBox="0 0 14 28">
+        <circle cx="7" cy="3" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+        <path d="M7 6 C7 12, 7 16, 7 22" stroke="#4b5563" strokeWidth="1.5" fill="none" />
+        <circle cx="7" cy="25" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
       </svg>
     </div>
   );
@@ -424,7 +418,7 @@ function NodeConnector() {
 function FlowCanvas({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative overflow-hidden rounded-xl px-4 py-10"
+      className="relative overflow-hidden rounded-xl px-4 py-6"
       style={{
         background: "rgb(var(--panel) / 0.4)",
         backgroundImage: "radial-gradient(circle, rgb(var(--foreground) / 0.06) 1px, transparent 1px)",
@@ -481,17 +475,16 @@ export function BoxRow({
         const stateBorder = STATE_BORDER[state];
         const isChosen = chosen === box.id;
         return (
-          <li key={box.id} className="relative flex w-full flex-col items-center" style={{ maxWidth: 280 }}>
+          <li key={box.id} className="relative flex w-full flex-col items-center" style={{ maxWidth: 240 }}>
             {/* SVG connector between nodes */}
             {i > 0 && (progress
               ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
               : <NodeConnector />
             )}
-            {/* ── n8n NODE ──
-             *  Two-panel card: solid-coloured ICON PANEL on the left,
-             *  content area on the right. Rounded corners, shadow, port
-             *  handles implied by the connector dots above/below. After a
-             *  run the whole card gets a coloured border (green/red). */}
+            {/* ── n8n NODE — COMPACT ──
+             *  Small two-panel card: 40px icon square on the left,
+             *  1-line truncated title on the right. Description is only
+             *  shown when you click to open the editor — just like n8n. */}
             <button
               type="button"
               onClick={() => onChoose(box.id)}
@@ -499,50 +492,45 @@ export function BoxRow({
               data-testid="flow-box"
               data-kind={box.kind}
               data-state={progress ? state : undefined}
-              className="flex w-full overflow-hidden rounded-xl text-start transition-all"
+              className="flex w-full overflow-hidden rounded-lg text-start transition-all"
               style={{
                 boxShadow: isChosen
-                  ? `0 0 0 2px ${theme.border}, 0 4px 12px rgba(0,0,0,0.2)`
+                  ? `0 0 0 2px ${theme.border}, 0 3px 10px rgba(0,0,0,0.2)`
                   : stateBorder
-                    ? `0 0 0 2px ${stateBorder}, 0 4px 12px rgba(0,0,0,0.15)`
-                    : "0 2px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)",
+                    ? `0 0 0 2px ${stateBorder}, 0 3px 10px rgba(0,0,0,0.15)`
+                    : "0 1px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)",
               }}
             >
-              {/* LEFT: solid colour icon panel (n8n signature) */}
+              {/* LEFT: 40×40 solid colour icon (n8n signature) */}
               <div
-                className="flex w-12 shrink-0 items-center justify-center"
+                className="flex h-10 w-10 shrink-0 items-center justify-center"
                 style={{ background: theme.bg, color: theme.text }}
               >
                 <BoxIconInner box={box} />
               </div>
-              {/* RIGHT: content area */}
-              <div className="flex min-w-0 flex-1 items-center gap-2 bg-panel px-3 py-2.5">
+              {/* RIGHT: compact content — kind label + 1-line description */}
+              <div className="flex min-w-0 flex-1 items-center gap-1.5 bg-panel px-2.5 py-1.5">
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.border }}>{kind[box.kind]}</span>
-                  <span className="mt-0.5 block break-words text-[12px] leading-snug text-foreground">{describe(box)}</span>
-                  {/* n8n-style: last run result ON the node */}
+                  <span className="block text-[9px] font-bold uppercase tracking-wider" style={{ color: theme.border }}>{kind[box.kind]}</span>
+                  <span className="mt-0.5 block truncate text-[11px] leading-tight text-foreground" title={describe(box)}>{describe(box)}</span>
+                  {/* Run result — 1 line */}
                   {lastStep && !progress?.live && (
-                    <span className={`mt-1 block text-[10px] ${lastStep.status === "failed" ? "text-danger" : lastStep.status === "ok" ? "text-success" : "text-muted"}`}>
+                    <span className={`block truncate text-[9px] ${lastStep.status === "failed" ? "text-danger" : lastStep.status === "ok" ? "text-success" : "text-muted"}`}>
                       {noteWords(lastStep)}
                     </span>
                   )}
                 </span>
-                {/* Status badge */}
+                {/* Status badge — smaller */}
                 {state === "active" && (
-                  <span className="shrink-0">
-                    <ThinkingIndicator size="sm" />
-                    <span className="sr-only">{t("runStatus.running")}</span>
-                  </span>
+                  <span className="shrink-0"><ThinkingIndicator size="sm" /><span className="sr-only">{t("runStatus.running")}</span></span>
                 )}
                 {state === "done" && (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: "#dcfce7" }}>
-                    <Check className="h-3 w-3" style={{ color: "#16a34a" }} aria-hidden="true" />
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full" style={{ background: "#dcfce7" }}>
+                    <Check className="h-2.5 w-2.5" style={{ color: "#16a34a" }} aria-hidden="true" />
                   </span>
                 )}
                 {state === "failed" && (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold" style={{ background: "#fee2e2", color: "#dc2626" }}>
-                    ✕
-                  </span>
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8px] font-bold" style={{ background: "#fee2e2", color: "#dc2626" }}>✕</span>
                 )}
               </div>
             </button>
@@ -716,27 +704,27 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
           const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
           const theme = NODE_THEME[box.kind];
           return (
-            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full flex-col items-center" style={{ maxWidth: 280 }}>
-              {/* n8n NODE — same two-panel card as BoxRow */}
+            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full flex-col items-center" style={{ maxWidth: 240 }}>
+              {/* n8n NODE — compact two-panel card, same as BoxRow */}
               {i > 0 && <NodeConnector />}
               <div
                 data-testid="flow-box"
                 data-kind={box.kind}
-                className="flex w-full overflow-hidden rounded-xl"
-                style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)" }}
+                className="flex w-full overflow-hidden rounded-lg"
+                style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)" }}
               >
-                {/* LEFT: solid colour icon panel */}
+                {/* LEFT: 40×40 solid colour icon */}
                 <div
-                  className="flex w-12 shrink-0 items-center justify-center"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center"
                   style={{ background: theme.bg, color: theme.text }}
                 >
                   <BoxIconInner box={box} />
                 </div>
-                {/* RIGHT: content */}
-                <div className="flex min-w-0 flex-1 items-center bg-panel px-3 py-2.5">
+                {/* RIGHT: compact — kind + 1-line description */}
+                <div className="flex min-w-0 flex-1 items-center bg-panel px-2.5 py-1.5">
                   <span className="min-w-0 flex-1">
-                    <span data-testid="flow-step-part" className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.border }}>{part[partOf(box)]} · {kind[box.kind]}</span>
-                    <span title={preview && box.kind === "ai" ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} mt-0.5 break-words text-[12px] leading-snug text-foreground`}>
+                    <span data-testid="flow-step-part" className="block text-[9px] font-bold uppercase tracking-wider" style={{ color: theme.border }}>{kind[box.kind]}</span>
+                    <span title={sentence(box)} className="mt-0.5 block truncate text-[11px] leading-tight text-foreground">
                       {sentence(box)}
                     </span>
                   </span>

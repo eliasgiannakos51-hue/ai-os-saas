@@ -12,6 +12,7 @@ import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
 import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, FlowSteps, ModeForm, PendingApprovals, RunHistory, TimeSavedForm, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
+import { FlowCanvasView } from "@/components/automations/flow-canvas";
 import { TemplateGallery } from "@/components/automations/template-gallery";
 import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
@@ -612,41 +613,11 @@ export function AutomationShell({
               {shown.boxes.length === 0 ? (
                 <p className="text-xs text-warning">{t("errors.broken")}</p>
               ) : (
-                <BoxRow
+                <FlowCanvasView
                   boxes={shown.boxes}
                   chosen={chosen}
                   onChoose={(id) => setChosen((c) => (c === id ? null : id))}
                   connected={connected}
-                  progress={progress}
-                  lastRunSteps={shownRuns[0]?.steps}
-                  onAdd={(afterIndex, addKind) => {
-                    // n8n-style: insert a box of the chosen kind
-                    const newId = `b${Date.now().toString(36)}`;
-                    let newBox: Box;
-                    switch (addKind) {
-                      case "read": newBox = { id: newId, kind: "read", source: "last_emails" }; break;
-                      case "ai": newBox = { id: newId, kind: "ai", instruction: "Summarise" }; break;
-                      case "condition": newBox = { id: newId, kind: "condition", test: "has_content" }; break;
-                      case "approval": newBox = { id: newId, kind: "approval" }; break;
-                      case "action": newBox = { id: newId, kind: "action", do: "send_email" }; break;
-                      default: newBox = { id: newId, kind: "ai", instruction: "Summarise" }; break;
-                    }
-                    const boxes = [...shown.boxes];
-                    boxes.splice(afterIndex + 1, 0, newBox);
-                    void (async () => {
-                      const data = await call(`/api/automations/flows/${shown.id}`, "PATCH", { boxes }, "save");
-                      if (data) { placeFlow(data.flow); setChosen(newId); }
-                    })();
-                  }}
-                  onDelete={(boxId) => {
-                    const boxes = shown.boxes.filter((b) => b.id !== boxId);
-                    if (boxes.length < 2) return; // Keep at least start + 1
-                    setChosen(null);
-                    void (async () => {
-                      const data = await call(`/api/automations/flows/${shown.id}`, "PATCH", { boxes }, "save");
-                      if (data) placeFlow(data.flow);
-                    })();
-                  }}
                 />
               )}
               {chosenBox ? (

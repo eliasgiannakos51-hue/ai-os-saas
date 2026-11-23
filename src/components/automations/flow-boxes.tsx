@@ -397,15 +397,15 @@ function BoxIconInner({ box }: { box: Box }) {
   return <BookOpen className={cls} aria-hidden="true" />;
 }
 
-/** SVG connector — a curved bezier with n8n-style port handles.
- *  Shorter and tighter than before to match compact node size. */
+/** HORIZONTAL SVG connector — left-to-right like n8n's canvas.
+ *  Small port circles with a curved bezier line between them. */
 function NodeConnector() {
   return (
-    <div aria-hidden="true" className="flex justify-center" style={{ height: 28 }}>
-      <svg width="14" height="28" viewBox="0 0 14 28">
-        <circle cx="7" cy="3" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
-        <path d="M7 6 C7 12, 7 16, 7 22" stroke="#4b5563" strokeWidth="1.5" fill="none" />
-        <circle cx="7" cy="25" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+    <div aria-hidden="true" className="flex shrink-0 items-center" style={{ width: 32 }}>
+      <svg width="32" height="14" viewBox="0 0 32 14">
+        <circle cx="3" cy="7" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+        <path d="M6 7 C12 7, 20 7, 26 7" stroke="#4b5563" strokeWidth="1.5" fill="none" />
+        <circle cx="29" cy="7" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
       </svg>
     </div>
   );
@@ -415,7 +415,7 @@ function NodeConnector() {
 function FlowCanvas({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative overflow-hidden rounded-xl px-4 py-6"
+      className="relative overflow-x-auto rounded-xl px-6 py-6"
       style={{
         background: "rgb(var(--panel) / 0.4)",
         backgroundImage: "radial-gradient(circle, rgb(var(--foreground) / 0.06) 1px, transparent 1px)",
@@ -462,7 +462,7 @@ export function BoxRow({
   const ADD_KINDS: Box["kind"][] = ["read", "ai", "condition", "approval", "action"];
   return (
     <FlowCanvas>
-    <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
+    <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex items-start gap-0">
       {boxes.map((box, i) => {
         const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
         const state = progress?.boxes[box.id] ?? "idle";
@@ -472,16 +472,17 @@ export function BoxRow({
         const stateBorder = STATE_BORDER[state];
         const isChosen = chosen === box.id;
         return (
-          <li key={box.id} className="relative flex w-full flex-col items-center" style={{ maxWidth: 240 }}>
-            {/* SVG connector between nodes */}
+          <li key={box.id} className="relative flex shrink-0 items-start">
+            {/* Horizontal SVG connector between nodes */}
             {i > 0 && (progress
-              ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
+              ? <span className="flex items-center"><FlowLine state={progress.lines[i - 1] ?? "idle"} /></span>
               : <NodeConnector />
             )}
-            {/* ── n8n NODE — BLUE/GRAY MINIMAL ──
-             *  Neutral gray card with a small coloured icon circle.
-             *  Like actual n8n: the card is uniform, the icon carries
-             *  the accent. Clean, professional, blue-gray. */}
+            {/* Node + sub-elements in a column */}
+            <div className="flex flex-col items-center">
+            {/* ── n8n NODE — HORIZONTAL LAYOUT ──
+             *  Compact card: icon on top, name below. Arranged left-to-right
+             *  like n8n's canvas. Each node is ~120px wide. */}
             <button
               type="button"
               onClick={() => onChoose(box.id)}
@@ -489,37 +490,39 @@ export function BoxRow({
               data-testid="flow-box"
               data-kind={box.kind}
               data-state={progress ? state : undefined}
-              className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2 text-start transition-all"
+              className="flex w-28 flex-col items-center gap-1.5 rounded-xl bg-panel px-2 py-3 text-center transition-all"
               style={{
                 border: isChosen
                   ? `2px solid ${theme.border}`
                   : stateBorder
                     ? `2px solid ${stateBorder}`
                     : "1px solid rgb(var(--border) / 0.5)",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
               }}
             >
-              {/* Small coloured icon circle — the only colour on the node */}
-              <div
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                style={{ background: theme.icon }}
-              >
-                <span style={{ color: theme.iconText }}><BoxIconInner box={box} /></span>
+              {/* Coloured icon — the main visual element */}
+              <div className="relative">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-xl"
+                  style={{ background: theme.icon }}
+                >
+                  <span style={{ color: theme.iconText }}><BoxIconInner box={box} /></span>
+                </div>
+                {/* Status badge — top right of icon */}
+                {state === "done" && <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full" style={{ background: "#dcfce7", border: "1.5px solid #10b981" }}><Check className="h-2.5 w-2.5" style={{ color: "#10b981" }} aria-hidden="true" /></span>}
+                {state === "failed" && <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[7px] font-bold" style={{ background: "#fee2e2", border: "1.5px solid #ef4444", color: "#ef4444" }}>✕</span>}
+                {state === "active" && <span className="absolute -right-1 -top-1"><ThinkingIndicator size="sm" /><span className="sr-only">{t("runStatus.running")}</span></span>}
               </div>
-              {/* Text: kind label + 1-line description */}
-              <span className="min-w-0 flex-1">
-                <span className="block text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
-                <span className="mt-0.5 block truncate text-[11px] leading-tight text-foreground" title={describe(box)}>{describe(box)}</span>
-                {lastStep && !progress?.live && (
-                  <span className={`block truncate text-[9px] ${lastStep.status === "failed" ? "text-danger" : lastStep.status === "ok" ? "text-success" : "text-muted"}`}>
-                    {noteWords(lastStep)}
-                  </span>
-                )}
-              </span>
-              {/* Status badge */}
-              {state === "active" && <span className="shrink-0"><ThinkingIndicator size="sm" /><span className="sr-only">{t("runStatus.running")}</span></span>}
-              {state === "done" && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full" style={{ background: "rgba(16,185,129,0.2)" }}><Check className="h-2.5 w-2.5" style={{ color: "#10b981" }} aria-hidden="true" /></span>}
-              {state === "failed" && <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8px] font-bold" style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444" }}>✕</span>}
+              {/* Kind label */}
+              <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
+              {/* 1-line description */}
+              <span className="w-full truncate text-[10px] leading-tight text-muted" title={describe(box)}>{describe(box)}</span>
+              {/* Run result */}
+              {lastStep && !progress?.live && (
+                <span className={`w-full truncate text-[8px] ${lastStep.status === "failed" ? "text-danger" : lastStep.status === "ok" ? "text-success" : "text-muted"}`}>
+                  {noteWords(lastStep)}
+                </span>
+              )}
             </button>
             {/* Delete button (not for start — every flow needs one) */}
             {onDelete && box.kind !== "start" && (
@@ -593,12 +596,13 @@ export function BoxRow({
                 )}
               </div>
             )}
+            </div>{/* end node column */}
           </li>
         );
       })}
-      {/* "+" at the bottom → type picker */}
+      {/* "+" at the end → type picker */}
       {onAdd && (
-        <li className="relative flex flex-col items-center pt-2">
+        <li className="relative flex shrink-0 items-center ps-2">
           <button
             type="button"
             onClick={() => setAddAt(addAt === -1 ? null : -1)}
@@ -686,43 +690,41 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
   return (
     <div>
       <FlowCanvas>
-      <ol data-testid="flow-steps" className="flex flex-col items-center gap-0">
+      <ol data-testid="flow-steps" className="flex items-start gap-0">
         {boxes.map((box, i) => {
           const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
           const theme = NODE_THEME[box.kind];
           return (
-            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full flex-col items-center" style={{ maxWidth: 240 }}>
-              {/* n8n NODE — compact two-panel card, same as BoxRow */}
+            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex shrink-0 items-start">
+              {/* Horizontal connector */}
               {i > 0 && <NodeConnector />}
+              <div className="flex flex-col items-center">
+              {/* n8n NODE — compact card, icon top, name below */}
               <div
                 data-testid="flow-box"
                 data-kind={box.kind}
-                className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2"
-                style={{ border: "1px solid rgb(var(--border) / 0.5)", boxShadow: "0 1px 3px rgba(0,0,0,0.12)" }}
+                className="flex w-28 flex-col items-center gap-1.5 rounded-xl bg-panel px-2 py-3 text-center"
+                style={{ border: "1px solid rgb(var(--border) / 0.5)", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
               >
-                {/* Small coloured icon circle */}
                 <div
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl"
                   style={{ background: theme.icon }}
                 >
                   <span style={{ color: theme.iconText }}><BoxIconInner box={box} /></span>
                 </div>
-                {/* Text */}
-                <span className="min-w-0 flex-1">
-                  <span data-testid="flow-step-part" className="block text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
-                  <span title={sentence(box)} className="mt-0.5 block truncate text-[11px] leading-tight text-foreground">
-                    {sentence(box)}
-                  </span>
+                <span data-testid="flow-step-part" className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
+                <span title={sentence(box)} className="w-full truncate text-[10px] leading-tight text-muted">
+                  {sentence(box)}
                 </span>
               </div>
               {missing.map((need) => (
-                <p key={need} data-testid="flow-needs" className="mt-1 flex flex-wrap items-center gap-2 text-xs text-warning">
-                  {t("needsConnection", { name: needs[need] })}
-                  <Link href={CONNECT_AT[need]} className="inline-flex min-h-[44px] items-center text-foreground underline underline-offset-2">
+                <p key={need} data-testid="flow-needs" className="mt-1 text-center text-[9px] text-warning">
+                  <Link href={CONNECT_AT[need]} className="underline underline-offset-2">
                     {t("connect")}
                   </Link>
                 </p>
               ))}
+              </div>{/* end node column */}
             </li>
           );
         })}

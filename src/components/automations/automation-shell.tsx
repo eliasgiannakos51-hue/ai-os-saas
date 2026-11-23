@@ -642,41 +642,36 @@ export function AutomationShell({
                     ? shownRuns[0]?.output ?? null
                     : null}
                 />
-              ) : (
-                shown.boxes.length > 0 && <p className="text-xs text-muted">{t("choose")}</p>
-              )}
+              ) : null}
 
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    disabled={running !== null || !configured || shown.boxes.length === 0}
-                    onClick={() => withConfirm(runPrice, () => void runIt(shown, true))}
-                    data-testid="flow-try"
-                    className={buttonClass}
-                  >
-                    {running === "try" ? <ThinkingIndicator size="sm" /> : <FlaskConical className="h-3.5 w-3.5" aria-hidden="true" />}
-                    {t("try")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={running !== null || !configured || shown.boxes.length === 0}
-                    onClick={() => withConfirm(runPrice, () => void runIt(shown, false))}
-                    data-testid="flow-run-now"
-                    className={buttonClass}
-                  >
-                    {running === "run" ? <ThinkingIndicator size="sm" /> : <Play className="h-3.5 w-3.5" aria-hidden="true" />}
-                    {t("runNow")}
-                  </button>
-                </div>
-                <p data-testid="flow-run-price" className="flex items-center gap-1.5 text-[11px] text-muted">
-                  <Zap className="h-3 w-3 text-foreground/70" aria-hidden="true" />
-                  {runPrice > 0 ? t("priceRun", { count: runPrice }) : t("priceRunFree")}
-                </p>
-                <p className="text-[11px] text-muted">{t("tryHelp")}</p>
+              {/* Clean action bar — just buttons, no wall of text */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={running !== null || !configured || shown.boxes.length === 0}
+                  onClick={() => withConfirm(runPrice, () => void runIt(shown, true))}
+                  data-testid="flow-try"
+                  className={buttonClass}
+                >
+                  {running === "try" ? <ThinkingIndicator size="sm" /> : <FlaskConical className="h-3.5 w-3.5" aria-hidden="true" />}
+                  {t("try")}
+                </button>
+                <button
+                  type="button"
+                  disabled={running !== null || !configured || shown.boxes.length === 0}
+                  onClick={() => withConfirm(runPrice, () => void runIt(shown, false))}
+                  data-testid="flow-run-now"
+                  className={buttonClass}
+                >
+                  {running === "run" ? <ThinkingIndicator size="sm" /> : <Play className="h-3.5 w-3.5" aria-hidden="true" />}
+                  {t("runNow")}
+                </button>
+                {runPrice > 0 && (
+                  <span className="text-[10px] text-muted">
+                    <Zap className="inline h-3 w-3" aria-hidden="true" /> {t("priceRun", { count: runPrice })}
+                  </span>
+                )}
               </div>
-
-              <CostLimitForm key={`${shown.id}-${shown.costLimit}`} limit={shown.costLimit} saving={running !== null} onSave={(limit) => void saveLimit(shown, limit)} />
 
               {modes && (
                 <ModeForm

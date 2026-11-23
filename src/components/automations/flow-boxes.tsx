@@ -397,15 +397,20 @@ function BoxIconInner({ box }: { box: Box }) {
   return <BookOpen className={cls} aria-hidden="true" />;
 }
 
-/** HORIZONTAL SVG connector — left-to-right like n8n's canvas.
- *  Small port circles with a curved bezier line between them. */
+/** VERTICAL connector with arrow — a line going DOWN with an arrowhead
+ *  showing the flow direction. Port circles at each end. */
 function NodeConnector() {
   return (
-    <div aria-hidden="true" className="flex shrink-0 items-center" style={{ width: 32 }}>
-      <svg width="32" height="14" viewBox="0 0 32 14">
-        <circle cx="3" cy="7" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
-        <path d="M6 7 C12 7, 20 7, 26 7" stroke="#4b5563" strokeWidth="1.5" fill="none" />
-        <circle cx="29" cy="7" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+    <div aria-hidden="true" className="flex justify-center" style={{ height: 36 }}>
+      <svg width="20" height="36" viewBox="0 0 20 36">
+        {/* Output port */}
+        <circle cx="10" cy="3" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+        {/* Line */}
+        <line x1="10" y1="6" x2="10" y2="27" stroke="#4b5563" strokeWidth="2" />
+        {/* Arrow head pointing down */}
+        <path d="M6 24 L10 30 L14 24" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Input port */}
+        <circle cx="10" cy="33" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
       </svg>
     </div>
   );
@@ -415,7 +420,7 @@ function NodeConnector() {
 function FlowCanvas({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative overflow-x-auto rounded-xl px-6 py-6"
+      className="relative overflow-hidden rounded-xl px-4 py-6"
       style={{
         background: "rgb(var(--panel) / 0.4)",
         backgroundImage: "radial-gradient(circle, rgb(var(--foreground) / 0.06) 1px, transparent 1px)",
@@ -462,7 +467,7 @@ export function BoxRow({
   const ADD_KINDS: Box["kind"][] = ["read", "ai", "condition", "approval", "action"];
   return (
     <FlowCanvas>
-    <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex items-start gap-0">
+    <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
       {boxes.map((box, i) => {
         const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
         const state = progress?.boxes[box.id] ?? "idle";
@@ -472,17 +477,14 @@ export function BoxRow({
         const stateBorder = STATE_BORDER[state];
         const isChosen = chosen === box.id;
         return (
-          <li key={box.id} className="relative flex shrink-0 items-start">
-            {/* Horizontal SVG connector between nodes */}
+          <li key={box.id} className="relative flex w-full flex-col items-center" style={{ maxWidth: 240 }}>
+            {/* Vertical connector with arrow */}
             {i > 0 && (progress
-              ? <span className="flex items-center"><FlowLine state={progress.lines[i - 1] ?? "idle"} /></span>
+              ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
               : <NodeConnector />
             )}
-            {/* Node + sub-elements in a column */}
-            <div className="flex flex-col items-center">
-            {/* ── n8n NODE — HORIZONTAL LAYOUT ──
-             *  Compact card: icon on top, name below. Arranged left-to-right
-             *  like n8n's canvas. Each node is ~120px wide. */}
+            {/* ── n8n NODE — VERTICAL FLOW, BLUE/GRAY ──
+             *  Icon-left, text-right. Connected by vertical arrows. */}
             <button
               type="button"
               onClick={() => onChoose(box.id)}
@@ -490,7 +492,7 @@ export function BoxRow({
               data-testid="flow-box"
               data-kind={box.kind}
               data-state={progress ? state : undefined}
-              className="flex w-28 flex-col items-center gap-1.5 rounded-xl bg-panel px-2 py-3 text-center transition-all"
+              className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2 text-start transition-all"
               style={{
                 border: isChosen
                   ? `2px solid ${theme.border}`
@@ -500,29 +502,21 @@ export function BoxRow({
                 boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
               }}
             >
-              {/* Coloured icon — the main visual element */}
-              <div className="relative">
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-xl"
-                  style={{ background: theme.icon }}
-                >
+              <div className="relative shrink-0">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: theme.icon }}>
                   <span style={{ color: theme.iconText }}><BoxIconInner box={box} /></span>
                 </div>
-                {/* Status badge — top right of icon */}
                 {state === "done" && <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full" style={{ background: "#dcfce7", border: "1.5px solid #10b981" }}><Check className="h-2.5 w-2.5" style={{ color: "#10b981" }} aria-hidden="true" /></span>}
                 {state === "failed" && <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[7px] font-bold" style={{ background: "#fee2e2", border: "1.5px solid #ef4444", color: "#ef4444" }}>✕</span>}
                 {state === "active" && <span className="absolute -right-1 -top-1"><ThinkingIndicator size="sm" /><span className="sr-only">{t("runStatus.running")}</span></span>}
               </div>
-              {/* Kind label */}
-              <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
-              {/* 1-line description */}
-              <span className="w-full truncate text-[10px] leading-tight text-muted" title={describe(box)}>{describe(box)}</span>
-              {/* Run result */}
-              {lastStep && !progress?.live && (
-                <span className={`w-full truncate text-[8px] ${lastStep.status === "failed" ? "text-danger" : lastStep.status === "ok" ? "text-success" : "text-muted"}`}>
-                  {noteWords(lastStep)}
-                </span>
-              )}
+              <span className="min-w-0 flex-1">
+                <span className="block text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
+                <span className="mt-0.5 block truncate text-[11px] leading-tight text-foreground" title={describe(box)}>{describe(box)}</span>
+                {lastStep && !progress?.live && (
+                  <span className={`block truncate text-[9px] ${lastStep.status === "failed" ? "text-danger" : lastStep.status === "ok" ? "text-success" : "text-muted"}`}>{noteWords(lastStep)}</span>
+                )}
+              </span>
             </button>
             {/* Delete button (not for start — every flow needs one) */}
             {onDelete && box.kind !== "start" && (
@@ -596,13 +590,12 @@ export function BoxRow({
                 )}
               </div>
             )}
-            </div>{/* end node column */}
           </li>
         );
       })}
-      {/* "+" at the end → type picker */}
+      {/* "+" at the bottom */}
       {onAdd && (
-        <li className="relative flex shrink-0 items-center ps-2">
+        <li className="relative flex flex-col items-center pt-1">
           <button
             type="button"
             onClick={() => setAddAt(addAt === -1 ? null : -1)}
@@ -690,31 +683,26 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
   return (
     <div>
       <FlowCanvas>
-      <ol data-testid="flow-steps" className="flex items-start gap-0">
+      <ol data-testid="flow-steps" className="flex flex-col items-center gap-0">
         {boxes.map((box, i) => {
           const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
           const theme = NODE_THEME[box.kind];
           return (
-            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex shrink-0 items-start">
-              {/* Horizontal connector */}
+            <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full flex-col items-center" style={{ maxWidth: 240 }}>
+              {/* Vertical connector with arrow */}
               {i > 0 && <NodeConnector />}
-              <div className="flex flex-col items-center">
-              {/* n8n NODE — compact card, icon top, name below */}
               <div
                 data-testid="flow-box"
                 data-kind={box.kind}
-                className="flex w-28 flex-col items-center gap-1.5 rounded-xl bg-panel px-2 py-3 text-center"
+                className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2"
                 style={{ border: "1px solid rgb(var(--border) / 0.5)", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
               >
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-xl"
-                  style={{ background: theme.icon }}
-                >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: theme.icon }}>
                   <span style={{ color: theme.iconText }}><BoxIconInner box={box} /></span>
                 </div>
-                <span data-testid="flow-step-part" className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
-                <span title={sentence(box)} className="w-full truncate text-[10px] leading-tight text-muted">
-                  {sentence(box)}
+                <span className="min-w-0 flex-1">
+                  <span data-testid="flow-step-part" className="block text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
+                  <span title={sentence(box)} className="mt-0.5 block truncate text-[11px] leading-tight text-foreground">{sentence(box)}</span>
                 </span>
               </div>
               {missing.map((need) => (
@@ -724,7 +712,6 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
                   </Link>
                 </p>
               ))}
-              </div>{/* end node column */}
             </li>
           );
         })}

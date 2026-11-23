@@ -11,7 +11,7 @@
  * The canvas has a dot-grid background like n8n.
  */
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -177,7 +177,56 @@ function AutomationNode({ data, selected }: NodeProps) {
   );
 }
 
-const nodeTypes: NodeTypes = { automation: AutomationNode };
+/** "+" add-node button rendered as a React Flow node at the end. */
+function AddNode({ data }: NodeProps) {
+  const { onAdd, kindNames, theme: themes } = data as {
+    onAdd: (kind: Box["kind"]) => void;
+    kindNames: Record<string, string>;
+    theme: typeof THEME;
+  };
+  const [open, setOpen] = useState(false);
+  const kinds: Box["kind"][] = ["read", "ai", "condition", "approval", "action"];
+  return (
+    <div className="flex flex-col items-center">
+      <Handle type="target" position={Position.Top} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition-all hover:bg-panel hover:text-foreground"
+        style={{ border: "1px dashed #4b5563" }}
+      >
+        <span className="text-lg leading-none">+</span>
+      </button>
+      {open && (
+        <div className="absolute top-10 z-10 flex gap-1 rounded-lg bg-panel p-1.5 shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
+          {kinds.map((k) => {
+            const th = themes[k];
+            return (
+              <button
+                key={k}
+                type="button"
+                onClick={() => { setOpen(false); onAdd(k); }}
+                className="flex flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[8px] font-bold uppercase tracking-wider transition-colors hover:bg-panel-hover"
+                style={{ color: th.label }}
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-md" style={{ background: th.icon, color: th.iconText }}>
+                  {k === "read" && <Table2 className="h-3 w-3" />}
+                  {k === "ai" && <Sparkles className="h-3 w-3" />}
+                  {k === "condition" && <Filter className="h-3 w-3" />}
+                  {k === "approval" && <PauseCircle className="h-3 w-3" />}
+                  {k === "action" && <Send className="h-3 w-3" />}
+                </span>
+                {kindNames[k]}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 
 /** Convert linear boxes to React Flow nodes arranged in a zigzag. */
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
@@ -221,17 +270,56 @@ export function FlowCanvasView({
   chosen,
   onChoose,
   connected,
+  onAdd,
 }: {
   boxes: Box[];
   chosen: string | null;
   onChoose: (id: string) => void;
   connected: Connected;
+  /** Add a new box of the given kind at the end. */
+  onAdd?: (kind: Box["kind"]) => void;
 }) {
   const kindNames = useKindNames();
   const describe = useDescribe();
 
-  const initialNodes = useMemo(() => boxesToNodes(boxes, kindNames, describe), [boxes, kindNames, describe]);
-  const initialEdges = useMemo(() => boxesToEdges(boxes), [boxes]);
+  const initialNodes = useMemo(() => {
+    const nodes = boxesToNodes(boxes, kindNames, describe);
+    // Add "+" node at the end
+    if (onAdd) {
+      const lastNode = nodes[nodes.length - 1];
+      const COLS = 2;
+      const lastRow = Math.floor(boxes.length / COLS);
+      const lastCol = boxes.length % COLS;
+      const X_STEP = 240;
+      const Y_STEP = 100;
+      const x = lastRow % 2 === 0 ? lastCol * X_STEP : (COLS - 1 - lastCol) * X_STEP;
+      const y = lastRow * Y_STEP;
+      nodes.push({
+        id: "__add__",
+        type: "addNode",
+        position: { x: x + 60, y: y + 20 },
+        data: { onAdd, kindNames, theme: THEME },
+        draggable: false,
+        selectable: false,
+      });
+    }
+    return nodes;
+  }, [boxes, kindNames, describe, onAdd]);
+  const initialEdges = useMemo(() => {
+    const edges = boxesToEdges(boxes);
+    // Connect last box to "+" node
+    if (onAdd && boxes.length > 0) {
+      edges.push({
+        id: `e-${boxes[boxes.length - 1].id}-__add__`,
+        source: boxes[boxes.length - 1].id,
+        target: "__add__",
+        type: "smoothstep",
+        animated: false,
+        style: { stroke: "#4b5563", strokeWidth: 1.5, strokeDasharray: "4 3" },
+      });
+    }
+    return edges;
+  }, [boxes, onAdd]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);

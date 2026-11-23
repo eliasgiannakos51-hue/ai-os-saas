@@ -618,6 +618,23 @@ export function AutomationShell({
                   chosen={chosen}
                   onChoose={(id) => setChosen((c) => (c === id ? null : id))}
                   connected={connected}
+                  onAdd={(addKind) => {
+                    const newId = `b${Date.now().toString(36)}`;
+                    let newBox: Box;
+                    switch (addKind) {
+                      case "read": newBox = { id: newId, kind: "read", source: "last_emails" }; break;
+                      case "ai": newBox = { id: newId, kind: "ai", instruction: "Summarise" }; break;
+                      case "condition": newBox = { id: newId, kind: "condition", test: "has_content" }; break;
+                      case "approval": newBox = { id: newId, kind: "approval" }; break;
+                      case "action": newBox = { id: newId, kind: "action", do: "send_email" }; break;
+                      default: newBox = { id: newId, kind: "ai", instruction: "Summarise" }; break;
+                    }
+                    const boxes = [...shown.boxes, newBox];
+                    void (async () => {
+                      const data = await call(`/api/automations/flows/${shown.id}`, "PATCH", { boxes }, "save");
+                      if (data) { placeFlow(data.flow); setChosen(newId); }
+                    })();
+                  }}
                 />
               )}
               {chosenBox ? (

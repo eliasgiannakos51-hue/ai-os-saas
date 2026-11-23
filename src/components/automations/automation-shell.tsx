@@ -597,16 +597,21 @@ export function AutomationShell({
                   onChoose={(id) => setChosen((c) => (c === id ? null : id))}
                   connected={connected}
                   progress={progress}
-                  onAdd={(afterIndex) => {
-                    // n8n-style: insert a new AI box after the given index
+                  lastRunSteps={shownRuns[0]?.steps}
+                  onAdd={(afterIndex, addKind) => {
+                    // n8n-style: insert a box of the chosen kind
                     const newId = `b${Date.now().toString(36)}`;
-                    const newBox: Box = { id: newId, kind: "ai", instruction: "Summarise" };
+                    let newBox: Box;
+                    switch (addKind) {
+                      case "read": newBox = { id: newId, kind: "read", source: "last_emails" }; break;
+                      case "ai": newBox = { id: newId, kind: "ai", instruction: "Summarise" }; break;
+                      case "condition": newBox = { id: newId, kind: "condition", test: "has_content" }; break;
+                      case "approval": newBox = { id: newId, kind: "approval" }; break;
+                      case "action": newBox = { id: newId, kind: "action", do: "send_email" }; break;
+                      default: newBox = { id: newId, kind: "ai", instruction: "Summarise" }; break;
+                    }
                     const boxes = [...shown.boxes];
                     boxes.splice(afterIndex + 1, 0, newBox);
-                    void saveByHand(shown, newBox).then(() => {
-                      // Actually save the full boxes array
-                    });
-                    // Directly save the new boxes array via PATCH
                     void (async () => {
                       const data = await call(`/api/automations/flows/${shown.id}`, "PATCH", { boxes }, "save");
                       if (data) { placeFlow(data.flow); setChosen(newId); }

@@ -446,6 +446,7 @@ export function BoxRow({
   progress,
   onAdd,
   onDelete,
+  lastRunSteps,
 }: {
   boxes: Box[];
   chosen: string | null;
@@ -455,19 +456,26 @@ export function BoxRow({
    *  the readers "agents-automations-pro" is open to. Omitted, the row is
    *  drawn exactly as it was before: a short still line, nothing marked. */
   progress?: RunProgress | null;
-  /** n8n-style: add a new box AFTER the given index. */
-  onAdd?: (afterIndex: number) => void;
+  /** n8n-style: add a new box AFTER the given index, with the chosen kind. */
+  onAdd?: (afterIndex: number, kind: Box["kind"]) => void;
   /** Delete a box by id (start cannot be deleted). */
   onDelete?: (boxId: string) => void;
+  /** Steps from the last run — shown as a summary on each node. */
+  lastRunSteps?: RunStep[];
 }) {
   const { t, kind, needs, describe } = useWords();
   const noteWords = useNoteWords();
+  /** Which "+" was clicked — shows the type picker at that index. */
+  const [addAt, setAddAt] = useState<number | null>(null);
+  /** The 5 addable kinds (start is never added manually). */
+  const ADD_KINDS: Box["kind"][] = ["read", "ai", "condition", "approval", "action"];
   return (
     <FlowCanvas>
     <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
       {boxes.map((box, i) => {
         const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
         const state = progress?.boxes[box.id] ?? "idle";
+        const lastStep = lastRunSteps?.find((s) => s.box === box.id);
         const failed = progress?.failed?.box === box.id ? progress.failed : null;
         const theme = NODE_THEME[box.kind];
         const stateBorder = STATE_BORDER[state];
@@ -512,6 +520,12 @@ export function BoxRow({
                 <span className="min-w-0 flex-1">
                   <span className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.border }}>{kind[box.kind]}</span>
                   <span className="mt-0.5 block break-words text-[12px] leading-snug text-foreground">{describe(box)}</span>
+                  {/* n8n-style: last run result ON the node */}
+                  {lastStep && !progress?.live && (
+                    <span className={`mt-1 block text-[10px] ${lastStep.status === "failed" ? "text-danger" : lastStep.status === "ok" ? "text-success" : "text-muted"}`}>
+                      {noteWords(lastStep)}
+                    </span>
+                  )}
                 </span>
                 {/* Status badge */}
                 {state === "active" && (
@@ -563,28 +577,56 @@ export function BoxRow({
                 </Link>
               </p>
             ))}
-            {/* n8n-style "+" button to add a node AFTER this one */}
+            {/* n8n-style "+" button → opens type picker */}
             {onAdd && i < boxes.length - 1 && (
-              <button
-                type="button"
-                onClick={() => onAdd(i)}
-                data-testid="flow-add"
-                className="mt-1 flex h-6 w-6 items-center justify-center rounded-full text-muted opacity-0 transition-opacity hover:bg-panel hover:text-foreground [li:hover>&]:opacity-100"
-                style={{ border: "1px dashed rgb(var(--border))" }}
-                title={t("edit.add")}
-              >
-                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
+              <div className="relative mt-1">
+                <button
+                  type="button"
+                  onClick={() => setAddAt(addAt === i ? null : i)}
+                  data-testid="flow-add"
+                  className="flex h-6 w-6 items-center justify-center rounded-full text-muted opacity-0 transition-opacity hover:bg-panel hover:text-foreground [li:hover>&]:opacity-100"
+                  style={{ border: "1px dashed rgb(var(--border))" }}
+                  title={t("edit.add")}
+                >
+                  <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+                {/* Type picker popup */}
+                {addAt === i && (
+                  <div className="absolute left-1/2 z-10 mt-1 flex -translate-x-1/2 gap-1 rounded-lg bg-panel p-1.5 shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
+                    {ADD_KINDS.map((k) => {
+                      const th = NODE_THEME[k];
+                      return (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => { setAddAt(null); onAdd(i, k); }}
+                          className="flex flex-col items-center gap-0.5 rounded-lg px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-panel-hover"
+                          style={{ color: th.border }}
+                        >
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full text-white" style={{ background: th.bg }}>
+                            {k === "read" && <Table2 className="h-3.5 w-3.5" />}
+                            {k === "ai" && <Sparkles className="h-3.5 w-3.5" />}
+                            {k === "condition" && <Filter className="h-3.5 w-3.5" />}
+                            {k === "approval" && <PauseCircle className="h-3.5 w-3.5" />}
+                            {k === "action" && <Send className="h-3.5 w-3.5" />}
+                          </span>
+                          {kind[k]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
           </li>
         );
       })}
-      {/* "+" at the bottom to append a new node */}
+      {/* "+" at the bottom → type picker */}
       {onAdd && (
-        <li className="flex justify-center pt-2">
+        <li className="relative flex flex-col items-center pt-2">
           <button
             type="button"
-            onClick={() => onAdd(boxes.length - 1)}
+            onClick={() => setAddAt(addAt === -1 ? null : -1)}
             data-testid="flow-add-end"
             className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition-all hover:bg-panel hover:text-foreground"
             style={{ border: "1px dashed rgb(var(--border))" }}
@@ -592,6 +634,31 @@ export function BoxRow({
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
           </button>
+          {addAt === -1 && (
+            <div className="absolute top-10 z-10 flex gap-1 rounded-lg bg-panel p-1.5 shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
+              {ADD_KINDS.map((k) => {
+                const th = NODE_THEME[k];
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => { setAddAt(null); onAdd(boxes.length - 1, k); }}
+                    className="flex flex-col items-center gap-0.5 rounded-lg px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-panel-hover"
+                    style={{ color: th.border }}
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full text-white" style={{ background: th.bg }}>
+                      {k === "read" && <Table2 className="h-3.5 w-3.5" />}
+                      {k === "ai" && <Sparkles className="h-3.5 w-3.5" />}
+                      {k === "condition" && <Filter className="h-3.5 w-3.5" />}
+                      {k === "approval" && <PauseCircle className="h-3.5 w-3.5" />}
+                      {k === "action" && <Send className="h-3.5 w-3.5" />}
+                    </span>
+                    {kind[k]}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </li>
       )}
     </ol>

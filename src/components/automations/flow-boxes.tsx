@@ -1057,17 +1057,31 @@ export function RunHistory({
         const expanded = open === run.id;
         const code = errorCode(run.error);
         return (
-          <li key={run.id} data-testid="flow-run" data-status={run.status} className="rounded-item bg-panel/60">
+          <li key={run.id} data-testid="flow-run" data-status={run.status} className="overflow-hidden rounded-lg" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
             <button
               type="button"
               onClick={() => setOpen(expanded ? null : run.id)}
               aria-expanded={expanded}
-              className="flex min-h-[44px] w-full flex-wrap items-center gap-x-3 gap-y-0.5 px-3 py-2 text-start text-xs"
+              className="flex min-h-[44px] w-full items-center gap-2.5 px-3 py-2 text-start text-xs transition-colors hover:bg-panel/80"
+              style={{ background: "rgb(var(--panel) / 0.4)" }}
             >
-              <span className="text-foreground">{when(run.startedAt)}</span>
-              <span className="text-muted">{by[run.startedBy]}</span>
-              <span className={run.status === "failed" ? "text-danger" : run.status === "waiting_approval" ? "text-warning" : "text-body"}>{status[run.status]}</span>
-              <span className="ms-auto text-muted">{t("credits", { count: run.credits })}</span>
+              {/* n8n-style status dot */}
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{
+                  background: run.status === "done" ? "#10b981"
+                    : run.status === "failed" ? "#ef4444"
+                    : run.status === "running" ? "#8b5cf6"
+                    : run.status === "waiting_approval" ? "#f59e0b"
+                    : "#6b7280",
+                }}
+              />
+              <span className="min-w-0 flex-1">
+                <span className="text-foreground">{when(run.startedAt)}</span>
+                <span className="ms-1.5 text-muted">{by[run.startedBy]}</span>
+              </span>
+              <span className={`text-[10px] font-medium ${run.status === "failed" ? "text-danger" : run.status === "waiting_approval" ? "text-warning" : run.status === "done" ? "text-success" : "text-body"}`}>{status[run.status]}</span>
+              <span className="text-[10px] text-muted">{run.credits > 0 ? t("credits", { count: run.credits }) : ""}</span>
             </button>
             {expanded && (
               <div className="space-y-2 px-3 pb-3">

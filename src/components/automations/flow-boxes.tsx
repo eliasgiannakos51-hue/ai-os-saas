@@ -397,23 +397,42 @@ function BoxIconInner({ box }: { box: Box }) {
   return <BookOpen className={cls} aria-hidden="true" />;
 }
 
-/** VERTICAL connector with arrow — a line going DOWN with an arrowhead
- *  showing the flow direction. Port circles at each end. */
-function NodeConnector() {
+/** Horizontal arrow connector → (left to right) */
+function HArrow() {
   return (
-    <div aria-hidden="true" className="flex justify-center" style={{ height: 36 }}>
-      <svg width="20" height="36" viewBox="0 0 20 36">
-        {/* Output port */}
-        <circle cx="10" cy="3" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
-        {/* Line */}
-        <line x1="10" y1="6" x2="10" y2="27" stroke="#4b5563" strokeWidth="2" />
-        {/* Arrow head pointing down */}
-        <path d="M6 24 L10 30 L14 24" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        {/* Input port */}
-        <circle cx="10" cy="33" r="3" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+    <div aria-hidden="true" className="flex shrink-0 items-center" style={{ width: 28 }}>
+      <svg width="28" height="14" viewBox="0 0 28 14">
+        <circle cx="3" cy="7" r="2.5" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+        <line x1="6" y1="7" x2="19" y2="7" stroke="#4b5563" strokeWidth="2" />
+        <path d="M17 4 L22 7 L17 10" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="25" cy="7" r="2.5" fill="#374151" stroke="#4b5563" strokeWidth="1" />
       </svg>
     </div>
   );
+}
+
+/** Vertical arrow connector ↓ (top to bottom, between rows) */
+function VArrow() {
+  return (
+    <div aria-hidden="true" className="flex w-full justify-end pe-8" style={{ height: 28 }}>
+      <svg width="14" height="28" viewBox="0 0 14 28">
+        <circle cx="7" cy="3" r="2.5" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+        <line x1="7" y1="6" x2="7" y2="19" stroke="#4b5563" strokeWidth="2" />
+        <path d="M4 17 L7 22 L10 17" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="7" cy="25" r="2.5" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+      </svg>
+    </div>
+  );
+}
+
+/** Arrange boxes into rows of 2 for the zigzag/snake layout.
+ *  Row 0: left→right, Row 1: (drop down), Row 2: left→right, etc. */
+function zigzagRows(boxes: Box[]): Box[][] {
+  const rows: Box[][] = [];
+  for (let i = 0; i < boxes.length; i += 2) {
+    rows.push(boxes.slice(i, i + 2));
+  }
+  return rows;
 }
 
 /** Canvas wrapper — dot-grid background like n8n's infinite canvas. */
@@ -465,10 +484,18 @@ export function BoxRow({
   const [addAt, setAddAt] = useState<number | null>(null);
   /** The 5 addable kinds (start is never added manually). */
   const ADD_KINDS: Box["kind"][] = ["read", "ai", "condition", "approval", "action"];
+  const rows = zigzagRows(boxes);
   return (
     <FlowCanvas>
-    <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
-      {boxes.map((box, i) => {
+    <div data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col gap-0">
+      {rows.map((row, rowIdx) => (
+        <div key={rowIdx}>
+          {/* Vertical arrow between rows */}
+          {rowIdx > 0 && <VArrow />}
+          {/* Row of nodes, left to right */}
+          <div className="flex items-center justify-center gap-0">
+            {row.map((box, colIdx) => {
+        const i = rowIdx * 2 + colIdx;
         const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
         const state = progress?.boxes[box.id] ?? "idle";
         const lastStep = lastRunSteps?.find((s) => s.box === box.id);
@@ -477,14 +504,14 @@ export function BoxRow({
         const stateBorder = STATE_BORDER[state];
         const isChosen = chosen === box.id;
         return (
-          <li key={box.id} className="relative flex w-full flex-col items-center" style={{ maxWidth: 240 }}>
-            {/* Vertical connector with arrow */}
-            {i > 0 && (progress
+          <div key={box.id} className="relative flex shrink-0 items-center">
+            {/* Horizontal arrow between nodes in same row */}
+            {colIdx > 0 && (progress
               ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
-              : <NodeConnector />
+              : <HArrow />
             )}
-            {/* ── n8n NODE — VERTICAL FLOW, BLUE/GRAY ──
-             *  Icon-left, text-right. Connected by vertical arrows. */}
+            <div className="flex flex-col items-center" style={{ width: 160 }}>
+            {/* ── n8n NODE — ZIGZAG FLOW ── */}
             <button
               type="button"
               onClick={() => onChoose(box.id)}
@@ -492,7 +519,7 @@ export function BoxRow({
               data-testid="flow-box"
               data-kind={box.kind}
               data-state={progress ? state : undefined}
-              className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2 text-start transition-all"
+              className="flex items-center gap-2 rounded-lg bg-panel px-2.5 py-2 text-start transition-all"
               style={{
                 border: isChosen
                   ? `2px solid ${theme.border}`
@@ -590,9 +617,13 @@ export function BoxRow({
                 )}
               </div>
             )}
-          </li>
+            </div>{/* end node column */}
+          </div>{/* end node+connector */}
         );
       })}
+          </div>{/* end row */}
+        </div>
+      ))}
       {/* "+" at the bottom */}
       {onAdd && (
         <li className="relative flex flex-col items-center pt-1">
@@ -631,9 +662,9 @@ export function BoxRow({
               })}
             </div>
           )}
-        </li>
+        </div>
       )}
-    </ol>
+    </div>
     </FlowCanvas>
   );
 }

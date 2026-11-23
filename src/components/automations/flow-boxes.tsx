@@ -484,18 +484,10 @@ export function BoxRow({
   const [addAt, setAddAt] = useState<number | null>(null);
   /** The 5 addable kinds (start is never added manually). */
   const ADD_KINDS: Box["kind"][] = ["read", "ai", "condition", "approval", "action"];
-  const rows = zigzagRows(boxes);
   return (
     <FlowCanvas>
-    <div data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col gap-0">
-      {rows.map((row, rowIdx) => (
-        <div key={rowIdx}>
-          {/* Vertical arrow between rows */}
-          {rowIdx > 0 && <VArrow />}
-          {/* Row of nodes, left to right */}
-          <div className="flex items-center justify-center gap-0">
-            {row.map((box, colIdx) => {
-        const i = rowIdx * 2 + colIdx;
+    <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
+      {boxes.map((box, i) => {
         const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
         const state = progress?.boxes[box.id] ?? "idle";
         const lastStep = lastRunSteps?.find((s) => s.box === box.id);
@@ -504,14 +496,8 @@ export function BoxRow({
         const stateBorder = STATE_BORDER[state];
         const isChosen = chosen === box.id;
         return (
-          <div key={box.id} className="relative flex shrink-0 items-center">
-            {/* Horizontal arrow between nodes in same row */}
-            {colIdx > 0 && (progress
-              ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
-              : <HArrow />
-            )}
-            <div className="flex flex-col items-center" style={{ width: 160 }}>
-            {/* ── n8n NODE — ZIGZAG FLOW ── */}
+          <li key={box.id} className="relative flex w-full flex-col items-center" style={{ maxWidth: 240 }}>
+            {i > 0 && (progress ? <FlowLine state={progress.lines[i - 1] ?? "idle"} /> : <VArrow />)}
             <button
               type="button"
               onClick={() => onChoose(box.id)}
@@ -519,13 +505,9 @@ export function BoxRow({
               data-testid="flow-box"
               data-kind={box.kind}
               data-state={progress ? state : undefined}
-              className="flex items-center gap-2 rounded-lg bg-panel px-2.5 py-2 text-start transition-all"
+              className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2 text-start transition-all"
               style={{
-                border: isChosen
-                  ? `2px solid ${theme.border}`
-                  : stateBorder
-                    ? `2px solid ${stateBorder}`
-                    : "1px solid rgb(var(--border) / 0.5)",
+                border: isChosen ? `2px solid ${theme.border}` : stateBorder ? `2px solid ${stateBorder}` : "1px solid rgb(var(--border) / 0.5)",
                 boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
               }}
             >
@@ -545,86 +527,17 @@ export function BoxRow({
                 )}
               </span>
             </button>
-            {/* Delete button (not for start — every flow needs one) */}
-            {onDelete && box.kind !== "start" && (
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onDelete(box.id); }}
-                data-testid="flow-box-delete"
-                className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-panel text-muted opacity-0 shadow transition-opacity hover:text-danger group-hover:opacity-100 [li:hover>&]:opacity-100"
-                style={{ border: "1px solid rgb(var(--border))" }}
-                title={t("edit.delete")}
-              >
-                <Trash2 className="h-3 w-3" aria-hidden="true" />
-              </button>
-            )}
-            {box.kind === "condition" && (
-              <span data-testid="flow-branch" className="mt-1 text-[11px] text-muted">
-                {t("conditionElse")}
-              </span>
-            )}
-            {failed && (
-              <p data-testid="flow-failed" className="mt-1 ps-3 text-xs text-danger">
-                {t("failedHere", { reason: noteWords({ box: failed.box, status: "failed", note: failed.note }) })}
-              </p>
-            )}
+            {box.kind === "condition" && <span data-testid="flow-branch" className="mt-1 text-[11px] text-muted">{t("conditionElse")}</span>}
+            {failed && <p data-testid="flow-failed" className="mt-1 ps-3 text-xs text-danger">{t("failedHere", { reason: noteWords({ box: failed.box, status: "failed", note: failed.note }) })}</p>}
             {missing.map((need) => (
               <p key={need} data-testid="flow-needs" className="mt-1 flex flex-wrap items-center gap-2 ps-3 text-xs text-warning">
                 {t("needsConnection", { name: needs[need] })}
-                <Link href={CONNECT_AT[need]} className="inline-flex min-h-[44px] items-center text-foreground underline underline-offset-2">
-                  {t("connect")}
-                </Link>
+                <Link href={CONNECT_AT[need]} className="inline-flex min-h-[44px] items-center text-foreground underline underline-offset-2">{t("connect")}</Link>
               </p>
             ))}
-            {/* n8n-style "+" button → opens type picker */}
-            {onAdd && i < boxes.length - 1 && (
-              <div className="relative mt-1">
-                <button
-                  type="button"
-                  onClick={() => setAddAt(addAt === i ? null : i)}
-                  data-testid="flow-add"
-                  className="flex h-6 w-6 items-center justify-center rounded-full text-muted opacity-0 transition-opacity hover:bg-panel hover:text-foreground [li:hover>&]:opacity-100"
-                  style={{ border: "1px dashed rgb(var(--border))" }}
-                  title={t("edit.add")}
-                >
-                  <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
-                {/* Type picker popup */}
-                {addAt === i && (
-                  <div className="absolute left-1/2 z-10 mt-1 flex -translate-x-1/2 gap-1 rounded-lg bg-panel p-1.5 shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
-                    {ADD_KINDS.map((k) => {
-                      const th = NODE_THEME[k];
-                      return (
-                        <button
-                          key={k}
-                          type="button"
-                          onClick={() => { setAddAt(null); onAdd(i, k); }}
-                          className="flex flex-col items-center gap-0.5 rounded-lg px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-panel-hover"
-                          style={{ color: th.border }}
-                        >
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full text-white" style={{ background: th.bg }}>
-                            {k === "read" && <Table2 className="h-3.5 w-3.5" />}
-                            {k === "ai" && <Sparkles className="h-3.5 w-3.5" />}
-                            {k === "condition" && <Filter className="h-3.5 w-3.5" />}
-                            {k === "approval" && <PauseCircle className="h-3.5 w-3.5" />}
-                            {k === "action" && <Send className="h-3.5 w-3.5" />}
-                          </span>
-                          {kind[k]}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-            </div>{/* end node column */}
-          </div>{/* end node+connector */}
+          </li>
         );
       })}
-          </div>{/* end row */}
-        </div>
-      ))}
-      {/* "+" at the bottom */}
       {onAdd && (
         <li className="relative flex flex-col items-center pt-1">
           <button
@@ -662,9 +575,9 @@ export function BoxRow({
               })}
             </div>
           )}
-        </div>
+        </li>
       )}
-    </div>
+    </ol>
     </FlowCanvas>
   );
 }
@@ -721,7 +634,7 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
           return (
             <li key={box.id} data-testid="flow-step" data-kind={box.kind} data-part={partOf(box)} className="relative flex w-full flex-col items-center" style={{ maxWidth: 240 }}>
               {/* Vertical connector with arrow */}
-              {i > 0 && <NodeConnector />}
+              {i > 0 && <VArrow />}
               <div
                 data-testid="flow-box"
                 data-kind={box.kind}

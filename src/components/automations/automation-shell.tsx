@@ -629,7 +629,27 @@ export function AutomationShell({
                 />
               )}
               {chosenBox ? (
-                <BoxEditor key={`${shown.id}-${shown.version}-${chosenBox.id}`} box={chosenBox} saving={running === "save"} onSave={(next) => void saveByHand(shown, next)} />
+                <BoxEditor
+                  key={`${shown.id}-${shown.version}-${chosenBox.id}`}
+                  box={chosenBox}
+                  saving={running === "save"}
+                  onSave={(next) => void saveByHand(shown, next)}
+                  onDuplicate={() => {
+                    const idx = shown.boxes.findIndex((b) => b.id === chosenBox.id);
+                    if (idx < 0) return;
+                    const newId = `b${Date.now().toString(36)}`;
+                    const copy = { ...chosenBox, id: newId } as Box;
+                    const boxes = [...shown.boxes];
+                    boxes.splice(idx + 1, 0, copy);
+                    void (async () => {
+                      const data = await call(`/api/automations/flows/${shown.id}`, "PATCH", { boxes }, "save");
+                      if (data) { placeFlow(data.flow); setChosen(newId); }
+                    })();
+                  }}
+                  lastOutput={shownRuns[0]?.steps?.find((s) => s.box === chosenBox.id)?.status === "ok"
+                    ? shownRuns[0]?.output ?? null
+                    : null}
+                />
               ) : (
                 shown.boxes.length > 0 && <p className="text-xs text-muted">{t("choose")}</p>
               )}

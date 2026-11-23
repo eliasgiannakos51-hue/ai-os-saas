@@ -797,7 +797,15 @@ function ConfigFields({ fields, config, onChange }: { fields: ConfigField[]; con
   );
 }
 
-export function BoxEditor({ box, saving, onSave }: { box: Box; saving: boolean; onSave: (next: Box) => void }) {
+export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
+  box: Box;
+  saving: boolean;
+  onSave: (next: Box) => void;
+  /** Duplicate this box (insert a copy after it). */
+  onDuplicate?: () => void;
+  /** The output from the last run for this box — shown in a preview panel. */
+  lastOutput?: string | null;
+}) {
   const { t, source, action, weekday } = useWords();
   const [draft, setDraft] = useState<Box>(box);
   const field = "mt-1 block min-h-[44px] w-full rounded-item bg-panel px-3 text-sm text-foreground";
@@ -818,21 +826,34 @@ export function BoxEditor({ box, saving, onSave }: { box: Box; saving: boolean; 
           {t("edit.when")}
           <select
             className={field}
-            value={timed ? timed.every : "file"}
+            value={timed ? timed.every : draft.when}
             onChange={(e) => {
               const v = e.target.value;
-              setDraft(
-                v === "file"
-                  ? { id: draft.id, kind: "start", when: "file_uploaded" }
-                  : { id: draft.id, kind: "start", when: "time", every: v as "day", at: timed?.at ?? "09:00", ...(v === "week" ? { weekday: timed?.weekday ?? 1 } : {}), ...(v === "month" ? { monthDay: timed?.monthDay ?? 1 } : {}) }
-              );
+              if (v === "file_uploaded") setDraft({ id: draft.id, kind: "start", when: "file_uploaded" });
+              else if (v === "webhook") setDraft({ id: draft.id, kind: "start", when: "webhook" });
+              else if (v === "new_email") setDraft({ id: draft.id, kind: "start", when: "new_email" });
+              else if (v === "rss") setDraft({ id: draft.id, kind: "start", when: "rss" });
+              else if (v === "form_submitted") setDraft({ id: draft.id, kind: "start", when: "form_submitted" });
+              else if (v === "chat_message") setDraft({ id: draft.id, kind: "start", when: "chat_message" });
+              else if (v === "manual") setDraft({ id: draft.id, kind: "start", when: "manual" });
+              else setDraft({ id: draft.id, kind: "start", when: "time", every: v as "day", at: timed?.at ?? "09:00", ...(v === "week" ? { weekday: timed?.weekday ?? 1 } : {}), ...(v === "month" ? { monthDay: timed?.monthDay ?? 1 } : {}) });
             }}
           >
-            <option value="day">{t("edit.everyDay")}</option>
-            <option value="weekdays">{t("edit.everyWeekdays")}</option>
-            <option value="week">{t("edit.everyWeek")}</option>
-            <option value="month">{t("edit.everyMonth")}</option>
-            <option value="file">{t("start.file")}</option>
+            <optgroup label="⏰ Schedule">
+              <option value="day">{t("edit.everyDay")}</option>
+              <option value="weekdays">{t("edit.everyWeekdays")}</option>
+              <option value="week">{t("edit.everyWeek")}</option>
+              <option value="month">{t("edit.everyMonth")}</option>
+            </optgroup>
+            <optgroup label="⚡ Events">
+              <option value="file_uploaded">{t("start.file")}</option>
+              <option value="webhook">{t("start.webhook")}</option>
+              <option value="new_email">{t("start.new_email")}</option>
+              <option value="rss">{t("start.rss")}</option>
+              <option value="form_submitted">{t("start.form_submitted")}</option>
+              <option value="chat_message">{t("start.chat_message")}</option>
+              <option value="manual">{t("start.manual")}</option>
+            </optgroup>
           </select>
         </label>
         {timed && (
@@ -917,21 +938,53 @@ export function BoxEditor({ box, saving, onSave }: { box: Box; saving: boolean; 
   }
 
   const editable = draft.kind !== "condition" && draft.kind !== "approval";
+  const theme = NODE_THEME[box.kind];
   return (
-    <div data-testid="flow-box-editor" className="space-y-3 rounded-item bg-panel/60 p-3">
-      <p className="text-xs font-medium text-foreground">{t("edit.title")}</p>
+    <div data-testid="flow-box-editor" className="space-y-3 rounded-xl p-4" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>
+      {/* Header with node colour accent */}
+      <div className="flex items-center gap-2">
+        <span className="flex h-6 w-6 items-center justify-center rounded-md text-white" style={{ background: theme.bg }}>
+          <BoxIconInner box={box} />
+        </span>
+        <p className="flex-1 text-xs font-bold" style={{ color: theme.border }}>{t("edit.title")}</p>
+        {/* Duplicate button */}
+        {onDuplicate && (
+          <button
+            type="button"
+            onClick={onDuplicate}
+            className="flex h-7 items-center gap-1 rounded-md px-2 text-[10px] text-muted transition-colors hover:bg-panel hover:text-foreground"
+            style={{ border: "1px solid rgb(var(--border) / 0.3)" }}
+          >
+            <Layers className="h-3 w-3" aria-hidden="true" />
+            Duplicate
+          </button>
+        )}
+      </div>
       {body}
-      {editable && (
-        <button
-          type="button"
-          disabled={saving || JSON.stringify(draft) === JSON.stringify(box)}
-          onClick={() => onSave(draft)}
-          data-testid="flow-box-save"
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-3 text-xs text-foreground hover:bg-panel-hover disabled:opacity-60"
-        >
-          {saving ? <ThinkingIndicator size="sm" /> : <Check className="h-3.5 w-3.5" aria-hidden="true" />}
-          {t("edit.save")}
-        </button>
+      {/* Action buttons */}
+      <div className="flex flex-wrap gap-2">
+        {editable && (
+          <button
+            type="button"
+            disabled={saving || JSON.stringify(draft) === JSON.stringify(box)}
+            onClick={() => onSave(draft)}
+            data-testid="flow-box-save"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-4 text-xs font-medium text-white disabled:opacity-60"
+            style={{ background: saving ? theme.bgHover : theme.bg }}
+          >
+            {saving ? <ThinkingIndicator size="sm" /> : <Check className="h-3.5 w-3.5" aria-hidden="true" />}
+            {t("edit.save")}
+          </button>
+        )}
+      </div>
+      {/* n8n-style OUTPUT PREVIEW — shows the last run result for this node */}
+      {lastOutput && (
+        <div className="mt-2 space-y-1 border-t pt-2" style={{ borderColor: "rgb(var(--border) / 0.3)" }}>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted">📄 Output</p>
+          <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-panel p-3 text-[11px] text-foreground" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
+            {lastOutput}
+          </pre>
+        </div>
       )}
     </div>
   );

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowRight, Bell, ClipboardPaste, Crown, FileUp, FlaskConical, LayoutTemplate, Link2, Pause, Play, Power, Sparkles, Trash2, Undo2, Zap } from "lucide-react";
+import { ArrowRight, Bell, ClipboardPaste, Copy, Crown, FileUp, FlaskConical, LayoutTemplate, Link2, Pause, Play, Power, Sparkles, Trash2, Undo2, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { LargeActionConfirm } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
@@ -496,6 +496,24 @@ export function AutomationShell({
     setModes((prev) => (prev ? { ...prev, [flow.id]: (data.mode as FlowMode | undefined) ?? mode } : prev));
   }
 
+  // DUPLICATE: clone the automation's boxes into a new flow with " (copy)" suffix.
+  async function duplicateFlow(flow: ShownFlow) {
+    const data = await call("/api/automations/flows", "POST", {
+      name: `${flow.name} (copy)`,
+      boxes: flow.boxes,
+      timeZone: flow.timeZone,
+    }, "save");
+    if (!data) return;
+    const next = placeFlow(data.flow);
+    if (next) {
+      setOpenId(next.id);
+      setChosen(null);
+      setOpen("flow");
+      say("tool", t("duplicated", { name: next.name }), next.id);
+      router.refresh();
+    }
+  }
+
   // BARE DELETE, no confirm of its own — the work panel's trash button
   // confirms before calling this, and the [◧] column (ShellHistoryColumn)
   // confirms its own way; neither should ask twice.
@@ -558,6 +576,9 @@ export function AutomationShell({
             <>
               <button type="button" disabled={running !== null || shown.version <= 1} onClick={() => void undo(shown)} aria-label={t("undo")} title={t("undo")} data-testid="flow-undo" className={`${ACTION} disabled:opacity-40`}>
                 <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+              <button type="button" disabled={running !== null} onClick={() => void duplicateFlow(shown)} aria-label={t("duplicate")} title={t("duplicate")} data-testid="flow-duplicate" className={ACTION}>
+                <Copy className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
               <button
                 type="button"

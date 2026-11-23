@@ -3742,6 +3742,8 @@
       "paused": "Si è fermata, perché ora ha bisogno di una connessione: {names}.",
       "turnedOn": "«{name}» è accesa e funziona da sola.",
       "turnedOff": "«{name}» è in pausa.",
+      "duplicated": "Copiato: \"{name}\". Disattivato.",
+      "duplicate": "Duplica",
       "tried": "Provata senza inviare nulla. Cosa avrebbe fatto è nella cronologia.",
       "ran": "È stata eseguita. Il risultato è nella cronologia.",
       "choose": "Tocca una casella per cambiarla, con parole nel campo o a mano qui.",

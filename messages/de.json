@@ -3742,6 +3742,8 @@
       "paused": "Sie wurde angehalten, weil sie jetzt eine Verbindung braucht: {names}.",
       "turnedOn": "„{name}“ ist an und läuft von selbst.",
       "turnedOff": "„{name}“ ist pausiert.",
+      "duplicated": "Kopiert: \"{name}\". Ausgeschaltet.",
+      "duplicate": "Automation duplizieren",
       "tried": "Ausprobiert, ohne etwas zu senden. Was sie getan hätte, steht im Verlauf.",
       "ran": "Sie ist gelaufen. Das Ergebnis steht im Verlauf.",
       "choose": "Tippe auf ein Kästchen, um es zu ändern – mit Worten im Feld oder hier von Hand.",

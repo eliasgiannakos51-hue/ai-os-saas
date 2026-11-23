@@ -3742,6 +3742,8 @@
       "paused": "Elle s’est arrêtée, car elle a maintenant besoin d’une connexion : {names}.",
       "turnedOn": "« {name} » est activée et tourne toute seule.",
       "turnedOff": "« {name} » est en pause.",
+      "duplicated": "Copie : \"{name}\". Desactive.",
+      "duplicate": "Dupliquer",
       "tried": "Testée sans rien envoyer. Ce qu’elle aurait fait est dans l’historique.",
       "ran": "Elle a tourné. Le résultat est dans l’historique.",
       "choose": "Appuie sur une case pour la modifier, avec des mots dans le champ ou à la main ici.",

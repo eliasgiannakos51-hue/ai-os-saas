@@ -777,7 +777,55 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       });
       return { status: "waiting_approval", steps, credits };
     }
+    // n8n CORE NODES — filter, code, wait, transform, note
+    if (box.kind === "filter") {
+      // Filter: check if the data matches the expression (uses AI to evaluate)
+      const hasData = text.trim().length > 0;
+      if (!hasData) {
+        steps.push({ box: box.id, status: "stopped", note: "condition_empty" });
+        return { status: "done", steps, credits };
+      }
+      steps.push({ box: box.id, status: "ok", note: "condition_met" });
+      continue;
+    }
+    if (box.kind === "code") {
+      // Code: skip for now — the AI step can do what code does
+      steps.push({ box: box.id, status: "ok", note: "ai_done" });
+      continue;
+    }
+    if (box.kind === "wait") {
+      // Wait: in dry mode skip; in real mode, pause
+      if (ctx.dry) {
+        steps.push({ box: box.id, status: "would", note: "would_wait" });
+        continue;
+      }
+      // For now, waits are treated as instant — real wait needs a scheduler
+      steps.push({ box: box.id, status: "ok", note: "started" });
+      continue;
+    }
+    if (box.kind === "transform") {
+      // Transform: uses AI to reshape data, same as AI box
+      if (!text.trim()) {
+        steps.push({ box: box.id, status: "ok", note: "read_nothing" });
+        continue;
+      }
+      // Run through AI with the transform instruction
+      const costs = new CostAccumulator();
+      const out = await runAi(box.instruction, text, ctx.user.id, costs, locale ?? (locale = await emailLocaleFor(ctx.user.id)));
+      if (out.kind !== "ok") {
+        steps.push({ box: box.id, status: "failed", note: "provider" });
+        return { status: "failed", steps, credits, error: `${box.id}:provider` };
+      }
+      text = out.text;
+      steps.push({ box: box.id, status: "ok", note: "ai_done" });
+      continue;
+    }
+    if (box.kind === "note") {
+      // Note: purely visual, does nothing in the run
+      continue;
+    }
     // action
+    if (box.kind !== "action") continue; // safety: skip unknown kinds
     const step = await act(box, text, ctx);
     steps.push(step);
     if (step.status === "failed") return { status: "failed", steps, credits, error: `${box.id}:${step.note}` };

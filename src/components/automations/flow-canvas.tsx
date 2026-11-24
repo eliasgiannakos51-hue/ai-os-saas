@@ -31,7 +31,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTranslations } from "next-intl";
-import { BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Cloud, CreditCard, Database, DollarSign, FileOutput, FileText, FileUp, Filter, FolderUp, FormInput, GitBranch, Globe, Hash, Image, Layers, Mail, MessageCircle, MessageSquare, Package, PauseCircle, Phone, Play, Rss, Send, Share2, ShoppingCart, Sparkles, Table2, Video, Webhook, Zap } from "lucide-react";
+import { Clock, Filter, Hash, FileText, Layers, PauseCircle, Send, Sparkles, Table2, Zap } from "lucide-react";
 import type { Box, ReadSource, ActionKind, StartBox } from "@/lib/automations/boxes";
 import type { Connected } from "@/components/automations/flow-boxes";
 
@@ -43,6 +43,11 @@ const THEME: Record<Box["kind"], { icon: string; iconText: string; label: string
   condition: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
   approval:  { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
   action:    { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  filter:    { icon: "#4a2c0a", iconText: "#fbbf24", label: "#fbbf24", border: "#f59e0b" },
+  code:      { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
+  wait:      { icon: "#3b1a3b", iconText: "#e879f9", label: "#e879f9", border: "#d946ef" },
+  transform: { icon: "#1e3a5f", iconText: "#38bdf8", label: "#38bdf8", border: "#0ea5e9" },
+  note:      { icon: "#3a3a1a", iconText: "#fde68a", label: "#fde68a", border: "#fbbf24" },
 };
 
 /** Translate box kind to display name. */
@@ -138,6 +143,11 @@ function NodeIcon({ box }: { box: Box }) {
   if (box.kind === "ai") return <Sparkles className={cls} />;
   if (box.kind === "condition") return <Filter className={cls} />;
   if (box.kind === "approval") return <PauseCircle className={cls} />;
+  if (box.kind === "filter") return <Filter className={cls} />;
+  if (box.kind === "code") return <Hash className={cls} />;
+  if (box.kind === "wait") return <Clock className={cls} />;
+  if (box.kind === "transform") return <Layers className={cls} />;
+  if (box.kind === "note") return <FileText className={cls} />;
   if (box.kind === "action") return <Send className={cls} />;
   return <Zap className={cls} />;
 }

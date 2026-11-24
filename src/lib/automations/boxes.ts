@@ -80,6 +80,22 @@ export type ConditionBox = { id: string; kind: "condition"; test: "has_content" 
 
 export type ApprovalBox = { id: string; kind: "approval" };
 
+/**
+ * n8n CORE NODE TYPES (2026-11-24).
+ *
+ * These match n8n's essential utility nodes that make workflows powerful:
+ * - filter: IF node — stop if a condition is not met (extends condition)
+ * - code: Code node — run custom JavaScript on the data
+ * - wait: Wait node — pause for a duration or until a webhook
+ * - transform: Edit Fields / Set — reshape data with an instruction
+ * - note: Sticky Note — visual annotation on the canvas
+ */
+export type FilterBox = { id: string; kind: "filter"; expression: string };
+export type CodeBox = { id: string; kind: "code"; language: "javascript" | "python"; code: string };
+export type WaitBox = { id: string; kind: "wait"; duration: number; unit: "seconds" | "minutes" | "hours" | "days" };
+export type TransformBox = { id: string; kind: "transform"; instruction: string };
+export type NoteBox = { id: string; kind: "note"; text: string };
+
 export const ACTIONS = [
   // Original
   "send_telegram", "send_email", "notify", "save_to_library",
@@ -106,7 +122,7 @@ export const ACTIONS = [
 export type ActionKind = (typeof ACTIONS)[number];
 export type ActionBox = { id: string; kind: "action"; do: ActionKind; url?: string; config?: Record<string, string> };
 
-export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox;
+export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox | FilterBox | CodeBox | WaitBox | TransformBox | NoteBox;
 export type BoxKind = Box["kind"];
 
 const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -272,6 +288,29 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
       return { id, kind: "condition", test: "has_content" };
     case "approval":
       return { id, kind: "approval" };
+    // n8n CORE NODES
+    case "filter": {
+      const expr = typeof v.expression === "string" ? v.expression.trim().slice(0, MAX_INSTRUCTION_CHARS) : "data is not empty";
+      return { id, kind: "filter", expression: expr };
+    }
+    case "code": {
+      const code = typeof v.code === "string" ? v.code.trim().slice(0, 5000) : "";
+      const lang = v.language === "python" ? "python" : "javascript";
+      return code.length >= 1 ? { id, kind: "code", language: lang, code } : null;
+    }
+    case "wait": {
+      const dur = Number(v.duration) || 60;
+      const unit = (["seconds", "minutes", "hours", "days"] as const).includes(v.unit as never) ? (v.unit as "seconds") : "seconds";
+      return { id, kind: "wait", duration: Math.min(dur, 86400), unit };
+    }
+    case "transform": {
+      const inst = typeof v.instruction === "string" ? v.instruction.trim().slice(0, MAX_INSTRUCTION_CHARS) : "";
+      return inst.length >= 3 ? { id, kind: "transform", instruction: inst } : null;
+    }
+    case "note": {
+      const text = typeof v.text === "string" ? v.text.trim().slice(0, 500) : "";
+      return { id, kind: "note", text };
+    }
     case "action": {
       if (!(ACTIONS as readonly unknown[]).includes(v.do)) return null;
       const actUrl = typeof v.url === "string" ? sanitiseBoxUrl(v.url) : undefined;
@@ -429,8 +468,13 @@ export const SENTENCE_PART: Record<BoxKind, SentencePart> = {
   start: "when",
   condition: "if",
   approval: "if",
+  filter: "if",
   read: "do",
   ai: "do",
+  code: "do",
+  transform: "do",
+  wait: "if",
+  note: "do",
   action: "do",
 };
 export function partOf(box: Box): SentencePart {
@@ -439,7 +483,7 @@ export function partOf(box: Box): SentencePart {
 
 /** How many boxes call a model: what a run is priced on. */
 export function aiBoxCount(boxes: Box[]): number {
-  return boxes.filter((b) => b.kind === "ai").length;
+  return boxes.filter((b) => b.kind === "ai" || b.kind === "transform").length;
 }
 
 /** Replaces one box, keeping its place and its id. */

@@ -634,6 +634,11 @@ export function AutomationShell({
                     switch (addKind) {
                       case "read": newBox = { id: newId, kind: "read", source: "last_emails" }; break;
                       case "ai": newBox = { id: newId, kind: "ai", instruction: "Summarise" }; break;
+                      case "filter": newBox = { id: newId, kind: "filter", expression: "data is not empty" }; break;
+                      case "code": newBox = { id: newId, kind: "code", language: "javascript", code: "return items;" }; break;
+                      case "wait": newBox = { id: newId, kind: "wait", duration: 60, unit: "seconds" }; break;
+                      case "transform": newBox = { id: newId, kind: "transform", instruction: "Extract the key fields" }; break;
+                      case "note": newBox = { id: newId, kind: "note", text: "" }; break;
                       case "condition": newBox = { id: newId, kind: "condition", test: "has_content" }; break;
                       case "approval": newBox = { id: newId, kind: "approval" }; break;
                       case "action": newBox = { id: newId, kind: "action", do: "send_email" }; break;

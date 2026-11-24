@@ -124,6 +124,12 @@ const NODE_THEME: Record<Box["kind"], { icon: string; iconText: string; label: s
   condition: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
   approval:  { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
   action:    { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  // n8n core nodes
+  filter:    { icon: "#4a2c0a", iconText: "#fbbf24", label: "#fbbf24", bg: "#4a2c0a", bgHover: "#4a2c0a", text: "#fff", border: "#f59e0b" },
+  code:      { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", bg: "#1a2e1a", bgHover: "#1a2e1a", text: "#fff", border: "#22c55e" },
+  wait:      { icon: "#3b1a3b", iconText: "#e879f9", label: "#e879f9", bg: "#3b1a3b", bgHover: "#3b1a3b", text: "#fff", border: "#d946ef" },
+  transform: { icon: "#1e3a5f", iconText: "#38bdf8", label: "#38bdf8", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#0ea5e9" },
+  note:      { icon: "#3a3a1a", iconText: "#fde68a", label: "#fde68a", bg: "#3a3a1a", bgHover: "#3a3a1a", text: "#fff", border: "#fbbf24" },
 };
 
 /** Status → border highlight on the WHOLE node after a run. */
@@ -142,6 +148,11 @@ function useWords() {
     condition: t("kinds.condition"),
     approval: t("kinds.approval"),
     action: t("kinds.action"),
+    filter: "Filter",
+    code: "Code",
+    wait: "Wait",
+    transform: "Transform",
+    note: "Note",
   };
   const source: Record<ReadSource, string> = {
     calendar_today: t("sources.calendar_today"),
@@ -259,6 +270,16 @@ function useWords() {
         return t("condition");
       case "approval":
         return t("approval");
+      case "filter":
+        return box.expression;
+      case "code":
+        return `${box.language}: ${box.code.slice(0, 40)}`;
+      case "wait":
+        return `${box.duration} ${box.unit}`;
+      case "transform":
+        return box.instruction;
+      case "note":
+        return box.text || "Note";
       case "action":
         return action[box.do];
     }
@@ -366,6 +387,11 @@ function BoxIconInner({ box }: { box: Box }) {
   if (box.kind === "ai") return <Sparkles className={cls} aria-hidden="true" />;
   if (box.kind === "condition") return <Filter className={cls} aria-hidden="true" />;
   if (box.kind === "approval") return <PauseCircle className={cls} aria-hidden="true" />;
+  if (box.kind === "filter") return <Filter className={cls} aria-hidden="true" />;
+  if (box.kind === "code") return <Hash className={cls} aria-hidden="true" />;
+  if (box.kind === "wait") return <Clock className={cls} aria-hidden="true" />;
+  if (box.kind === "transform") return <Layers className={cls} aria-hidden="true" />;
+  if (box.kind === "note") return <FileText className={cls} aria-hidden="true" />;
   if (box.kind === "action") {
     if (box.do === "send_telegram") return <Send className={cls} aria-hidden="true" />;
     if (box.do === "send_email" || box.do === "sendgrid_send") return <Mail className={cls} aria-hidden="true" />;
@@ -483,7 +509,7 @@ export function BoxRow({
   /** Which "+" was clicked — shows the type picker at that index. */
   const [addAt, setAddAt] = useState<number | null>(null);
   /** The 5 addable kinds (start is never added manually). */
-  const ADD_KINDS: Box["kind"][] = ["read", "ai", "condition", "approval", "action"];
+  const ADD_KINDS: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action"];
   return (
     <FlowCanvas>
     <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
@@ -565,6 +591,10 @@ export function BoxRow({
                     <span className="flex h-7 w-7 items-center justify-center rounded-full text-white" style={{ background: th.bg }}>
                       {k === "read" && <Table2 className="h-3.5 w-3.5" />}
                       {k === "ai" && <Sparkles className="h-3.5 w-3.5" />}
+                      {k === "filter" && <Filter className="h-3.5 w-3.5" />}
+                      {k === "code" && <Hash className="h-3.5 w-3.5" />}
+                      {k === "transform" && <Layers className="h-3.5 w-3.5" />}
+                      {k === "wait" && <Clock className="h-3.5 w-3.5" />}
                       {k === "condition" && <Filter className="h-3.5 w-3.5" />}
                       {k === "approval" && <PauseCircle className="h-3.5 w-3.5" />}
                       {k === "action" && <Send className="h-3.5 w-3.5" />}
@@ -821,6 +851,61 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
         />
       </label>
     );
+  } else if (draft.kind === "filter") {
+    body = (
+      <label className={label}>
+        Expression
+        <textarea className={`${field} min-h-[66px] py-2`} maxLength={MAX_INSTRUCTION_CHARS} value={draft.expression} onChange={(e) => setDraft({ ...draft, expression: e.target.value })} placeholder="e.g. data contains 'urgent'" />
+      </label>
+    );
+  } else if (draft.kind === "code") {
+    body = (
+      <>
+        <label className={label}>
+          Language
+          <select className={field} value={draft.language} onChange={(e) => setDraft({ ...draft, language: e.target.value as "javascript" | "python" })}>
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+          </select>
+        </label>
+        <label className={label}>
+          Code
+          <textarea className={`${field} min-h-[120px] py-2 font-mono text-xs`} maxLength={5000} value={draft.code} onChange={(e) => setDraft({ ...draft, code: e.target.value })} placeholder="return items.map(i => i.name);" />
+        </label>
+      </>
+    );
+  } else if (draft.kind === "wait") {
+    body = (
+      <div className="flex gap-2">
+        <label className={`${label} flex-1`}>
+          Duration
+          <input type="number" className={field} min={1} max={86400} value={draft.duration} onChange={(e) => setDraft({ ...draft, duration: Number(e.target.value) })} />
+        </label>
+        <label className={`${label} flex-1`}>
+          Unit
+          <select className={field} value={draft.unit} onChange={(e) => setDraft({ ...draft, unit: e.target.value as "seconds" })}>
+            <option value="seconds">Seconds</option>
+            <option value="minutes">Minutes</option>
+            <option value="hours">Hours</option>
+            <option value="days">Days</option>
+          </select>
+        </label>
+      </div>
+    );
+  } else if (draft.kind === "transform") {
+    body = (
+      <label className={label}>
+        Transform instruction
+        <textarea className={`${field} min-h-[88px] py-2`} maxLength={MAX_INSTRUCTION_CHARS} value={draft.instruction} onChange={(e) => setDraft({ ...draft, instruction: e.target.value })} placeholder="Extract name, email, and phone from each item" />
+      </label>
+    );
+  } else if (draft.kind === "note") {
+    body = (
+      <label className={label}>
+        Note text
+        <textarea className={`${field} min-h-[66px] py-2`} maxLength={500} value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} placeholder="Add a note about this part of the workflow" />
+      </label>
+    );
   } else if (draft.kind === "action") {
     const act = draft;
     body = (
@@ -844,7 +929,7 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
     body = <p className="text-xs text-muted">{t("edit.nothing")}</p>;
   }
 
-  const editable = draft.kind !== "condition" && draft.kind !== "approval";
+  const editable = draft.kind !== "condition" && draft.kind !== "approval" && draft.kind !== "note";
   const theme = NODE_THEME[box.kind];
   return (
     <div data-testid="flow-box-editor" className="space-y-3 rounded-xl p-4" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>

@@ -72,7 +72,7 @@ export default async function ModulePage(
     // The two switches of 2026-11-05 (the owner, after the automation
     // videos), read before the page's data: closed, the minutes are not
     // even read, and the gallery is not drawn.
-    const [simplePro, templatesOn, timeSavedOn] = await Promise.all([
+    const [simplePro, templatesOn, timeSavedOn, advancedNodesOn] = await Promise.all([
       // «Simple | Pro» (directive 55 Κομμάτι 1). Off reads as the screen
       // before it: the boxes, no switch. It fails towards 'staff'
       // (lib/flags/flags.ts), so a customer never meets a half-built
@@ -80,6 +80,7 @@ export default async function ModulePage(
       isFeatureOn("agents-automations-pro", user),
       isFeatureOn("automation-templates", user),
       isFeatureOn("automation-time-saved", user),
+      isFeatureOn("automation-advanced-nodes", user),
     ]);
     const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn, simplePro);
     return (

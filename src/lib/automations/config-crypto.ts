@@ -27,7 +27,12 @@ import { encryptSecret, decryptSecret, encryptionAvailable } from "@/lib/integra
 const ENC_PREFIX = "enc:";
 
 /** Config keys whose values contain credentials and must be encrypted. */
-const SENSITIVE_KEYS = /^(bot_token|api_key|token|secret|connection_string|password)$/i;
+/** Config keys whose values contain credentials and must be encrypted.
+ * Covers all integration config fields that hold secrets:
+ * bot_token, api_key, token, secret, password, connection_string,
+ * consumer_secret, access_token, private_key, service_account.
+ */
+const SENSITIVE_KEYS = /^(bot_token|api_key|token|secret|password|connection_string|consumer_secret|access_token|private_key|service_account)$/i;
 
 function isSensitive(key: string): boolean {
   return SENSITIVE_KEYS.test(key);

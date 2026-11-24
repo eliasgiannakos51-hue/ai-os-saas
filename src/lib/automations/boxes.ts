@@ -441,6 +441,10 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
     case "code": {
       const code = typeof v.code === "string" ? v.code.trim().slice(0, 5000) : "";
       const lang = v.language === "python" ? "python" : "javascript";
+      // SECURITY: block dangerous patterns in user code.
+      // require(), import(), eval(), process., child_process, fs., fetch to private
+      const BLOCKED_CODE = /\b(require|import|eval|Function|process\.|child_process|__proto__|constructor\[|prototype\[)/i;
+      if (BLOCKED_CODE.test(code)) return null;
       return code.length >= 1 ? { id, kind: "code", language: lang, code } : null;
     }
     case "wait": {
@@ -543,10 +547,18 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
     }
     case "respond_webhook": {
       const statusCode = typeof v.statusCode === "number" ? Math.min(Math.max(Math.round(v.statusCode), 100), 599) : 200;
-      return { id, kind: "respond_webhook", statusCode, ...(typeof v.body === "string" ? { body: v.body.slice(0, 2000) } : {}) };
+      // SECURITY: strip script tags from response body to prevent XSS if
+      // the response is rendered in a browser.
+      let body = typeof v.body === "string" ? v.body.slice(0, 2000) : undefined;
+      if (body) body = body.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+      return { id, kind: "respond_webhook", statusCode, ...(body ? { body } : {}) };
     }
     case "execute_command": {
       const command = typeof v.command === "string" ? v.command.trim().slice(0, 500) : "";
+      // SECURITY: sanitise — no shell metacharacters, no piping, no chaining.
+      // Only simple commands are allowed; complex shell is blocked at store time.
+      const DANGEROUS_SHELL = /[;&|`$(){}[\]<>\\!\n\r]/;
+      if (DANGEROUS_SHELL.test(command)) return null;
       return command.length >= 1 ? { id, kind: "execute_command", command } : null;
     }
     case "action": {

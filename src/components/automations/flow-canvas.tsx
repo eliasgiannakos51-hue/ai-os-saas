@@ -16,6 +16,8 @@ import {
   ReactFlow,
   Background,
   BackgroundVariant,
+  Controls,
+  MiniMap,
   type Node,
   type Edge,
   type NodeTypes,
@@ -24,6 +26,8 @@ import {
   Position,
   useNodesState,
   useEdgesState,
+  useReactFlow,
+  ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTranslations } from "next-intl";
@@ -265,19 +269,22 @@ function boxesToEdges(boxes: Box[]): Edge[] {
   }));
 }
 
-export function FlowCanvasView({
+function FlowCanvasInner({
   boxes,
   chosen,
   onChoose,
   connected,
   onAdd,
+  onDelete,
+  onUndo,
 }: {
   boxes: Box[];
   chosen: string | null;
   onChoose: (id: string) => void;
   connected: Connected;
-  /** Add a new box of the given kind at the end. */
   onAdd?: (kind: Box["kind"]) => void;
+  onDelete?: (boxId: string) => void;
+  onUndo?: () => void;
 }) {
   const kindNames = useKindNames();
   const describe = useDescribe();
@@ -328,9 +335,23 @@ export function FlowCanvasView({
     onChoose(node.id);
   }, [onChoose]);
 
+  // Keyboard shortcuts — n8n style
+  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Delete: remove selected node
+    if ((e.key === "Delete" || e.key === "Backspace") && chosen && onDelete) {
+      e.preventDefault();
+      onDelete(chosen);
+    }
+    // Ctrl+Z: undo
+    if ((e.ctrlKey || e.metaKey) && e.key === "z" && onUndo) {
+      e.preventDefault();
+      onUndo();
+    }
+  }, [chosen, onDelete, onUndo]);
+
   // Height based on number of rows
   const rows = Math.ceil(boxes.length / 2);
-  const canvasHeight = Math.max(250, rows * 100 + 80);
+  const canvasHeight = Math.max(280, rows * 100 + 100);
 
   return (
     <div
@@ -339,6 +360,8 @@ export function FlowCanvasView({
         height: canvasHeight,
         border: "1px solid rgb(var(--border) / 0.3)",
       }}
+      onKeyDown={onKeyDown}
+      tabIndex={0}
     >
       <ReactFlow
         nodes={nodes.map((n) => ({ ...n, selected: n.id === chosen }))}
@@ -351,6 +374,7 @@ export function FlowCanvasView({
         fitViewOptions={{ padding: 0.3 }}
         proOptions={{ hideAttribution: true }}
         style={{ background: "transparent" }}
+        deleteKeyCode={null}
       >
         <Background
           variant={BackgroundVariant.Dots}
@@ -358,7 +382,35 @@ export function FlowCanvasView({
           size={1}
           color="rgb(var(--foreground) / 0.08)"
         />
+        {/* n8n-style zoom controls — bottom left */}
+        <Controls
+          showInteractive={false}
+          style={{ background: "rgb(var(--panel))", border: "1px solid rgb(var(--border) / 0.3)", borderRadius: 8 }}
+        />
+        {/* Mini-map — bottom right, like n8n */}
+        <MiniMap
+          nodeColor={() => "#3b82f6"}
+          maskColor="rgb(var(--panel) / 0.8)"
+          style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)", borderRadius: 8, height: 80, width: 120 }}
+        />
       </ReactFlow>
     </div>
+  );
+}
+
+/** Wrapper that provides ReactFlowProvider. */
+export function FlowCanvasView(props: {
+  boxes: Box[];
+  chosen: string | null;
+  onChoose: (id: string) => void;
+  connected: Connected;
+  onAdd?: (kind: Box["kind"]) => void;
+  onDelete?: (boxId: string) => void;
+  onUndo?: () => void;
+}) {
+  return (
+    <ReactFlowProvider>
+      <FlowCanvasInner {...props} />
+    </ReactFlowProvider>
   );
 }

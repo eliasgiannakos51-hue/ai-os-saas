@@ -618,6 +618,16 @@ export function AutomationShell({
                   chosen={chosen}
                   onChoose={(id) => setChosen((c) => (c === id ? null : id))}
                   connected={connected}
+                  onDelete={(boxId) => {
+                    const boxes = shown.boxes.filter((b) => b.id !== boxId && b.kind !== "start" ? true : b.kind === "start");
+                    if (boxes.length < 2) return;
+                    setChosen(null);
+                    void (async () => {
+                      const data = await call(`/api/automations/flows/${shown.id}`, "PATCH", { boxes: shown.boxes.filter((b) => b.id !== boxId) }, "save");
+                      if (data) placeFlow(data.flow);
+                    })();
+                  }}
+                  onUndo={() => { if (shown.version > 1) void undo(shown); }}
                   onAdd={(addKind) => {
                     const newId = `b${Date.now().toString(36)}`;
                     let newBox: Box;

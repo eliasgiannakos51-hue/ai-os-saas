@@ -8,6 +8,7 @@ import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/bill
 import type { Plan } from "@/lib/billing/plans";
 import { isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
 import { listIntegrations } from "@/lib/integrations/store";
+import { encryptFlowBoxConfigs } from "@/lib/automations/config-crypto";
 import { listDeliveryChannels } from "@/lib/agents/delivery-store";
 import { connectionsNeeded, cronFor, isFlowMode, DEFAULT_FLOW_MODE, type Box, type FlowMode, type StartBox } from "@/lib/automations/boxes";
 
@@ -145,6 +146,10 @@ export async function releaseFlow(flowId: string, userId: string): Promise<void>
  */
 export async function saveVersion(params: { flowId: string; userId: string; version: number; boxes: Box[]; said: string; extra?: Record<string, unknown> }): Promise<boolean> {
   const admin = createAdminClient();
+  // ENCRYPT sensitive config fields (bot_token, api_key, etc.) before
+  // writing to the database. The same AES-256-GCM key that protects
+  // OAuth tokens protects these. lib/automations/config-crypto.ts.
+  const encryptedBoxes = encryptFlowBoxConfigs(params.boxes, params.flowId);
   const { error: clearError } = await admin
     .from("automation_flow_versions")
     .delete()
@@ -157,14 +162,14 @@ export async function saveVersion(params: { flowId: string; userId: string; vers
   }
   const { error: versionError } = await admin
     .from("automation_flow_versions")
-    .insert({ flow_id: params.flowId, user_id: params.userId, version: params.version, boxes: params.boxes, said: params.said.slice(0, MAX_SAID_CHARS) });
+    .insert({ flow_id: params.flowId, user_id: params.userId, version: params.version, boxes: encryptedBoxes, said: params.said.slice(0, MAX_SAID_CHARS) });
   if (versionError) {
     logApiError("automations:version", versionError, { flowId: params.flowId, version: params.version });
     return false;
   }
   const { error } = await admin
     .from("automation_flows")
-    .update({ boxes: params.boxes, version: params.version, ...(params.extra ?? {}) })
+    .update({ boxes: encryptedBoxes, version: params.version, ...(params.extra ?? {}) })
     .eq("id", params.flowId)
     .eq("user_id", params.userId);
   if (error) {

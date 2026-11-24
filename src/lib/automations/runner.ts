@@ -20,6 +20,7 @@ import type { Plan } from "@/lib/billing/plans";
 import { formatItemsForModel, searchUserData } from "@/lib/integrations/read";
 import { parseMcpUrl, isBlockedAddress } from "@/lib/mcp/ssrf";
 import { readFlow, withSupervisedApprovals, DEFAULT_FLOW_MODE, type ActionBox, type Box, type FlowMode, type ReadBox } from "@/lib/automations/boxes";
+import { decryptFlowBoxConfigs } from "@/lib/automations/config-crypto";
 import { APPROVAL_WAIT_HOURS, type RunStep } from "@/lib/automations/run-steps";
 import { periodFor, readAiAnswer, textToDocumentHtml, type AiOutcome, type Resume } from "@/lib/automations/answers";
 
@@ -628,12 +629,16 @@ async function reportProgress(ctx: RunContext, steps: RunStep[]): Promise<void> 
 export async function runFlow(ctx: RunContext): Promise<RunResult> {
   const flow = readFlow(ctx.flow.boxes);
   if (!flow.ok) return { status: "failed", steps: [], credits: 0, error: `flow:${flow.reason}` };
+  // DECRYPT sensitive config fields (bot_token, api_key, etc.) before
+  // any box reads them. The database stores them encrypted; the runner
+  // is the only place that needs the plaintext.
+  const decryptedBoxes = decryptFlowBoxConfigs(flow.boxes, ctx.flow.id);
   // "supervised": one extra, synthetic approval before any action box
   // that does not already have one — never stored, computed the SAME
   // way on a fresh run and on a resume of it (withSupervisedApprovals's
   // own doc comment says why that has to hold).
   const mode = ctx.flow.mode ?? DEFAULT_FLOW_MODE;
-  const boxes: Box[] = mode === "supervised" ? withSupervisedApprovals(flow.boxes) : flow.boxes;
+  const boxes: Box[] = mode === "supervised" ? withSupervisedApprovals(decryptedBoxes) : decryptedBoxes;
   // A resume whose stored index no longer fits this rebuild — the mode
   // changed under a waiting run, or the boxes did — fails the run
   // instead of reading the wrong box at boxes[i].

@@ -25,6 +25,22 @@
 - CONNECTION_NAME map extended
 - i18n σε 10 locales (el, de, es, fr, it, pt, ja, zh, ar, en)
 
+### 14 data transformation + flow control nodes (σύνολο 30 node types)
+- **Sort**: ταξινόμηση κατά πεδίο (asc/desc)
+- **Limit**: κράτα τα πρώτα N στοιχεία
+- **Remove Duplicates**: αφαίρεση διπλότυπων κατά πεδίο
+- **Summarize**: count/sum/avg/min/max
+- **Set**: ορισμός/μετονομασία πεδίων
+- **Date & Time**: μορφοποίηση, πρόσθεση, αφαίρεση ημερομηνιών
+- **HTML Extract**: εξαγωγή δεδομένων με CSS selector
+- **Compare**: σύγκριση δύο datasets
+- **Switch**: routing σε branches κατά τιμή πεδίου
+- **Text Classifier**: κατηγοριοποίηση κειμένου (AI)
+- **Sentiment**: ανάλυση συναισθήματος (AI)
+- **Extract Info**: εξαγωγή δομημένων πεδίων (AI)
+- **Respond Webhook**: HTTP response πίσω στον caller
+- **Execute Command**: εκτέλεση εντολής
+
 ### MAX_BOXES 8 → 20
 Για σύνθετα workflows με πολλά βήματα (n8n-style).
 

@@ -31,7 +31,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, Clock, Filter, GitBranch, GitMerge, Hash, FileText, Layers, PauseCircle, RefreshCw, Send, Sparkles, Table2, Timer, Zap } from "lucide-react";
+import { AlertTriangle, ArrowUpDown, BarChart3, Calendar, Clock, Code2, FileOutput, Filter, GitBranch, GitCompare, GitMerge, Hash, Heart, FileText, Layers, List, ListFilter, PauseCircle, RefreshCw, Reply, Scissors, Send, Sparkles, Split, Table2, Terminal, Timer, Type, Zap } from "lucide-react";
 import type { Box, ReadSource, ActionKind, StartBox } from "@/lib/automations/boxes";
 import type { Connected } from "@/components/automations/flow-boxes";
 
@@ -54,6 +54,21 @@ const THEME: Record<Box["kind"], { icon: string; iconText: string; label: string
   split:         { icon: "#1a4a3a", iconText: "#6ee7b7", label: "#6ee7b7", border: "#10b981" },
   merge:         { icon: "#3a1a4a", iconText: "#c4b5fd", label: "#c4b5fd", border: "#8b5cf6" },
   delay:         { icon: "#3a2a1a", iconText: "#fdba74", label: "#fdba74", border: "#f97316" },
+  // n8n data transformation + flow control (round 2):
+  sort:              { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  limit:             { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  remove_duplicates: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  summarize:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  switch:            { icon: "#4a2c0a", iconText: "#fbbf24", label: "#fbbf24", border: "#f59e0b" },
+  set:               { icon: "#1e3a5f", iconText: "#38bdf8", label: "#38bdf8", border: "#0ea5e9" },
+  compare:           { icon: "#1a4a3a", iconText: "#6ee7b7", label: "#6ee7b7", border: "#10b981" },
+  date_time:         { icon: "#3b1a3b", iconText: "#e879f9", label: "#e879f9", border: "#d946ef" },
+  html_extract:      { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
+  text_classifier:   { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  sentiment:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  extract_info:      { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  respond_webhook:   { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  execute_command:   { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
 };
 
 /** Translate box kind to display name. */
@@ -76,6 +91,20 @@ function useKindNames() {
     split: "Split",
     merge: "Merge",
     delay: "Delay",
+    sort: "Sort",
+    limit: "Limit",
+    remove_duplicates: "Remove Duplicates",
+    summarize: "Summarize",
+    switch: "Switch",
+    set: "Set",
+    compare: "Compare",
+    date_time: "Date & Time",
+    html_extract: "HTML Extract",
+    text_classifier: "Text Classifier",
+    sentiment: "Sentiment",
+    extract_info: "Extract Info",
+    respond_webhook: "Respond Webhook",
+    execute_command: "Execute Command",
   };
 }
 
@@ -116,6 +145,21 @@ function useDescribe() {
     if (box.kind === "split") return `Batch ${box.batchSize}`;
     if (box.kind === "merge") return `Merge: ${box.mode}`;
     if (box.kind === "delay") return `${box.delay} ${box.unit}`;
+    // n8n data transformation + flow control (round 2):
+    if (box.kind === "sort") return `Sort by ${box.field}`;
+    if (box.kind === "limit") return `First ${box.maxItems}`;
+    if (box.kind === "remove_duplicates") return `Dedup ${box.field}`;
+    if (box.kind === "summarize") return `${box.operation}(${box.field})`;
+    if (box.kind === "switch") return `Route: ${box.field}`;
+    if (box.kind === "set") return "Set fields";
+    if (box.kind === "compare") return box.mode.replace(/_/g, " ");
+    if (box.kind === "date_time") return `Date: ${box.operation}`;
+    if (box.kind === "html_extract") return box.selector.slice(0, 30);
+    if (box.kind === "text_classifier") return box.categories.slice(0, 2).join(", ");
+    if (box.kind === "sentiment") return "Sentiment";
+    if (box.kind === "extract_info") return box.fields.slice(0, 2).join(", ");
+    if (box.kind === "respond_webhook") return `Respond ${box.statusCode}`;
+    if (box.kind === "execute_command") return box.command.slice(0, 30);
     if (box.kind === "action") return act(box.do);
     return "";
   };
@@ -140,6 +184,21 @@ function NodeIcon({ box }: { box: Box }) {
   if (box.kind === "split") return <GitBranch className={cls} />;
   if (box.kind === "merge") return <GitMerge className={cls} />;
   if (box.kind === "delay") return <Timer className={cls} />;
+  // n8n data transformation + flow control (round 2):
+  if (box.kind === "sort") return <ArrowUpDown className={cls} />;
+  if (box.kind === "limit") return <ListFilter className={cls} />;
+  if (box.kind === "remove_duplicates") return <Scissors className={cls} />;
+  if (box.kind === "summarize") return <BarChart3 className={cls} />;
+  if (box.kind === "switch") return <Split className={cls} />;
+  if (box.kind === "set") return <Type className={cls} />;
+  if (box.kind === "compare") return <GitCompare className={cls} />;
+  if (box.kind === "date_time") return <Calendar className={cls} />;
+  if (box.kind === "html_extract") return <Code2 className={cls} />;
+  if (box.kind === "text_classifier") return <List className={cls} />;
+  if (box.kind === "sentiment") return <Heart className={cls} />;
+  if (box.kind === "extract_info") return <FileOutput className={cls} />;
+  if (box.kind === "respond_webhook") return <Reply className={cls} />;
+  if (box.kind === "execute_command") return <Terminal className={cls} />;
   if (box.kind === "action") return <Send className={cls} />;
   return <Zap className={cls} />;
 }
@@ -191,7 +250,7 @@ function AddNode({ data }: NodeProps) {
     theme: typeof THEME;
   };
   const [open, setOpen] = useState(false);
-  const kinds: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action", "error_handler", "loop", "split", "merge", "delay", "note"];
+  const kinds: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action", "error_handler", "loop", "split", "merge", "delay", "note", "sort", "limit", "remove_duplicates", "summarize", "switch", "set", "compare", "date_time", "html_extract", "text_classifier", "sentiment", "extract_info", "respond_webhook", "execute_command"];
   return (
     <div className="flex flex-col items-center">
       <Handle type="target" position={Position.Top} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />

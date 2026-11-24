@@ -120,6 +120,42 @@ export type SplitBox = { id: string; kind: "split"; batchSize: number };
 export type MergeBox = { id: string; kind: "merge"; mode: "append" | "combine" | "choose_branch" };
 export type DelayBox = { id: string; kind: "delay"; delay: number; unit: "seconds" | "minutes" | "hours" };
 
+/**
+ * n8n DATA TRANSFORMATION + FLOW CONTROL NODES (2026-11-24, round 2).
+ *
+ * Data transformation (n8n core):
+ * - sort: Sort — sort items by a field
+ * - limit: Limit — keep only the first N items
+ * - remove_duplicates: Remove Duplicates — deduplicate by field
+ * - summarize: Summarize — aggregate (count, sum, avg, min, max)
+ * - switch: Switch/Router — route to different branches based on value
+ * - set: Set — set/rename fields (n8n's most used utility node)
+ * - compare: Compare Datasets — diff two data sets
+ * - date_time: Date & Time — format, parse, calculate dates
+ * - html_extract: HTML — extract data from HTML
+ * - xml_parse: XML — parse or build XML
+ * - aggregate: Aggregate — combine items into one
+ * - text_classifier: Text Classifier — classify text into categories
+ * - sentiment: Sentiment Analysis — positive/negative/neutral
+ * - extract_info: Information Extractor — pull structured data from text
+ * - respond_webhook: Respond to Webhook — send response back to caller
+ * - execute_command: Execute Command — run a shell command
+ */
+export type SortBox = { id: string; kind: "sort"; field: string; direction: "asc" | "desc" };
+export type LimitBox = { id: string; kind: "limit"; maxItems: number };
+export type RemoveDuplicatesBox = { id: string; kind: "remove_duplicates"; field: string };
+export type SummarizeBox = { id: string; kind: "summarize"; operation: "count" | "sum" | "avg" | "min" | "max"; field: string };
+export type SwitchBox = { id: string; kind: "switch"; field: string; rules: Array<{ value: string; output: number }> };
+export type SetBox = { id: string; kind: "set"; assignments: Array<{ field: string; value: string }> };
+export type CompareBox = { id: string; kind: "compare"; mode: "find_new" | "find_removed" | "find_changed" };
+export type DateTimeBox = { id: string; kind: "date_time"; operation: "format" | "add" | "subtract" | "diff"; format?: string; amount?: number; unit?: "minutes" | "hours" | "days" | "weeks" | "months" };
+export type HtmlExtractBox = { id: string; kind: "html_extract"; selector: string; attribute?: string };
+export type TextClassifierBox = { id: string; kind: "text_classifier"; categories: string[] };
+export type SentimentBox = { id: string; kind: "sentiment" };
+export type ExtractInfoBox = { id: string; kind: "extract_info"; fields: string[] };
+export type RespondWebhookBox = { id: string; kind: "respond_webhook"; statusCode: number; body?: string };
+export type ExecuteCommandBox = { id: string; kind: "execute_command"; command: string };
+
 export const ACTIONS = [
   // Original
   "send_telegram", "send_email", "notify", "save_to_library",
@@ -157,7 +193,7 @@ export const ACTIONS = [
 export type ActionKind = (typeof ACTIONS)[number];
 export type ActionBox = { id: string; kind: "action"; do: ActionKind; url?: string; config?: Record<string, string> };
 
-export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox | FilterBox | CodeBox | WaitBox | TransformBox | NoteBox | ErrorHandlerBox | LoopBox | SplitBox | MergeBox | DelayBox;
+export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox | FilterBox | CodeBox | WaitBox | TransformBox | NoteBox | ErrorHandlerBox | LoopBox | SplitBox | MergeBox | DelayBox | SortBox | LimitBox | RemoveDuplicatesBox | SummarizeBox | SwitchBox | SetBox | CompareBox | DateTimeBox | HtmlExtractBox | TextClassifierBox | SentimentBox | ExtractInfoBox | RespondWebhookBox | ExecuteCommandBox;
 export type BoxKind = Box["kind"];
 
 const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -447,6 +483,72 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
       if (u !== "seconds" && u !== "minutes" && u !== "hours") return { id, kind: "delay", delay: d, unit: "seconds" };
       return { id, kind: "delay", delay: d, unit: u };
     }
+    // n8n data transformation + flow control (2026-11-24, round 2):
+    case "sort": {
+      const field = typeof v.field === "string" ? v.field.trim().slice(0, 100) : "name";
+      const dir = v.direction === "desc" ? "desc" : "asc";
+      return { id, kind: "sort", field, direction: dir };
+    }
+    case "limit": {
+      const max = typeof v.maxItems === "number" ? Math.min(Math.max(Math.round(v.maxItems), 1), 10000) : 10;
+      return { id, kind: "limit", maxItems: max };
+    }
+    case "remove_duplicates": {
+      const field = typeof v.field === "string" ? v.field.trim().slice(0, 100) : "id";
+      return { id, kind: "remove_duplicates", field };
+    }
+    case "summarize": {
+      const op = v.operation;
+      if (op !== "count" && op !== "sum" && op !== "avg" && op !== "min" && op !== "max") return { id, kind: "summarize", operation: "count", field: "id" };
+      const field = typeof v.field === "string" ? v.field.trim().slice(0, 100) : "id";
+      return { id, kind: "summarize", operation: op, field };
+    }
+    case "switch": {
+      const field = typeof v.field === "string" ? v.field.trim().slice(0, 100) : "status";
+      const rules = Array.isArray(v.rules) ? v.rules.slice(0, 10).filter((r: unknown): r is { value: string; output: number } =>
+        Boolean(r) && typeof r === "object" && typeof (r as Record<string, unknown>).value === "string" && typeof (r as Record<string, unknown>).output === "number"
+      ).map((r: { value: string; output: number }) => ({ value: String(r.value).slice(0, 200), output: Math.round(r.output) })) : [];
+      return { id, kind: "switch", field, rules };
+    }
+    case "set": {
+      const assignments = Array.isArray(v.assignments) ? v.assignments.slice(0, 20).filter((a: unknown): a is { field: string; value: string } =>
+        Boolean(a) && typeof a === "object" && typeof (a as Record<string, unknown>).field === "string" && typeof (a as Record<string, unknown>).value === "string"
+      ).map((a: { field: string; value: string }) => ({ field: a.field.slice(0, 100), value: a.value.slice(0, 500) })) : [];
+      return { id, kind: "set", assignments };
+    }
+    case "compare": {
+      const mode = v.mode;
+      if (mode !== "find_new" && mode !== "find_removed" && mode !== "find_changed") return { id, kind: "compare", mode: "find_new" };
+      return { id, kind: "compare", mode };
+    }
+    case "date_time": {
+      const operation = v.operation;
+      if (operation !== "format" && operation !== "add" && operation !== "subtract" && operation !== "diff") return { id, kind: "date_time", operation: "format" };
+      return { id, kind: "date_time", operation, ...(typeof v.format === "string" ? { format: v.format.slice(0, 50) } : {}), ...(typeof v.amount === "number" ? { amount: Math.round(v.amount) } : {}), ...(typeof v.unit === "string" && ["minutes", "hours", "days", "weeks", "months"].includes(v.unit) ? { unit: v.unit as "minutes" | "hours" | "days" | "weeks" | "months" } : {}) };
+    }
+    case "html_extract": {
+      const selector = typeof v.selector === "string" ? v.selector.trim().slice(0, 200) : "h1";
+      return { id, kind: "html_extract", selector, ...(typeof v.attribute === "string" ? { attribute: v.attribute.slice(0, 50) } : {}) };
+    }
+    case "text_classifier": {
+      const categories = Array.isArray(v.categories) ? v.categories.slice(0, 20).filter((c: unknown): c is string => typeof c === "string").map((c: string) => c.slice(0, 100)) : ["positive", "negative"];
+      return { id, kind: "text_classifier", categories };
+    }
+    case "sentiment": {
+      return { id, kind: "sentiment" };
+    }
+    case "extract_info": {
+      const fields = Array.isArray(v.fields) ? v.fields.slice(0, 20).filter((f: unknown): f is string => typeof f === "string").map((f: string) => f.slice(0, 100)) : ["name", "email"];
+      return { id, kind: "extract_info", fields };
+    }
+    case "respond_webhook": {
+      const statusCode = typeof v.statusCode === "number" ? Math.min(Math.max(Math.round(v.statusCode), 100), 599) : 200;
+      return { id, kind: "respond_webhook", statusCode, ...(typeof v.body === "string" ? { body: v.body.slice(0, 2000) } : {}) };
+    }
+    case "execute_command": {
+      const command = typeof v.command === "string" ? v.command.trim().slice(0, 500) : "";
+      return command.length >= 1 ? { id, kind: "execute_command", command } : null;
+    }
     case "action": {
       if (!(ACTIONS as readonly unknown[]).includes(v.do)) return null;
       const actUrl = typeof v.url === "string" ? sanitiseBoxUrl(v.url) : undefined;
@@ -618,6 +720,21 @@ export const SENTENCE_PART: Record<BoxKind, SentencePart> = {
   split: "do",
   merge: "do",
   delay: "if",
+  // n8n data transformation + flow control (2026-11-24, round 2):
+  sort: "do",
+  limit: "do",
+  remove_duplicates: "do",
+  summarize: "do",
+  switch: "if",
+  set: "do",
+  compare: "do",
+  date_time: "do",
+  html_extract: "do",
+  text_classifier: "do",
+  sentiment: "do",
+  extract_info: "do",
+  respond_webhook: "do",
+  execute_command: "do",
 };
 export function partOf(box: Box): SentencePart {
   return SENTENCE_PART[box.kind];

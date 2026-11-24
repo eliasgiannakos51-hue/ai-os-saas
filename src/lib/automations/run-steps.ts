@@ -36,6 +36,7 @@ export const STEP_NOTES = [
   "split_done",
   "merge_done",
   "delay_done",
+  "transform_done",
 ] as const;
 export type StepNote = (typeof STEP_NOTES)[number];
 

@@ -866,6 +866,16 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       steps.push({ box: box.id, status: "ok", note: "delay_done" });
       continue;
     }
+    // n8n data transformation + flow control (round 2):
+    if (box.kind === "sort" || box.kind === "limit" || box.kind === "remove_duplicates" ||
+        box.kind === "summarize" || box.kind === "switch" || box.kind === "set" ||
+        box.kind === "compare" || box.kind === "date_time" || box.kind === "html_extract" ||
+        box.kind === "text_classifier" || box.kind === "sentiment" || box.kind === "extract_info" ||
+        box.kind === "respond_webhook" || box.kind === "execute_command") {
+      // All data transformation nodes: placeholder, pass through
+      steps.push({ box: box.id, status: "ok", note: "transform_done" });
+      continue;
+    }
     // action
     if (box.kind !== "action") continue; // safety: skip unknown kinds
     const step = await act(box, text, ctx);

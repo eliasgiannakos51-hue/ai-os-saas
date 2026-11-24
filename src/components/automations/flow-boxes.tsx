@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Cloud, CreditCard, Database, DollarSign, FileOutput, FileText, FileUp, Filter, FolderUp, FormInput, GitBranch, GitMerge, Globe, Hash, Image, Layers, Mail, MessageCircle, MessageSquare, Package, PauseCircle, Phone, Play, Plus, RefreshCw, Rss, Send, Share2, ShoppingCart, Sparkles, Table2, Timer, Trash2, Video, Webhook, Zap } from "lucide-react";
+import { AlertTriangle, ArrowDownUp, ArrowUpDown, BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Cloud, Code2, CreditCard, Database, DollarSign, FileOutput, FileText, FileUp, Filter, FolderUp, FormInput, GitBranch, GitCompare, GitMerge, Globe, Hash, Heart, Image, Layers, List, ListFilter, Mail, MessageCircle, MessageSquare, Package, PauseCircle, Phone, Play, Plus, RefreshCw, Reply, Rss, Scissors, Send, Share2, ShoppingCart, Sparkles, Split, Table2, Terminal, Timer, Trash2, Type, Video, Webhook, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import {
   ACTIONS,
@@ -164,6 +164,21 @@ const NODE_THEME: Record<Box["kind"], { icon: string; iconText: string; label: s
   split:         { icon: "#1a4a3a", iconText: "#6ee7b7", label: "#6ee7b7", bg: "#1a4a3a", bgHover: "#1a4a3a", text: "#fff", border: "#10b981" },
   merge:         { icon: "#3a1a4a", iconText: "#c4b5fd", label: "#c4b5fd", bg: "#3a1a4a", bgHover: "#3a1a4a", text: "#fff", border: "#8b5cf6" },
   delay:         { icon: "#3a2a1a", iconText: "#fdba74", label: "#fdba74", bg: "#3a2a1a", bgHover: "#3a2a1a", text: "#fff", border: "#f97316" },
+  // n8n data transformation + flow control (round 2):
+  sort:              { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  limit:             { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  remove_duplicates: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  summarize:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  switch:            { icon: "#4a2c0a", iconText: "#fbbf24", label: "#fbbf24", bg: "#4a2c0a", bgHover: "#4a2c0a", text: "#fff", border: "#f59e0b" },
+  set:               { icon: "#1e3a5f", iconText: "#38bdf8", label: "#38bdf8", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#0ea5e9" },
+  compare:           { icon: "#1a4a3a", iconText: "#6ee7b7", label: "#6ee7b7", bg: "#1a4a3a", bgHover: "#1a4a3a", text: "#fff", border: "#10b981" },
+  date_time:         { icon: "#3b1a3b", iconText: "#e879f9", label: "#e879f9", bg: "#3b1a3b", bgHover: "#3b1a3b", text: "#fff", border: "#d946ef" },
+  html_extract:      { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", bg: "#1a2e1a", bgHover: "#1a2e1a", text: "#fff", border: "#22c55e" },
+  text_classifier:   { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  sentiment:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  extract_info:      { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  respond_webhook:   { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  execute_command:   { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", bg: "#1a2e1a", bgHover: "#1a2e1a", text: "#fff", border: "#22c55e" },
 };
 
 /** Status → border highlight on the WHOLE node after a run. */
@@ -193,6 +208,21 @@ function useWords() {
     split: "Split",
     merge: "Merge",
     delay: "Delay",
+    // n8n data transformation + flow control (round 2):
+    sort: "Sort",
+    limit: "Limit",
+    remove_duplicates: "Remove Duplicates",
+    summarize: "Summarize",
+    switch: "Switch",
+    set: "Set",
+    compare: "Compare",
+    date_time: "Date & Time",
+    html_extract: "HTML Extract",
+    text_classifier: "Text Classifier",
+    sentiment: "Sentiment",
+    extract_info: "Extract Info",
+    respond_webhook: "Respond Webhook",
+    execute_command: "Execute Command",
   };
   const source: Record<ReadSource, string> = {
     calendar_today: t("sources.calendar_today"),
@@ -376,6 +406,35 @@ function useWords() {
         return `Merge: ${box.mode}`;
       case "delay":
         return `${box.delay} ${box.unit}`;
+      // n8n data transformation + flow control (round 2):
+      case "sort":
+        return `Sort by ${box.field} ${box.direction}`;
+      case "limit":
+        return `Keep first ${box.maxItems}`;
+      case "remove_duplicates":
+        return `Deduplicate by ${box.field}`;
+      case "summarize":
+        return `${box.operation}(${box.field})`;
+      case "switch":
+        return `Route by ${box.field}`;
+      case "set":
+        return box.assignments.length > 0 ? `Set ${box.assignments[0].field}` : "Set fields";
+      case "compare":
+        return `Compare: ${box.mode.replace(/_/g, " ")}`;
+      case "date_time":
+        return `Date: ${box.operation}`;
+      case "html_extract":
+        return `Extract: ${box.selector}`;
+      case "text_classifier":
+        return `Classify: ${box.categories.slice(0, 3).join(", ")}`;
+      case "sentiment":
+        return "Analyze sentiment";
+      case "extract_info":
+        return `Extract: ${box.fields.slice(0, 3).join(", ")}`;
+      case "respond_webhook":
+        return `Respond ${box.statusCode}`;
+      case "execute_command":
+        return box.command.slice(0, 40);
       case "action":
         return action[box.do];
     }
@@ -416,6 +475,7 @@ function useNoteWords(): (step: RunStep) => string {
       split_done: "Split completed",
       merge_done: "Merge completed",
       delay_done: "Delay completed",
+      transform_done: "Transform completed",
     };
     return note[step.note];
   };
@@ -500,6 +560,21 @@ function BoxIconInner({ box }: { box: Box }) {
   if (box.kind === "split") return <GitBranch className={cls} aria-hidden="true" />;
   if (box.kind === "merge") return <GitMerge className={cls} aria-hidden="true" />;
   if (box.kind === "delay") return <Timer className={cls} aria-hidden="true" />;
+  // n8n data transformation + flow control (round 2):
+  if (box.kind === "sort") return <ArrowUpDown className={cls} aria-hidden="true" />;
+  if (box.kind === "limit") return <ListFilter className={cls} aria-hidden="true" />;
+  if (box.kind === "remove_duplicates") return <Scissors className={cls} aria-hidden="true" />;
+  if (box.kind === "summarize") return <BarChart3 className={cls} aria-hidden="true" />;
+  if (box.kind === "switch") return <Split className={cls} aria-hidden="true" />;
+  if (box.kind === "set") return <Type className={cls} aria-hidden="true" />;
+  if (box.kind === "compare") return <GitCompare className={cls} aria-hidden="true" />;
+  if (box.kind === "date_time") return <Calendar className={cls} aria-hidden="true" />;
+  if (box.kind === "html_extract") return <Code2 className={cls} aria-hidden="true" />;
+  if (box.kind === "text_classifier") return <List className={cls} aria-hidden="true" />;
+  if (box.kind === "sentiment") return <Heart className={cls} aria-hidden="true" />;
+  if (box.kind === "extract_info") return <FileOutput className={cls} aria-hidden="true" />;
+  if (box.kind === "respond_webhook") return <Reply className={cls} aria-hidden="true" />;
+  if (box.kind === "execute_command") return <Terminal className={cls} aria-hidden="true" />;
   if (box.kind === "action") {
     if (box.do === "send_telegram") return <Send className={cls} aria-hidden="true" />;
     if (box.do === "send_email" || box.do === "sendgrid_send") return <Mail className={cls} aria-hidden="true" />;
@@ -617,7 +692,7 @@ export function BoxRow({
   /** Which "+" was clicked — shows the type picker at that index. */
   const [addAt, setAddAt] = useState<number | null>(null);
   /** The 5 addable kinds (start is never added manually). */
-  const ADD_KINDS: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action", "error_handler", "loop", "split", "merge", "delay", "note"];
+  const ADD_KINDS: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action", "error_handler", "loop", "split", "merge", "delay", "note", "sort", "limit", "remove_duplicates", "summarize", "switch", "set", "compare", "date_time", "html_extract", "text_classifier", "sentiment", "extract_info", "respond_webhook", "execute_command"];
   return (
     <FlowCanvas>
     <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
@@ -1081,6 +1156,65 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
         </label>
       </>
     );
+  } else if (draft.kind === "sort") {
+    body = (
+      <>
+        <label className={label}>Field<input type="text" className={field} value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="name" /></label>
+        <label className={label}>Direction<select className={field} value={draft.direction} onChange={(e) => setDraft({ ...draft, direction: e.target.value as "asc" | "desc" })}><option value="asc">Ascending</option><option value="desc">Descending</option></select></label>
+      </>
+    );
+  } else if (draft.kind === "limit") {
+    body = <label className={label}>Max items<input type="number" className={field} min={1} max={10000} value={draft.maxItems} onChange={(e) => setDraft({ ...draft, maxItems: Number(e.target.value) })} /></label>;
+  } else if (draft.kind === "remove_duplicates") {
+    body = <label className={label}>Deduplicate by field<input type="text" className={field} value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="email" /></label>;
+  } else if (draft.kind === "summarize") {
+    body = (
+      <>
+        <label className={label}>Operation<select className={field} value={draft.operation} onChange={(e) => setDraft({ ...draft, operation: e.target.value as "count" | "sum" | "avg" | "min" | "max" })}><option value="count">Count</option><option value="sum">Sum</option><option value="avg">Average</option><option value="min">Min</option><option value="max">Max</option></select></label>
+        <label className={label}>Field<input type="text" className={field} value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="amount" /></label>
+      </>
+    );
+  } else if (draft.kind === "switch") {
+    body = <label className={label}>Route by field<input type="text" className={field} value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="status" /></label>;
+  } else if (draft.kind === "set") {
+    body = <label className={label}>Assignments<textarea className={`${field} min-h-[66px] py-2`} value={draft.assignments.map(a => `${a.field}=${a.value}`).join("\n")} onChange={(e) => setDraft({ ...draft, assignments: e.target.value.split("\n").filter(Boolean).map(l => { const [f, ...v] = l.split("="); return { field: f?.trim() ?? "", value: v.join("=").trim() }; }).slice(0, 20) })} placeholder={"name=John\nemail=john@example.com"} /></label>;
+  } else if (draft.kind === "compare") {
+    body = <label className={label}>Mode<select className={field} value={draft.mode} onChange={(e) => setDraft({ ...draft, mode: e.target.value as "find_new" | "find_removed" | "find_changed" })}><option value="find_new">Find new items</option><option value="find_removed">Find removed items</option><option value="find_changed">Find changed items</option></select></label>;
+  } else if (draft.kind === "date_time") {
+    body = (
+      <>
+        <label className={label}>Operation<select className={field} value={draft.operation} onChange={(e) => setDraft({ ...draft, operation: e.target.value as "format" | "add" | "subtract" | "diff" })}><option value="format">Format</option><option value="add">Add</option><option value="subtract">Subtract</option><option value="diff">Difference</option></select></label>
+        {draft.operation === "format" && <label className={label}>Format<input type="text" className={field} value={draft.format ?? ""} onChange={(e) => setDraft({ ...draft, format: e.target.value })} placeholder="YYYY-MM-DD" /></label>}
+        {(draft.operation === "add" || draft.operation === "subtract") && (
+          <>
+            <label className={label}>Amount<input type="number" className={field} value={draft.amount ?? 1} onChange={(e) => setDraft({ ...draft, amount: Number(e.target.value) })} /></label>
+            <label className={label}>Unit<select className={field} value={draft.unit ?? "days"} onChange={(e) => setDraft({ ...draft, unit: e.target.value as "minutes" | "hours" | "days" | "weeks" | "months" })}><option value="minutes">Minutes</option><option value="hours">Hours</option><option value="days">Days</option><option value="weeks">Weeks</option><option value="months">Months</option></select></label>
+          </>
+        )}
+      </>
+    );
+  } else if (draft.kind === "html_extract") {
+    body = (
+      <>
+        <label className={label}>CSS Selector<input type="text" className={field} value={draft.selector} onChange={(e) => setDraft({ ...draft, selector: e.target.value })} placeholder="h1, .title, #main" /></label>
+        <label className={label}>Attribute (optional)<input type="text" className={field} value={draft.attribute ?? ""} onChange={(e) => setDraft({ ...draft, attribute: e.target.value || undefined })} placeholder="href, src" /></label>
+      </>
+    );
+  } else if (draft.kind === "text_classifier") {
+    body = <label className={label}>Categories (one per line)<textarea className={`${field} min-h-[66px] py-2`} value={draft.categories.join("\n")} onChange={(e) => setDraft({ ...draft, categories: e.target.value.split("\n").filter(Boolean).slice(0, 20) })} placeholder={"urgent\nnormal\nlow priority"} /></label>;
+  } else if (draft.kind === "sentiment") {
+    body = <p className="text-xs text-muted">Analyzes the sentiment of the input text. Returns positive, negative, or neutral.</p>;
+  } else if (draft.kind === "extract_info") {
+    body = <label className={label}>Fields to extract (one per line)<textarea className={`${field} min-h-[66px] py-2`} value={draft.fields.join("\n")} onChange={(e) => setDraft({ ...draft, fields: e.target.value.split("\n").filter(Boolean).slice(0, 20) })} placeholder={"name\nemail\nphone"} /></label>;
+  } else if (draft.kind === "respond_webhook") {
+    body = (
+      <>
+        <label className={label}>Status code<input type="number" className={field} min={100} max={599} value={draft.statusCode} onChange={(e) => setDraft({ ...draft, statusCode: Number(e.target.value) })} /></label>
+        <label className={label}>Response body<textarea className={`${field} min-h-[44px] py-2`} value={draft.body ?? ""} onChange={(e) => setDraft({ ...draft, body: e.target.value })} placeholder='{"ok": true}' /></label>
+      </>
+    );
+  } else if (draft.kind === "execute_command") {
+    body = <label className={label}>Command<input type="text" className={field} value={draft.command} onChange={(e) => setDraft({ ...draft, command: e.target.value })} placeholder="curl https://..." /></label>;
   } else if (draft.kind === "action") {
     const act = draft;
     body = (

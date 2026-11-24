@@ -78,6 +78,19 @@ export async function POST(request: Request) {
   const t = await getTranslations("dashboard.automations.templates");
   // The automation's sentence (automation_flows.said) is the card's own
   // description: what the person read before the press is what it says it is.
+  // Hardcoded English fallbacks for new templates (i18n keys will be added).
+  const complex: Record<string, { name: string; said: string; instruction: string }> = {
+    data_pipeline: { name: "Data Pipeline", said: "Scrape a website daily, extract and clean the data, and save to Google Sheets.", instruction: "Extract the key data points from this content. Format as a clean table with columns for name, value, date and source. Remove any irrelevant or duplicate entries." },
+    customer_onboarding: { name: "Customer Onboarding", said: "When a new customer signs up via webhook, send welcome email, create tasks, and update CRM.", instruction: "Write a warm, professional welcome email for this new customer. Include their name, mention their plan, and list 3 quick-start steps. Keep it under 200 words." },
+    social_monitor: { name: "Social Media Monitor", said: "Track social mentions daily, analyze sentiment, classify feedback, and report to Slack.", instruction: "Analyze these social mentions. For each, identify the sentiment, the main topic, and whether it needs a response. Prioritize complaints." },
+    invoice_processor: { name: "Invoice Processor", said: "When an email arrives with an invoice, extract all fields and save to accounting.", instruction: "Extract all invoice details: vendor name, invoice number, date, due date, line items, subtotal, tax, and total amount." },
+    competitor_tracker: { name: "Competitor Tracker", said: "Daily scrape competitor websites, compare changes, and send analysis report.", instruction: "Compare today's data with the previous version. Highlight pricing changes, new features, removed features, or messaging changes." },
+    report_generator: { name: "Weekly Report Generator", said: "Every Monday, compile data from Sheets, analyze trends, generate PDF and distribute.", instruction: "Create a comprehensive weekly business report with executive summary, key metrics, top performers, areas of concern, and recommended actions." },
+    webhook_processor: { name: "Webhook Processor", said: "Receive webhooks, validate, process with AI, store results, and respond.", instruction: "Process this webhook payload. Validate the data, extract the relevant fields, determine the appropriate action, and format a structured response." },
+    crm_sync: { name: "CRM Sync", said: "Daily sync between Salesforce and HubSpot: find new contacts, enrich, and update.", instruction: "For each new contact, enrich with available data: company size, industry, likely role, and engagement score (1-100). Flag high-priority leads." },
+    content_pipeline: { name: "Content Pipeline", said: "Read RSS feeds, create social media posts for all platforms, get approval, and publish.", instruction: "Create 3 social media posts from this content: LinkedIn (professional), Twitter/X (280 chars), Facebook (casual). Each with a different angle." },
+    alert_system: { name: "Alert System", said: "Monitor APIs, detect failures, classify severity, and alert the team.", instruction: "Analyze this API response. If there are errors, diagnose the cause, assess severity (critical/warning/info), and suggest remediation steps." },
+  };
   const words: Record<TemplateId, { name: string; said: string; instruction: string }> = {
     finance_daily: { name: t("finance_daily.name"), said: t("finance_daily.description"), instruction: t("finance_daily.instruction") },
     finance_weekly: { name: t("finance_weekly.name"), said: t("finance_weekly.description"), instruction: t("finance_weekly.instruction") },
@@ -85,7 +98,9 @@ export async function POST(request: Request) {
     support_triage: { name: t("support_triage.name"), said: t("support_triage.description"), instruction: t("support_triage.instruction") },
     content_repurpose: { name: t("content_repurpose.name"), said: t("content_repurpose.description"), instruction: t("content_repurpose.instruction") },
     lead_enrich: { name: t("lead_enrich.name"), said: t("lead_enrich.description"), instruction: t("lead_enrich.instruction") },
-  };
+    // Complex templates use English hardcoded (i18n keys pending):
+    ...complex as Record<string, { name: string; said: string; instruction: string }>,
+  } as Record<TemplateId, { name: string; said: string; instruction: string }>;
   const { name, said, instruction } = words[template];
   const boxes = templateFlow(template, instruction);
   if (!boxes) {

@@ -222,8 +222,8 @@ function AutomationNode({ data, selected }: NodeProps) {
         cursor: "grab",
       }}
     >
-      {/* Input handle (top) */}
-      <Handle type="target" position={Position.Top} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
+      {/* Input handle (left) — n8n style: left-to-right flow */}
+      <Handle type="target" position={Position.Left} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
       {/* Icon */}
       <div
         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
@@ -236,8 +236,8 @@ function AutomationNode({ data, selected }: NodeProps) {
         <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kindName}</div>
         <div className="mt-0.5 truncate text-[10px] leading-tight text-foreground" title={description}>{description}</div>
       </div>
-      {/* Output handle (bottom) */}
-      <Handle type="source" position={Position.Bottom} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
+      {/* Output handle (right) — n8n style */}
+      <Handle type="source" position={Position.Right} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
     </div>
   );
 }
@@ -253,7 +253,7 @@ function AddNode({ data }: NodeProps) {
   const kinds: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action", "error_handler", "loop", "split", "merge", "delay", "note", "sort", "limit", "remove_duplicates", "summarize", "switch", "set", "compare", "date_time", "html_extract", "text_classifier", "sentiment", "extract_info", "respond_webhook", "execute_command"];
   return (
     <div className="flex flex-col items-center">
-      <Handle type="target" position={Position.Top} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -293,16 +293,21 @@ function AddNode({ data }: NodeProps) {
 
 const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 
-/** Convert linear boxes to React Flow nodes arranged in a zigzag. */
+/**
+ * Convert linear boxes to React Flow nodes in a HORIZONTAL layout
+ * exactly like n8n: left → right, with rows wrapping when the
+ * canvas gets too wide. Each row holds up to COLS nodes; when a row
+ * is full the next row starts below it, flowing left → right again.
+ */
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
-  const COLS = 2;
-  const X_STEP = 240;
-  const Y_STEP = 100;
+  const COLS = 5;        // nodes per row before wrapping
+  const X_STEP = 220;    // horizontal gap between nodes
+  const Y_STEP = 120;    // vertical gap between rows
   return boxes.map((box, i) => {
     const row = Math.floor(i / COLS);
     const col = i % COLS;
-    // Zigzag: even rows left→right, odd rows right→left
-    const x = row % 2 === 0 ? col * X_STEP : (COLS - 1 - col) * X_STEP;
+    // n8n layout: always left → right, new row below
+    const x = col * X_STEP;
     const y = row * Y_STEP;
     return {
       id: box.id,
@@ -354,18 +359,17 @@ function FlowCanvasInner({
     const nodes = boxesToNodes(boxes, kindNames, describe);
     // Add "+" node at the end
     if (onAdd) {
-      const lastNode = nodes[nodes.length - 1];
-      const COLS = 2;
-      const lastRow = Math.floor(boxes.length / COLS);
-      const lastCol = boxes.length % COLS;
-      const X_STEP = 240;
-      const Y_STEP = 100;
-      const x = lastRow % 2 === 0 ? lastCol * X_STEP : (COLS - 1 - lastCol) * X_STEP;
-      const y = lastRow * Y_STEP;
+      // Place "+" to the right of the last node (horizontal n8n layout)
+      const COLS = 5;
+      const X_STEP = 220;
+      const Y_STEP = 120;
+      const nextIdx = boxes.length;
+      const row = Math.floor(nextIdx / COLS);
+      const col = nextIdx % COLS;
       nodes.push({
         id: "__add__",
         type: "addNode",
-        position: { x: x + 60, y: y + 20 },
+        position: { x: col * X_STEP + 20, y: row * Y_STEP + 20 },
         data: { onAdd, kindNames, theme: THEME },
         draggable: false,
         selectable: false,

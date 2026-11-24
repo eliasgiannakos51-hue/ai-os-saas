@@ -49,6 +49,9 @@ export function TemplateGallery({
     support: t("templates.groups.support"),
     marketing: t("templates.groups.marketing"),
     sales: t("templates.groups.sales"),
+    data: "Data",
+    operations: "Operations",
+    monitoring: "Monitoring",
   };
   const ready: Record<TemplateId, { name: string; description: string; instruction: string }> = {
     finance_daily: { name: t("templates.finance_daily.name"), description: t("templates.finance_daily.description"), instruction: t("templates.finance_daily.instruction") },
@@ -57,6 +60,17 @@ export function TemplateGallery({
     support_triage: { name: t("templates.support_triage.name"), description: t("templates.support_triage.description"), instruction: t("templates.support_triage.instruction") },
     content_repurpose: { name: t("templates.content_repurpose.name"), description: t("templates.content_repurpose.description"), instruction: t("templates.content_repurpose.instruction") },
     lead_enrich: { name: t("templates.lead_enrich.name"), description: t("templates.lead_enrich.description"), instruction: t("templates.lead_enrich.instruction") },
+    // Complex n8n-style templates (2026-11-24):
+    data_pipeline: { name: "Data Pipeline", description: "Scrape a website daily, extract and clean the data, and save to Google Sheets.", instruction: "Extract the key data points from this content. Format as a clean table with columns for name, value, date and source. Remove any irrelevant or duplicate entries." },
+    customer_onboarding: { name: "Customer Onboarding", description: "When a new customer signs up via webhook, send welcome email, create tasks, and update CRM.", instruction: "Write a warm, professional welcome email for this new customer. Include their name, mention their plan, and list 3 quick-start steps. Keep it under 200 words." },
+    social_monitor: { name: "Social Media Monitor", description: "Track social mentions daily, analyze sentiment, classify feedback, and report to Slack.", instruction: "Analyze these social mentions. For each, identify the sentiment (positive/negative/neutral), the main topic, and whether it needs a response. Prioritize complaints." },
+    invoice_processor: { name: "Invoice Processor", description: "When an email arrives with an invoice, extract all fields and save to accounting.", instruction: "Extract all invoice details: vendor name, invoice number, date, due date, line items, subtotal, tax, and total amount. Format amounts with 2 decimal places." },
+    competitor_tracker: { name: "Competitor Tracker", description: "Daily scrape competitor websites, compare changes, and send analysis report.", instruction: "Compare today's data with the previous version. Highlight any pricing changes, new features, removed features, or messaging changes. Assess the competitive impact of each change." },
+    report_generator: { name: "Weekly Report Generator", description: "Every Monday, compile data from Sheets, analyze trends, generate PDF and distribute.", instruction: "Create a comprehensive weekly business report. Include: executive summary (3 bullets), key metrics with week-over-week changes, top performers, areas of concern, and 3 recommended actions." },
+    webhook_processor: { name: "Webhook Processor", description: "Receive webhooks, validate, process with AI, store results, and respond.", instruction: "Process this webhook payload. Validate the data, extract the relevant fields, determine the appropriate action, and format a structured response." },
+    crm_sync: { name: "CRM Sync", description: "Daily sync between Salesforce and HubSpot: find new contacts, enrich, and update.", instruction: "For each new contact, enrich with any available data: company size, industry, likely role, and engagement score (1-100). Flag high-priority leads (score > 70)." },
+    content_pipeline: { name: "Content Pipeline", description: "Read RSS feeds, create social media posts for all platforms, get approval, and publish.", instruction: "Create 3 social media posts from this content: 1) LinkedIn (professional, 1300 chars max with hashtags), 2) Twitter/X (280 chars, punchy), 3) Facebook (casual, 500 chars). Each should have a different angle." },
+    alert_system: { name: "Alert System", description: "Monitor APIs, detect failures, classify severity, and alert the team.", instruction: "Analyze this API response. If there are errors or anomalies, diagnose the likely cause, assess severity (critical/warning/info), and suggest immediate remediation steps." },
   };
   const soon: Record<SoonTemplateId, { name: string; description: string; why: string }> = {
     finance_expense_telegram: { name: t("templates.finance_expense_telegram.name"), description: t("templates.finance_expense_telegram.description"), why: t("templates.finance_expense_telegram.why") },

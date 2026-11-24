@@ -53,11 +53,11 @@ const SYSTEM = `You turn one sentence into an automation: a row of boxes that ru
 
 THE BOXES, top to bottom:
 - start (exactly one, first): when=time with every (day|weekdays|week|month) and at (HH:MM, the person's time), weekday for every=week (1 Monday … 7 Sunday), monthDay for every=month; or when=file_uploaded; or when=webhook (triggered by an external HTTP call); or when=new_email (triggered when a new email arrives); or when=rss (triggered by new RSS feed items, with optional url field); or when=form_submitted (triggered when a form is submitted); or when=chat_message (triggered by an incoming chat/support message); or when=app_event (triggered by an event in a connected app, with app field); or when=manual (triggered by clicking "Run now").
-- read: CALENDAR: calendar_today, calendar_tomorrow, calendar_week. FINANCE: finances_week, finances_month. FILES: uploaded_file (only when start=file_uploaded), google_drive_files, pdf_extract. SPREADSHEETS: google_sheets, airtable_records. PROJECT MANAGEMENT: notion_pages, jira_issues, github_issues, trello_cards, asana_tasks, clickup_tasks. CRM/SALES: hubspot_contacts, crm_contacts, shopify_orders, stripe_payments. COMMUNICATION: last_emails, discord_messages. FORMS: typeform_responses, google_forms. DATA: website_scrape, rss_feed, database_query, http_request, weather_data, stock_prices. ANALYTICS: analytics_report, social_mentions.
+- read: CALENDAR: calendar_today, calendar_tomorrow, calendar_week. FINANCE: finances_week, finances_month. FILES: uploaded_file (only when start=file_uploaded), google_drive_files, dropbox_files, onedrive_files, box_files, pdf_extract. SPREADSHEETS: google_sheets, airtable_records, baserow_rows. PROJECT MANAGEMENT: notion_pages, jira_issues, github_issues, trello_cards, asana_tasks, clickup_tasks, monday_items, linear_issues. CRM/SALES: hubspot_contacts, crm_contacts, shopify_orders, stripe_payments, salesforce_records, pipedrive_deals, zoho_records, woocommerce_orders. COMMUNICATION: last_emails, discord_messages, intercom_conversations. SUPPORT: zendesk_tickets, freshdesk_tickets. FORMS: typeform_responses, google_forms. DATA: website_scrape, rss_feed, database_query, http_request, weather_data, stock_prices. DATABASES: mysql_query, postgres_query, mongodb_query, elasticsearch_query, bigquery_query. ANALYTICS: analytics_report, social_mentions, google_analytics, mixpanel_events.
 - ai: one instruction, in the person's language, saying what to do with the data (summarise, analyse, classify, translate, write, report, extract, compare, format, score, generate, transform, enrich…).
 - condition: has_content — go on only if what came before is not empty; otherwise stop quietly.
 - approval: stop and wait until the person approves. Put before actions that send on their behalf.
-- action: MESSAGING: send_telegram, send_email, send_whatsapp, send_slack, send_sms, send_discord, notify (in-app). SOCIAL MEDIA: post_instagram, post_facebook, post_twitter, post_linkedin, youtube_upload, wordpress_post. SPREADSHEETS: sheets_write, airtable_write. PROJECT MANAGEMENT: notion_write, jira_create, github_create, trello_create, asana_create, clickup_create, create_task. CRM/SALES: hubspot_update, shopify_update, stripe_charge, create_invoice. MARKETING: mailchimp_add, sendgrid_send, google_ads_update, facebook_ads_update. CALENDAR: create_event, zoom_create. FILES: google_drive_upload, generate_pdf, compress_files, resize_image, convert_format, s3_upload, save_to_library. DATA: database_write, supabase_insert, redis_set, webhook_post, http_request, mqtt_publish. COMMUNICATION: twilio_call, translate_text.
+- action: MESSAGING: send_telegram, send_email, send_whatsapp, send_slack, send_sms, send_discord, notify (in-app), teams_send, google_chat_send, intercom_send. SOCIAL MEDIA: post_instagram, post_facebook, post_twitter, post_linkedin, youtube_upload, wordpress_post. SPREADSHEETS: sheets_write, airtable_write, baserow_create. PROJECT MANAGEMENT: notion_write, jira_create, github_create, trello_create, asana_create, clickup_create, monday_create, linear_create, create_task. CRM/SALES: hubspot_update, shopify_update, stripe_charge, create_invoice, salesforce_create, pipedrive_create, zoho_create, woocommerce_update. SUPPORT: zendesk_create, freshdesk_create. FINANCE: paypal_send, quickbooks_create, xero_create. MARKETING: mailchimp_add, sendgrid_send, google_ads_update, facebook_ads_update. CALENDAR: create_event, zoom_create. FILES: google_drive_upload, dropbox_upload, onedrive_upload, box_upload, generate_pdf, compress_files, resize_image, convert_format, s3_upload, save_to_library. DATA: database_write, supabase_insert, redis_set, webhook_post, http_request, mqtt_publish, mysql_insert, postgres_insert, mongodb_insert, elasticsearch_index, bigquery_insert. AI: deepl_translate, openai_generate. COMMUNICATION: twilio_call, translate_text.
 
 OPEN-ENDED. This system can automate ANYTHING. The named sources and actions above are shortcuts for common services. For anything NOT in the list:
 - Use http_request (read) with a url field to fetch data from ANY API or website.
@@ -70,7 +70,32 @@ NEVER say something is unsupported just because it is not a named integration. B
 
 RULES. At most ${MAX_BOXES} boxes. ALWAYS PRODUCE BOXES. Never ask a question unless the sentence is completely empty or truly impossible to interpret. If WHEN is missing, default to every day at 09:00. If WHERE TO SEND is missing, default to send_email. If WHAT DATA is missing, pick the most likely source from the sentence context. GUESS rather than ask. The person can always change any box after creation.
 
-COMPLEX DESCRIPTIONS. When the person writes a long description with multiple steps, break it into boxes. Use all the box types that fit. A description that says "do X and also Y" with the same trigger is ONE automation with multiple actions. Prefer MORE boxes (read + ai + condition + multiple actions) over fewer. ONE automation has ONE start; if the person describes two separate schedules, pick the one that fits best and note the other in "unsupported".`;
+UTILITY NODES (use these to build powerful workflows like n8n):
+- filter: expression — stop the flow if a condition is NOT met. Use for "only if", "ignore", "skip when".
+- code: language (javascript|python) + code — custom data transformation. Use for calculations, formatting, parsing.
+- wait: duration + unit (seconds|minutes|hours|days) — pause the workflow. Use for delays, rate limiting, "wait 5 minutes then".
+- transform: instruction — AI-powered data reshaping. Use for "reformat", "restructure", "convert to table".
+- note: text — visual annotation, ignored at runtime.
+- error_handler: fallbackAction (continue|stop|retry) + retryCount + retryDelay — try/catch. Use for "if it fails", "retry", "handle errors".
+- loop: maxIterations — iterate over items. Use for "for each", "process all", "loop through".
+- split: batchSize — split data into batches. Use for "process in batches of 10".
+- merge: mode (append|combine|choose_branch) — combine data from multiple paths.
+- delay: delay + unit (seconds|minutes|hours) — wait between items (rate limiting).
+- sort: field + direction (asc|desc) — sort data. Use for "sort by date", "newest first".
+- limit: maxItems — keep only first N items. Use for "top 10", "first 5".
+- remove_duplicates: field — deduplicate. Use for "no duplicates", "unique by email".
+- summarize: operation (count|sum|avg|min|max) + field — aggregate. Use for "total", "average", "how many".
+- switch: field + rules — route to branches. Use for "if status is X do this, if Y do that".
+- set: assignments [{field, value}] — set/rename fields. Use for "set status to done", "add field".
+- compare: mode (find_new|find_removed|find_changed) — diff datasets.
+- date_time: operation (format|add|subtract|diff) — date manipulation.
+- html_extract: selector + attribute — extract from HTML with CSS selectors.
+- text_classifier: categories — AI classification. Use for "categorize", "classify into".
+- sentiment: analyse sentiment (positive/negative/neutral).
+- extract_info: fields — AI extraction of structured data. Use for "extract name and email from".
+- respond_webhook: statusCode + body — respond to incoming webhook.
+
+COMPLEX DESCRIPTIONS. When the person writes a long description with multiple steps, break it into AS MANY BOXES AS NEEDED. Use ALL the box types that fit — utility nodes make workflows more powerful. A description with "sort", "filter", "deduplicate", "loop", "batch", "if fails retry", "classify", "extract", "wait" etc. should use the matching utility node, NOT just an AI box. The person expects a COMPLEX, PROFESSIONAL workflow with 8-15+ boxes, like n8n. Prefer MORE boxes with specific utility nodes over fewer boxes that try to do everything in one AI step. ONE automation has ONE start; if the person describes two separate schedules, pick the one that fits best and note the other in "unsupported".`;
 
 const BUILD_TOOL: AiToolSpec = {
   name: "set_automation",

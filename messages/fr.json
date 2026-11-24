@@ -7434,5 +7434,58 @@
       "none": "Pas encore de factures",
       "view": "Voir"
     }
+  },
+  "automation": {
+    "sentences": {
+      "sources": {
+        "salesforce_records": "Enregistrements Salesforce",
+        "pipedrive_deals": "Affaires Pipedrive",
+        "zoho_records": "Enregistrements Zoho CRM",
+        "monday_items": "Éléments Monday.com",
+        "linear_issues": "Tickets Linear",
+        "baserow_rows": "Lignes Baserow",
+        "mysql_query": "Requête MySQL",
+        "postgres_query": "Requête PostgreSQL",
+        "mongodb_query": "Requête MongoDB",
+        "elasticsearch_query": "Requête Elasticsearch",
+        "bigquery_query": "Requête BigQuery",
+        "dropbox_files": "Fichiers Dropbox",
+        "onedrive_files": "Fichiers OneDrive",
+        "box_files": "Fichiers Box",
+        "zendesk_tickets": "Tickets Zendesk",
+        "intercom_conversations": "Conversations Intercom",
+        "freshdesk_tickets": "Tickets Freshdesk",
+        "google_analytics": "Google Analytics",
+        "mixpanel_events": "Événements Mixpanel",
+        "woocommerce_orders": "Commandes WooCommerce"
+      },
+      "actions": {
+        "salesforce_create": "Crée dans Salesforce",
+        "pipedrive_create": "Crée dans Pipedrive",
+        "zoho_create": "Crée dans Zoho CRM",
+        "monday_create": "Crée un élément Monday.com",
+        "linear_create": "Crée un ticket Linear",
+        "baserow_create": "Crée une ligne Baserow",
+        "mysql_insert": "Insère dans MySQL",
+        "postgres_insert": "Insère dans PostgreSQL",
+        "mongodb_insert": "Insère dans MongoDB",
+        "elasticsearch_index": "Indexe dans Elasticsearch",
+        "bigquery_insert": "Insère dans BigQuery",
+        "dropbox_upload": "Téléverse dans Dropbox",
+        "onedrive_upload": "Téléverse dans OneDrive",
+        "box_upload": "Téléverse dans Box",
+        "zendesk_create": "Crée un ticket Zendesk",
+        "intercom_send": "Envoie via Intercom",
+        "freshdesk_create": "Crée un ticket Freshdesk",
+        "teams_send": "Envoie sur Microsoft Teams",
+        "google_chat_send": "Envoie sur Google Chat",
+        "woocommerce_update": "Met à jour WooCommerce",
+        "paypal_send": "Envoie via PayPal",
+        "quickbooks_create": "Crée dans QuickBooks",
+        "xero_create": "Crée dans Xero",
+        "deepl_translate": "Traduit avec DeepL",
+        "openai_generate": "Génère avec OpenAI"
+      }
+    }
   }
 }

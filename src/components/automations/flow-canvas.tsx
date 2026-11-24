@@ -63,53 +63,12 @@ function useKindNames() {
   };
 }
 
-/** Short description for a box. */
+/** Short description for a box. Uses t() with fallback to key name. */
 function useDescribe() {
   const t = useTranslations("dashboard.automations");
-  const source: Record<ReadSource, string> = {
-    calendar_today: t("sources.calendar_today"), calendar_tomorrow: t("sources.calendar_tomorrow"),
-    calendar_week: t("sources.calendar_week"), finances_week: t("sources.finances_week"),
-    finances_month: t("sources.finances_month"), uploaded_file: t("sources.uploaded_file"),
-    google_sheets: t("sources.google_sheets"), website_scrape: t("sources.website_scrape"),
-    rss_feed: t("sources.rss_feed"), last_emails: t("sources.last_emails"),
-    database_query: t("sources.database_query"), crm_contacts: t("sources.crm_contacts"),
-    social_mentions: t("sources.social_mentions"), analytics_report: t("sources.analytics_report"),
-    notion_pages: t("sources.notion_pages"), airtable_records: t("sources.airtable_records"),
-    google_drive_files: t("sources.google_drive_files"), jira_issues: t("sources.jira_issues"),
-    github_issues: t("sources.github_issues"), hubspot_contacts: t("sources.hubspot_contacts"),
-    shopify_orders: t("sources.shopify_orders"), http_request: t("sources.http_request"),
-    pdf_extract: t("sources.pdf_extract"), weather_data: t("sources.weather_data"),
-    stock_prices: t("sources.stock_prices"), discord_messages: t("sources.discord_messages"),
-    trello_cards: t("sources.trello_cards"), asana_tasks: t("sources.asana_tasks"),
-    clickup_tasks: t("sources.clickup_tasks"), stripe_payments: t("sources.stripe_payments"),
-    typeform_responses: t("sources.typeform_responses"), google_forms: t("sources.google_forms"),
-  };
-  const action: Record<ActionKind, string> = {
-    send_telegram: t("actions.send_telegram"), send_email: t("actions.send_email"),
-    notify: t("actions.notify"), save_to_library: t("actions.save_to_library"),
-    send_whatsapp: t("actions.send_whatsapp"), send_slack: t("actions.send_slack"),
-    send_sms: t("actions.send_sms"), post_instagram: t("actions.post_instagram"),
-    post_facebook: t("actions.post_facebook"), post_twitter: t("actions.post_twitter"),
-    post_linkedin: t("actions.post_linkedin"), sheets_write: t("actions.sheets_write"),
-    database_write: t("actions.database_write"), webhook_post: t("actions.webhook_post"),
-    create_task: t("actions.create_task"), create_event: t("actions.create_event"),
-    create_invoice: t("actions.create_invoice"), send_discord: t("actions.send_discord"),
-    notion_write: t("actions.notion_write"), airtable_write: t("actions.airtable_write"),
-    google_drive_upload: t("actions.google_drive_upload"), jira_create: t("actions.jira_create"),
-    github_create: t("actions.github_create"), hubspot_update: t("actions.hubspot_update"),
-    shopify_update: t("actions.shopify_update"), http_request: t("actions.http_request"),
-    generate_pdf: t("actions.generate_pdf"), translate_text: t("actions.translate_text"),
-    compress_files: t("actions.compress_files"), resize_image: t("actions.resize_image"),
-    convert_format: t("actions.convert_format"), trello_create: t("actions.trello_create"),
-    asana_create: t("actions.asana_create"), clickup_create: t("actions.clickup_create"),
-    stripe_charge: t("actions.stripe_charge"), mailchimp_add: t("actions.mailchimp_add"),
-    sendgrid_send: t("actions.sendgrid_send"), twilio_call: t("actions.twilio_call"),
-    zoom_create: t("actions.zoom_create"), google_ads_update: t("actions.google_ads_update"),
-    facebook_ads_update: t("actions.facebook_ads_update"), youtube_upload: t("actions.youtube_upload"),
-    wordpress_post: t("actions.wordpress_post"), supabase_insert: t("actions.supabase_insert"),
-    redis_set: t("actions.redis_set"), mqtt_publish: t("actions.mqtt_publish"),
-    s3_upload: t("actions.s3_upload"),
-  };
+  // Dynamic lookup — avoids maintaining a 100-entry Record manually
+  const src = (key: string) => { try { return t(`sources.${key}` as never); } catch { return key.replace(/_/g, " "); } };
+  const act = (key: string) => { try { return t(`actions.${key}` as never); } catch { return key.replace(/_/g, " "); } };
   const weekday = [t("weekdays.d1"), t("weekdays.d2"), t("weekdays.d3"), t("weekdays.d4"), t("weekdays.d5"), t("weekdays.d6"), t("weekdays.d7")];
   return (box: Box): string => {
     if (box.kind === "start") {
@@ -126,11 +85,16 @@ function useDescribe() {
       }
       return t("start.file");
     }
-    if (box.kind === "read") return source[box.source];
+    if (box.kind === "read") return src(box.source);
     if (box.kind === "ai") return box.instruction.slice(0, 50);
     if (box.kind === "condition") return t("condition");
     if (box.kind === "approval") return t("approval");
-    if (box.kind === "action") return action[box.do];
+    if (box.kind === "filter") return box.expression.slice(0, 40);
+    if (box.kind === "code") return `${box.language}: ${box.code.slice(0, 30)}`;
+    if (box.kind === "wait") return `${box.duration} ${box.unit}`;
+    if (box.kind === "transform") return box.instruction.slice(0, 40);
+    if (box.kind === "note") return box.text.slice(0, 30) || "Note";
+    if (box.kind === "action") return act(box.do);
     return "";
   };
 }

@@ -7434,5 +7434,58 @@
       "none": "暂无发票",
       "view": "查看"
     }
+  },
+  "automation": {
+    "sentences": {
+      "sources": {
+        "salesforce_records": "Salesforce 记录",
+        "pipedrive_deals": "Pipedrive 交易",
+        "zoho_records": "Zoho CRM 记录",
+        "monday_items": "Monday.com 项目",
+        "linear_issues": "Linear 问题",
+        "baserow_rows": "Baserow 行",
+        "mysql_query": "MySQL 查询",
+        "postgres_query": "PostgreSQL 查询",
+        "mongodb_query": "MongoDB 查询",
+        "elasticsearch_query": "Elasticsearch 查询",
+        "bigquery_query": "BigQuery 查询",
+        "dropbox_files": "Dropbox 文件",
+        "onedrive_files": "OneDrive 文件",
+        "box_files": "Box 文件",
+        "zendesk_tickets": "Zendesk 工单",
+        "intercom_conversations": "Intercom 对话",
+        "freshdesk_tickets": "Freshdesk 工单",
+        "google_analytics": "Google Analytics",
+        "mixpanel_events": "Mixpanel 事件",
+        "woocommerce_orders": "WooCommerce 订单"
+      },
+      "actions": {
+        "salesforce_create": "在 Salesforce 中创建",
+        "pipedrive_create": "在 Pipedrive 中创建",
+        "zoho_create": "在 Zoho CRM 中创建",
+        "monday_create": "创建 Monday.com 项目",
+        "linear_create": "创建 Linear 问题",
+        "baserow_create": "创建 Baserow 行",
+        "mysql_insert": "插入 MySQL",
+        "postgres_insert": "插入 PostgreSQL",
+        "mongodb_insert": "插入 MongoDB",
+        "elasticsearch_index": "索引到 Elasticsearch",
+        "bigquery_insert": "插入 BigQuery",
+        "dropbox_upload": "上传到 Dropbox",
+        "onedrive_upload": "上传到 OneDrive",
+        "box_upload": "上传到 Box",
+        "zendesk_create": "创建 Zendesk 工单",
+        "intercom_send": "通过 Intercom 发送",
+        "freshdesk_create": "创建 Freshdesk 工单",
+        "teams_send": "发送到 Microsoft Teams",
+        "google_chat_send": "发送到 Google Chat",
+        "woocommerce_update": "更新 WooCommerce",
+        "paypal_send": "通过 PayPal 发送",
+        "quickbooks_create": "在 QuickBooks 中创建",
+        "xero_create": "在 Xero 中创建",
+        "deepl_translate": "使用 DeepL 翻译",
+        "openai_generate": "使用 OpenAI 生成"
+      }
+    }
   }
 }

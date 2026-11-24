@@ -110,6 +110,13 @@ const EXTERNAL_SOURCES = new Set([
   // NOTE: http_request, website_scrape, rss_feed work WITHOUT a connection.
   // They are handled in readExternalSource() directly.
   "http_request", "website_scrape", "rss_feed",
+  // n8n parity (2026-11-24):
+  "salesforce_records", "pipedrive_deals", "zoho_records", "monday_items",
+  "linear_issues", "baserow_rows", "mysql_query", "postgres_query",
+  "mongodb_query", "elasticsearch_query", "bigquery_query",
+  "dropbox_files", "onedrive_files", "box_files",
+  "zendesk_tickets", "intercom_conversations", "freshdesk_tickets",
+  "google_analytics", "mixpanel_events", "woocommerce_orders",
 ]);
 
 async function readData(box: ReadBox, ctx: RunContext): Promise<{ ok: true; text: string; count: number } | { ok: false; note: "not_connected" | "no_file" | "failed" }> {
@@ -401,6 +408,15 @@ const EXTERNAL_ACTIONS = new Set([
   "database_write", "supabase_insert", "redis_set", "mqtt_publish", "s3_upload",
   // NOTE: http_request, webhook_post, generate_pdf work WITHOUT a connection.
   // They are handled in runExternalAction() directly.
+  // n8n parity (2026-11-24):
+  "salesforce_create", "pipedrive_create", "zoho_create", "monday_create",
+  "linear_create", "baserow_create", "mysql_insert", "postgres_insert",
+  "mongodb_insert", "elasticsearch_index", "bigquery_insert",
+  "dropbox_upload", "onedrive_upload", "box_upload",
+  "zendesk_create", "intercom_send", "freshdesk_create",
+  "teams_send", "google_chat_send", "woocommerce_update",
+  "paypal_send", "quickbooks_create", "xero_create",
+  "deepl_translate", "openai_generate",
 ]);
 
 async function act(box: ActionBox, text: string, ctx: RunContext): Promise<RunStep> {

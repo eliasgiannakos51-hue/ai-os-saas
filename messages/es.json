@@ -7434,5 +7434,58 @@
       "none": "Aún no hay facturas",
       "view": "Ver"
     }
+  },
+  "automation": {
+    "sentences": {
+      "sources": {
+        "salesforce_records": "Registros de Salesforce",
+        "pipedrive_deals": "Tratos de Pipedrive",
+        "zoho_records": "Registros de Zoho CRM",
+        "monday_items": "Elementos de Monday.com",
+        "linear_issues": "Incidencias de Linear",
+        "baserow_rows": "Filas de Baserow",
+        "mysql_query": "Consulta MySQL",
+        "postgres_query": "Consulta PostgreSQL",
+        "mongodb_query": "Consulta MongoDB",
+        "elasticsearch_query": "Consulta Elasticsearch",
+        "bigquery_query": "Consulta BigQuery",
+        "dropbox_files": "Archivos de Dropbox",
+        "onedrive_files": "Archivos de OneDrive",
+        "box_files": "Archivos de Box",
+        "zendesk_tickets": "Tickets de Zendesk",
+        "intercom_conversations": "Conversaciones de Intercom",
+        "freshdesk_tickets": "Tickets de Freshdesk",
+        "google_analytics": "Google Analytics",
+        "mixpanel_events": "Eventos de Mixpanel",
+        "woocommerce_orders": "Pedidos de WooCommerce"
+      },
+      "actions": {
+        "salesforce_create": "Crea en Salesforce",
+        "pipedrive_create": "Crea en Pipedrive",
+        "zoho_create": "Crea en Zoho CRM",
+        "monday_create": "Crea elemento en Monday.com",
+        "linear_create": "Crea incidencia en Linear",
+        "baserow_create": "Crea fila en Baserow",
+        "mysql_insert": "Inserta en MySQL",
+        "postgres_insert": "Inserta en PostgreSQL",
+        "mongodb_insert": "Inserta en MongoDB",
+        "elasticsearch_index": "Indexa en Elasticsearch",
+        "bigquery_insert": "Inserta en BigQuery",
+        "dropbox_upload": "Sube a Dropbox",
+        "onedrive_upload": "Sube a OneDrive",
+        "box_upload": "Sube a Box",
+        "zendesk_create": "Crea ticket en Zendesk",
+        "intercom_send": "Envía por Intercom",
+        "freshdesk_create": "Crea ticket en Freshdesk",
+        "teams_send": "Envía a Microsoft Teams",
+        "google_chat_send": "Envía a Google Chat",
+        "woocommerce_update": "Actualiza WooCommerce",
+        "paypal_send": "Envía por PayPal",
+        "quickbooks_create": "Crea en QuickBooks",
+        "xero_create": "Crea en Xero",
+        "deepl_translate": "Traduce con DeepL",
+        "openai_generate": "Genera con OpenAI"
+      }
+    }
   }
 }

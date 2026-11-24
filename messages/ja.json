@@ -7434,5 +7434,58 @@
       "none": "請求書はまだありません",
       "view": "表示"
     }
+  },
+  "automation": {
+    "sentences": {
+      "sources": {
+        "salesforce_records": "Salesforceレコード",
+        "pipedrive_deals": "Pipedrive取引",
+        "zoho_records": "Zoho CRMレコード",
+        "monday_items": "Monday.comアイテム",
+        "linear_issues": "Linearイシュー",
+        "baserow_rows": "Baserow行",
+        "mysql_query": "MySQLクエリ",
+        "postgres_query": "PostgreSQLクエリ",
+        "mongodb_query": "MongoDBクエリ",
+        "elasticsearch_query": "Elasticsearchクエリ",
+        "bigquery_query": "BigQueryクエリ",
+        "dropbox_files": "Dropboxファイル",
+        "onedrive_files": "OneDriveファイル",
+        "box_files": "Boxファイル",
+        "zendesk_tickets": "Zendeskチケット",
+        "intercom_conversations": "Intercom会話",
+        "freshdesk_tickets": "Freshdeskチケット",
+        "google_analytics": "Google Analytics",
+        "mixpanel_events": "Mixpanelイベント",
+        "woocommerce_orders": "WooCommerce注文"
+      },
+      "actions": {
+        "salesforce_create": "Salesforceに作成",
+        "pipedrive_create": "Pipedriveに作成",
+        "zoho_create": "Zoho CRMに作成",
+        "monday_create": "Monday.comアイテムを作成",
+        "linear_create": "Linearイシューを作成",
+        "baserow_create": "Baserow行を作成",
+        "mysql_insert": "MySQLに挿入",
+        "postgres_insert": "PostgreSQLに挿入",
+        "mongodb_insert": "MongoDBに挿入",
+        "elasticsearch_index": "Elasticsearchにインデックス",
+        "bigquery_insert": "BigQueryに挿入",
+        "dropbox_upload": "Dropboxにアップロード",
+        "onedrive_upload": "OneDriveにアップロード",
+        "box_upload": "Boxにアップロード",
+        "zendesk_create": "Zendeskチケットを作成",
+        "intercom_send": "Intercomで送信",
+        "freshdesk_create": "Freshdeskチケットを作成",
+        "teams_send": "Microsoft Teamsに送信",
+        "google_chat_send": "Google Chatに送信",
+        "woocommerce_update": "WooCommerceを更新",
+        "paypal_send": "PayPalで送信",
+        "quickbooks_create": "QuickBooksに作成",
+        "xero_create": "Xeroに作成",
+        "deepl_translate": "DeepLで翻訳",
+        "openai_generate": "OpenAIで生成"
+      }
+    }
   }
 }

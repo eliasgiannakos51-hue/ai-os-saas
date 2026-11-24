@@ -69,6 +69,15 @@ export const READ_SOURCES = [
   "weather_data", "stock_prices", "discord_messages",
   "trello_cards", "asana_tasks", "clickup_tasks",
   "stripe_payments", "typeform_responses", "google_forms",
+  // n8n parity (2026-11-24): 20 more read sources
+  "salesforce_records", "pipedrive_deals", "zoho_records",
+  "monday_items", "linear_issues", "baserow_rows",
+  "mysql_query", "postgres_query", "mongodb_query",
+  "elasticsearch_query", "bigquery_query",
+  "dropbox_files", "onedrive_files", "box_files",
+  "zendesk_tickets", "intercom_conversations", "freshdesk_tickets",
+  "google_analytics", "mixpanel_events",
+  "woocommerce_orders",
 ] as const;
 export type ReadSource = (typeof READ_SOURCES)[number];
 export type ReadBox = { id: string; kind: "read"; source: ReadSource; url?: string; config?: Record<string, string> };
@@ -118,6 +127,17 @@ export const ACTIONS = [
   "zoom_create", "google_ads_update", "facebook_ads_update",
   "youtube_upload", "wordpress_post", "supabase_insert",
   "redis_set", "mqtt_publish", "s3_upload",
+  // n8n parity (2026-11-24): 25 more actions
+  "salesforce_create", "pipedrive_create", "zoho_create",
+  "monday_create", "linear_create", "baserow_create",
+  "mysql_insert", "postgres_insert", "mongodb_insert",
+  "elasticsearch_index", "bigquery_insert",
+  "dropbox_upload", "onedrive_upload", "box_upload",
+  "zendesk_create", "intercom_send", "freshdesk_create",
+  "teams_send", "google_chat_send",
+  "woocommerce_update", "paypal_send",
+  "quickbooks_create", "xero_create",
+  "deepl_translate", "openai_generate",
 ] as const;
 export type ActionKind = (typeof ACTIONS)[number];
 export type ActionBox = { id: string; kind: "action"; do: ActionKind; url?: string; config?: Record<string, string> };
@@ -263,6 +283,80 @@ export const SOURCE_CONFIG: Partial<Record<ReadSource, ConfigField[]>> = {
   ],
   stripe_payments: [
     { key: "api_key", label: "Stripe Secret Key", type: "password", placeholder: "sk_live_...", required: true },
+  ],
+  // n8n parity (2026-11-24):
+  salesforce_records: [
+    { key: "api_key", label: "Salesforce Token", type: "password", placeholder: "00D...", required: true },
+    { key: "url", label: "Instance URL", type: "url", placeholder: "https://yourorg.salesforce.com" },
+  ],
+  pipedrive_deals: [
+    { key: "api_key", label: "Pipedrive API Token", type: "password", placeholder: "abc123...", required: true },
+  ],
+  zoho_records: [
+    { key: "api_key", label: "Zoho API Key", type: "password", placeholder: "1000.abc...", required: true },
+  ],
+  monday_items: [
+    { key: "api_key", label: "Monday.com API Key", type: "password", placeholder: "eyJh...", required: true },
+    { key: "board_id", label: "Board ID", type: "text", placeholder: "123456789" },
+  ],
+  linear_issues: [
+    { key: "api_key", label: "Linear API Key", type: "password", placeholder: "lin_api_...", required: true },
+  ],
+  baserow_rows: [
+    { key: "api_key", label: "Baserow Token", type: "password", placeholder: "abc...", required: true },
+    { key: "url", label: "Baserow URL", type: "url", placeholder: "https://api.baserow.io" },
+  ],
+  mysql_query: [
+    { key: "connection_string", label: "MySQL Connection", type: "password", placeholder: "mysql://user:pass@host/db", required: true },
+    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM ...", required: true },
+  ],
+  postgres_query: [
+    { key: "connection_string", label: "PostgreSQL Connection", type: "password", placeholder: "postgresql://user:pass@host/db", required: true },
+    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM ...", required: true },
+  ],
+  mongodb_query: [
+    { key: "connection_string", label: "MongoDB URI", type: "password", placeholder: "mongodb+srv://...", required: true },
+    { key: "query", label: "Collection", type: "text", placeholder: "users", required: true },
+  ],
+  elasticsearch_query: [
+    { key: "url", label: "Elasticsearch URL", type: "url", placeholder: "https://es.example.com:9200", required: true },
+    { key: "api_key", label: "API Key", type: "password", placeholder: "abc123..." },
+  ],
+  bigquery_query: [
+    { key: "api_key", label: "Service Account JSON", type: "textarea", placeholder: '{"type":"service_account",...}', required: true },
+    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM ...", required: true },
+  ],
+  dropbox_files: [
+    { key: "api_key", label: "Dropbox Access Token", type: "password", placeholder: "sl.B...", required: true },
+  ],
+  onedrive_files: [
+    { key: "api_key", label: "OneDrive Access Token", type: "password", placeholder: "EwB...", required: true },
+  ],
+  box_files: [
+    { key: "api_key", label: "Box Access Token", type: "password", placeholder: "abc...", required: true },
+  ],
+  zendesk_tickets: [
+    { key: "api_key", label: "Zendesk API Token", type: "password", placeholder: "abc...", required: true },
+    { key: "url", label: "Zendesk URL", type: "url", placeholder: "https://yourco.zendesk.com" },
+  ],
+  intercom_conversations: [
+    { key: "api_key", label: "Intercom Access Token", type: "password", placeholder: "dG9r...", required: true },
+  ],
+  freshdesk_tickets: [
+    { key: "api_key", label: "Freshdesk API Key", type: "password", placeholder: "abc...", required: true },
+    { key: "url", label: "Freshdesk URL", type: "url", placeholder: "https://yourco.freshdesk.com" },
+  ],
+  google_analytics: [
+    { key: "api_key", label: "Service Account JSON", type: "textarea", placeholder: '{"type":"service_account",...}', required: true },
+    { key: "property_id", label: "Property ID", type: "text", placeholder: "123456789" },
+  ],
+  mixpanel_events: [
+    { key: "api_key", label: "Mixpanel API Secret", type: "password", placeholder: "abc...", required: true },
+  ],
+  woocommerce_orders: [
+    { key: "url", label: "Store URL", type: "url", placeholder: "https://yourstore.com", required: true },
+    { key: "api_key", label: "Consumer Key", type: "password", placeholder: "ck_...", required: true },
+    { key: "secret", label: "Consumer Secret", type: "password", placeholder: "cs_..." },
   ],
 };
 

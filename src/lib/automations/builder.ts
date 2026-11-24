@@ -32,7 +32,7 @@ const BOX_SCHEMA = {
   type: "object",
   properties: {
     id: { type: "string", description: "Short id: b1, b2, …" },
-    kind: { type: "string", enum: ["start", "read", "ai", "condition", "approval", "action"] },
+    kind: { type: "string", enum: ["start", "read", "ai", "condition", "approval", "action", "filter", "code", "wait", "transform", "note", "error_handler", "loop", "split", "merge", "delay"] },
     when: { type: "string", enum: ["time", "file_uploaded", "webhook", "new_email", "rss", "form_submitted", "chat_message", "app_event", "manual"], description: "start only" },
     url: { type: "string", description: "For start with when=rss: the RSS feed URL. For read with source=http_request or source=website_scrape: the URL to fetch. For action with do=webhook_post or do=http_request: the URL to POST to." },
     app: { type: "string", description: "start with when=app_event: which app triggers it (e.g. shopify, github, stripe)" },

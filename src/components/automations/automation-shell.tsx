@@ -639,6 +639,11 @@ export function AutomationShell({
                       case "wait": newBox = { id: newId, kind: "wait", duration: 60, unit: "seconds" }; break;
                       case "transform": newBox = { id: newId, kind: "transform", instruction: "Extract the key fields" }; break;
                       case "note": newBox = { id: newId, kind: "note", text: "" }; break;
+                      case "error_handler": newBox = { id: newId, kind: "error_handler", fallbackAction: "continue" }; break;
+                      case "loop": newBox = { id: newId, kind: "loop", maxIterations: 10 }; break;
+                      case "split": newBox = { id: newId, kind: "split", batchSize: 10 }; break;
+                      case "merge": newBox = { id: newId, kind: "merge", mode: "append" }; break;
+                      case "delay": newBox = { id: newId, kind: "delay", delay: 5, unit: "seconds" }; break;
                       case "condition": newBox = { id: newId, kind: "condition", test: "has_content" }; break;
                       case "approval": newBox = { id: newId, kind: "approval" }; break;
                       case "action": newBox = { id: newId, kind: "action", do: "send_email" }; break;

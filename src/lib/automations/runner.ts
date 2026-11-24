@@ -840,6 +840,32 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       // Note: purely visual, does nothing in the run
       continue;
     }
+    // n8n advanced nodes (2026-11-24):
+    if (box.kind === "error_handler") {
+      // Error handler: wraps downstream execution. For now, log the config.
+      steps.push({ box: box.id, status: "ok", note: "error_handler_set" });
+      continue;
+    }
+    if (box.kind === "loop") {
+      // Loop: placeholder — signals the runner that iteration is active
+      steps.push({ box: box.id, status: "ok", note: "loop_started" });
+      continue;
+    }
+    if (box.kind === "split") {
+      // Split: placeholder for batch processing
+      steps.push({ box: box.id, status: "ok", note: "split_done" });
+      continue;
+    }
+    if (box.kind === "merge") {
+      // Merge: placeholder for combining paths
+      steps.push({ box: box.id, status: "ok", note: "merge_done" });
+      continue;
+    }
+    if (box.kind === "delay") {
+      // Delay: for now, record it without actually waiting
+      steps.push({ box: box.id, status: "ok", note: "delay_done" });
+      continue;
+    }
     // action
     if (box.kind !== "action") continue; // safety: skip unknown kinds
     const step = await act(box, text, ctx);

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Cloud, CreditCard, Database, DollarSign, FileOutput, FileText, FileUp, Filter, FolderUp, FormInput, GitBranch, Globe, Hash, Image, Layers, Mail, MessageCircle, MessageSquare, Package, PauseCircle, Phone, Play, Plus, Rss, Send, Share2, ShoppingCart, Sparkles, Table2, Timer, Trash2, Video, Webhook, Zap } from "lucide-react";
+import { AlertTriangle, BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Cloud, CreditCard, Database, DollarSign, FileOutput, FileText, FileUp, Filter, FolderUp, FormInput, GitBranch, GitMerge, Globe, Hash, Image, Layers, Mail, MessageCircle, MessageSquare, Package, PauseCircle, Phone, Play, Plus, RefreshCw, Rss, Send, Share2, ShoppingCart, Sparkles, Table2, Timer, Trash2, Video, Webhook, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import {
   ACTIONS,
@@ -158,6 +158,12 @@ const NODE_THEME: Record<Box["kind"], { icon: string; iconText: string; label: s
   wait:      { icon: "#3b1a3b", iconText: "#e879f9", label: "#e879f9", bg: "#3b1a3b", bgHover: "#3b1a3b", text: "#fff", border: "#d946ef" },
   transform: { icon: "#1e3a5f", iconText: "#38bdf8", label: "#38bdf8", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#0ea5e9" },
   note:      { icon: "#3a3a1a", iconText: "#fde68a", label: "#fde68a", bg: "#3a3a1a", bgHover: "#3a3a1a", text: "#fff", border: "#fbbf24" },
+  // n8n advanced nodes (2026-11-24):
+  error_handler: { icon: "#5c1a1a", iconText: "#fca5a5", label: "#fca5a5", bg: "#5c1a1a", bgHover: "#5c1a1a", text: "#fff", border: "#ef4444" },
+  loop:          { icon: "#1a3a5c", iconText: "#93c5fd", label: "#93c5fd", bg: "#1a3a5c", bgHover: "#1a3a5c", text: "#fff", border: "#3b82f6" },
+  split:         { icon: "#1a4a3a", iconText: "#6ee7b7", label: "#6ee7b7", bg: "#1a4a3a", bgHover: "#1a4a3a", text: "#fff", border: "#10b981" },
+  merge:         { icon: "#3a1a4a", iconText: "#c4b5fd", label: "#c4b5fd", bg: "#3a1a4a", bgHover: "#3a1a4a", text: "#fff", border: "#8b5cf6" },
+  delay:         { icon: "#3a2a1a", iconText: "#fdba74", label: "#fdba74", bg: "#3a2a1a", bgHover: "#3a2a1a", text: "#fff", border: "#f97316" },
 };
 
 /** Status → border highlight on the WHOLE node after a run. */
@@ -181,6 +187,12 @@ function useWords() {
     wait: "Wait",
     transform: "Transform",
     note: "Note",
+    // n8n advanced nodes:
+    error_handler: "Error Handler",
+    loop: "Loop",
+    split: "Split",
+    merge: "Merge",
+    delay: "Delay",
   };
   const source: Record<ReadSource, string> = {
     calendar_today: t("sources.calendar_today"),
@@ -353,6 +365,17 @@ function useWords() {
         return box.instruction;
       case "note":
         return box.text || "Note";
+      // n8n advanced nodes:
+      case "error_handler":
+        return `On error: ${box.fallbackAction}${box.retryCount ? ` (×${box.retryCount})` : ""}`;
+      case "loop":
+        return `Loop (max ${box.maxIterations})`;
+      case "split":
+        return `Split (batch ${box.batchSize})`;
+      case "merge":
+        return `Merge: ${box.mode}`;
+      case "delay":
+        return `${box.delay} ${box.unit}`;
       case "action":
         return action[box.do];
     }
@@ -387,6 +410,12 @@ function useNoteWords(): (step: RunStep) => string {
       unsafe: t("notes.unsafe"),
       delivery: t("notes.delivery"),
       failed: t("notes.failed"),
+      // n8n advanced nodes:
+      error_handler_set: "Error handler configured",
+      loop_started: "Loop started",
+      split_done: "Split completed",
+      merge_done: "Merge completed",
+      delay_done: "Delay completed",
     };
     return note[step.note];
   };
@@ -465,6 +494,12 @@ function BoxIconInner({ box }: { box: Box }) {
   if (box.kind === "wait") return <Clock className={cls} aria-hidden="true" />;
   if (box.kind === "transform") return <Layers className={cls} aria-hidden="true" />;
   if (box.kind === "note") return <FileText className={cls} aria-hidden="true" />;
+  // n8n advanced nodes:
+  if (box.kind === "error_handler") return <AlertTriangle className={cls} aria-hidden="true" />;
+  if (box.kind === "loop") return <RefreshCw className={cls} aria-hidden="true" />;
+  if (box.kind === "split") return <GitBranch className={cls} aria-hidden="true" />;
+  if (box.kind === "merge") return <GitMerge className={cls} aria-hidden="true" />;
+  if (box.kind === "delay") return <Timer className={cls} aria-hidden="true" />;
   if (box.kind === "action") {
     if (box.do === "send_telegram") return <Send className={cls} aria-hidden="true" />;
     if (box.do === "send_email" || box.do === "sendgrid_send") return <Mail className={cls} aria-hidden="true" />;
@@ -582,7 +617,7 @@ export function BoxRow({
   /** Which "+" was clicked — shows the type picker at that index. */
   const [addAt, setAddAt] = useState<number | null>(null);
   /** The 5 addable kinds (start is never added manually). */
-  const ADD_KINDS: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action"];
+  const ADD_KINDS: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action", "error_handler", "loop", "split", "merge", "delay", "note"];
   return (
     <FlowCanvas>
     <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
@@ -978,6 +1013,73 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
         Note text
         <textarea className={`${field} min-h-[66px] py-2`} maxLength={500} value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} placeholder="Add a note about this part of the workflow" />
       </label>
+    );
+  } else if (draft.kind === "error_handler") {
+    body = (
+      <>
+        <label className={label}>
+          On error
+          <select className={field} value={draft.fallbackAction} onChange={(e) => setDraft({ ...draft, fallbackAction: e.target.value as "continue" | "stop" | "retry" })}>
+            <option value="continue">Continue</option>
+            <option value="stop">Stop workflow</option>
+            <option value="retry">Retry</option>
+          </select>
+        </label>
+        {draft.fallbackAction === "retry" && (
+          <>
+            <label className={label}>
+              Retry count
+              <input type="number" className={field} min={1} max={5} value={draft.retryCount ?? 3} onChange={(e) => setDraft({ ...draft, retryCount: Number(e.target.value) })} />
+            </label>
+            <label className={label}>
+              Retry delay (seconds)
+              <input type="number" className={field} min={1} max={300} value={draft.retryDelay ?? 10} onChange={(e) => setDraft({ ...draft, retryDelay: Number(e.target.value) })} />
+            </label>
+          </>
+        )}
+      </>
+    );
+  } else if (draft.kind === "loop") {
+    body = (
+      <label className={label}>
+        Max iterations
+        <input type="number" className={field} min={1} max={100} value={draft.maxIterations} onChange={(e) => setDraft({ ...draft, maxIterations: Number(e.target.value) })} />
+      </label>
+    );
+  } else if (draft.kind === "split") {
+    body = (
+      <label className={label}>
+        Batch size
+        <input type="number" className={field} min={1} max={1000} value={draft.batchSize} onChange={(e) => setDraft({ ...draft, batchSize: Number(e.target.value) })} />
+      </label>
+    );
+  } else if (draft.kind === "merge") {
+    body = (
+      <label className={label}>
+        Merge mode
+        <select className={field} value={draft.mode} onChange={(e) => setDraft({ ...draft, mode: e.target.value as "append" | "combine" | "choose_branch" })}>
+          <option value="append">Append</option>
+          <option value="combine">Combine</option>
+          <option value="choose_branch">Choose branch</option>
+        </select>
+      </label>
+    );
+  } else if (draft.kind === "delay") {
+    body = (
+      <>
+        <label className={label}>
+          Delay
+          <input type="number" className={field} min={1} max={86400} value={draft.delay} onChange={(e) => setDraft({ ...draft, delay: Number(e.target.value) })} />
+        </label>
+        <label className={label}>
+          Unit
+          <select className={field} value={draft.unit} onChange={(e) => setDraft({ ...draft, unit: e.target.value as "seconds" | "minutes" | "hours" })}>
+            <option value="seconds">Seconds</option>
+            <option value="minutes">Minutes</option>
+            <option value="hours">Hours</option>
+          </select>
+        </label>
+      </>
     );
   } else if (draft.kind === "action") {
     const act = draft;

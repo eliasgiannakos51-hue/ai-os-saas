@@ -18,7 +18,7 @@
  * with it, the runner walks it. Held by scripts/tests/automations.test.mjs.
  */
 
-export const MAX_BOXES = 8;
+export const MAX_BOXES = 20;
 export const MAX_INSTRUCTION_CHARS = 600;
 
 /** A URL a box may carry must be https and not point anywhere private.
@@ -105,6 +105,21 @@ export type WaitBox = { id: string; kind: "wait"; duration: number; unit: "secon
 export type TransformBox = { id: string; kind: "transform"; instruction: string };
 export type NoteBox = { id: string; kind: "note"; text: string };
 
+/**
+ * n8n ADVANCED NODE TYPES (2026-11-24).
+ *
+ * - error_handler: Try/Catch — if any downstream box fails, jump to fallback
+ * - loop: Loop Over Items — repeat the next box(es) for each item
+ * - split: Split In Batches — split data into smaller chunks
+ * - merge: Merge — combine results from multiple paths
+ * - delay: Delay — wait a fixed time between items (rate limiting)
+ */
+export type ErrorHandlerBox = { id: string; kind: "error_handler"; fallbackAction: "continue" | "stop" | "retry"; retryCount?: number; retryDelay?: number };
+export type LoopBox = { id: string; kind: "loop"; maxIterations: number };
+export type SplitBox = { id: string; kind: "split"; batchSize: number };
+export type MergeBox = { id: string; kind: "merge"; mode: "append" | "combine" | "choose_branch" };
+export type DelayBox = { id: string; kind: "delay"; delay: number; unit: "seconds" | "minutes" | "hours" };
+
 export const ACTIONS = [
   // Original
   "send_telegram", "send_email", "notify", "save_to_library",
@@ -142,7 +157,7 @@ export const ACTIONS = [
 export type ActionKind = (typeof ACTIONS)[number];
 export type ActionBox = { id: string; kind: "action"; do: ActionKind; url?: string; config?: Record<string, string> };
 
-export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox | FilterBox | CodeBox | WaitBox | TransformBox | NoteBox;
+export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox | FilterBox | CodeBox | WaitBox | TransformBox | NoteBox | ErrorHandlerBox | LoopBox | SplitBox | MergeBox | DelayBox;
 export type BoxKind = Box["kind"];
 
 const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -405,6 +420,33 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
       const text = typeof v.text === "string" ? v.text.trim().slice(0, 500) : "";
       return { id, kind: "note", text };
     }
+    // n8n advanced nodes (2026-11-24):
+    case "error_handler": {
+      const fa = v.fallbackAction;
+      if (fa !== "continue" && fa !== "stop" && fa !== "retry") return { id, kind: "error_handler", fallbackAction: "continue" };
+      const rc = typeof v.retryCount === "number" ? Math.min(Math.max(Math.round(v.retryCount), 0), 5) : undefined;
+      const rd = typeof v.retryDelay === "number" ? Math.min(Math.max(Math.round(v.retryDelay), 1), 300) : undefined;
+      return { id, kind: "error_handler", fallbackAction: fa, ...(rc !== undefined ? { retryCount: rc } : {}), ...(rd !== undefined ? { retryDelay: rd } : {}) };
+    }
+    case "loop": {
+      const max = typeof v.maxIterations === "number" ? Math.min(Math.max(Math.round(v.maxIterations), 1), 100) : 10;
+      return { id, kind: "loop", maxIterations: max };
+    }
+    case "split": {
+      const bs = typeof v.batchSize === "number" ? Math.min(Math.max(Math.round(v.batchSize), 1), 1000) : 10;
+      return { id, kind: "split", batchSize: bs };
+    }
+    case "merge": {
+      const mode = v.mode;
+      if (mode !== "append" && mode !== "combine" && mode !== "choose_branch") return { id, kind: "merge", mode: "append" };
+      return { id, kind: "merge", mode };
+    }
+    case "delay": {
+      const d = typeof v.delay === "number" ? Math.min(Math.max(Math.round(v.delay), 1), 86400) : 5;
+      const u = v.unit;
+      if (u !== "seconds" && u !== "minutes" && u !== "hours") return { id, kind: "delay", delay: d, unit: "seconds" };
+      return { id, kind: "delay", delay: d, unit: u };
+    }
     case "action": {
       if (!(ACTIONS as readonly unknown[]).includes(v.do)) return null;
       const actUrl = typeof v.url === "string" ? sanitiseBoxUrl(v.url) : undefined;
@@ -570,6 +612,12 @@ export const SENTENCE_PART: Record<BoxKind, SentencePart> = {
   wait: "if",
   note: "do",
   action: "do",
+  // n8n advanced nodes (2026-11-24):
+  error_handler: "if",
+  loop: "do",
+  split: "do",
+  merge: "do",
+  delay: "if",
 };
 export function partOf(box: Box): SentencePart {
   return SENTENCE_PART[box.kind];

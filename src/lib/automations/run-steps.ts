@@ -30,6 +30,12 @@ export const STEP_NOTES = [
   "unsafe",
   "delivery",
   "failed",
+  // n8n advanced nodes (2026-11-24):
+  "error_handler_set",
+  "loop_started",
+  "split_done",
+  "merge_done",
+  "delay_done",
 ] as const;
 export type StepNote = (typeof STEP_NOTES)[number];
 

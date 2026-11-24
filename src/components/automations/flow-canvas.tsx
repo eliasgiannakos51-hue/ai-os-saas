@@ -31,7 +31,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTranslations } from "next-intl";
-import { Clock, Filter, Hash, FileText, Layers, PauseCircle, Send, Sparkles, Table2, Zap } from "lucide-react";
+import { AlertTriangle, Clock, Filter, GitBranch, GitMerge, Hash, FileText, Layers, PauseCircle, RefreshCw, Send, Sparkles, Table2, Timer, Zap } from "lucide-react";
 import type { Box, ReadSource, ActionKind, StartBox } from "@/lib/automations/boxes";
 import type { Connected } from "@/components/automations/flow-boxes";
 
@@ -48,6 +48,12 @@ const THEME: Record<Box["kind"], { icon: string; iconText: string; label: string
   wait:      { icon: "#3b1a3b", iconText: "#e879f9", label: "#e879f9", border: "#d946ef" },
   transform: { icon: "#1e3a5f", iconText: "#38bdf8", label: "#38bdf8", border: "#0ea5e9" },
   note:      { icon: "#3a3a1a", iconText: "#fde68a", label: "#fde68a", border: "#fbbf24" },
+  // n8n advanced nodes (2026-11-24):
+  error_handler: { icon: "#5c1a1a", iconText: "#fca5a5", label: "#fca5a5", border: "#ef4444" },
+  loop:          { icon: "#1a3a5c", iconText: "#93c5fd", label: "#93c5fd", border: "#3b82f6" },
+  split:         { icon: "#1a4a3a", iconText: "#6ee7b7", label: "#6ee7b7", border: "#10b981" },
+  merge:         { icon: "#3a1a4a", iconText: "#c4b5fd", label: "#c4b5fd", border: "#8b5cf6" },
+  delay:         { icon: "#3a2a1a", iconText: "#fdba74", label: "#fdba74", border: "#f97316" },
 };
 
 /** Translate box kind to display name. */
@@ -60,6 +66,16 @@ function useKindNames() {
     condition: t("kinds.condition"),
     approval: t("kinds.approval"),
     action: t("kinds.action"),
+    filter: "Filter",
+    code: "Code",
+    wait: "Wait",
+    transform: "Transform",
+    note: "Note",
+    error_handler: "Error Handler",
+    loop: "Loop",
+    split: "Split",
+    merge: "Merge",
+    delay: "Delay",
   };
 }
 
@@ -94,6 +110,12 @@ function useDescribe() {
     if (box.kind === "wait") return `${box.duration} ${box.unit}`;
     if (box.kind === "transform") return box.instruction.slice(0, 40);
     if (box.kind === "note") return box.text.slice(0, 30) || "Note";
+    // n8n advanced nodes:
+    if (box.kind === "error_handler") return `On error: ${box.fallbackAction}`;
+    if (box.kind === "loop") return `Loop (max ${box.maxIterations})`;
+    if (box.kind === "split") return `Batch ${box.batchSize}`;
+    if (box.kind === "merge") return `Merge: ${box.mode}`;
+    if (box.kind === "delay") return `${box.delay} ${box.unit}`;
     if (box.kind === "action") return act(box.do);
     return "";
   };
@@ -112,6 +134,12 @@ function NodeIcon({ box }: { box: Box }) {
   if (box.kind === "wait") return <Clock className={cls} />;
   if (box.kind === "transform") return <Layers className={cls} />;
   if (box.kind === "note") return <FileText className={cls} />;
+  // n8n advanced nodes:
+  if (box.kind === "error_handler") return <AlertTriangle className={cls} />;
+  if (box.kind === "loop") return <RefreshCw className={cls} />;
+  if (box.kind === "split") return <GitBranch className={cls} />;
+  if (box.kind === "merge") return <GitMerge className={cls} />;
+  if (box.kind === "delay") return <Timer className={cls} />;
   if (box.kind === "action") return <Send className={cls} />;
   return <Zap className={cls} />;
 }
@@ -163,7 +191,7 @@ function AddNode({ data }: NodeProps) {
     theme: typeof THEME;
   };
   const [open, setOpen] = useState(false);
-  const kinds: Box["kind"][] = ["read", "ai", "condition", "approval", "action"];
+  const kinds: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action", "error_handler", "loop", "split", "merge", "delay", "note"];
   return (
     <div className="flex flex-col items-center">
       <Handle type="target" position={Position.Top} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />

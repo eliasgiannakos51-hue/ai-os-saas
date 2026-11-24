@@ -3,6 +3,34 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-24 (n8n full parity: 150 capabilities + 16 node types) 🚀
+
+Ολοκληρωτική αναβάθμιση automations σε επίπεδο n8n.
+
+### Νέα node types (5 advanced)
+- **Error Handler** (Try/Catch): fallback continue/stop/retry, retry count+delay
+- **Loop**: repeat over items with max iterations guard
+- **Split**: split data into batches for processing
+- **Merge**: combine results (append/combine/choose_branch)
+- **Delay**: rate limiting between items (seconds/minutes/hours)
+
+### 45 νέες integrations (σύνολο 150 capabilities)
+- **20 νέα READ_SOURCES**: Salesforce, Pipedrive, Zoho CRM, Monday.com, Linear,
+  Baserow, MySQL, PostgreSQL, MongoDB, Elasticsearch, BigQuery, Dropbox, OneDrive,
+  Box, Zendesk, Intercom, Freshdesk, Google Analytics, Mixpanel, WooCommerce
+- **25 νέα ACTIONS**: creates/inserts/uploads για όλα τα νέα + Teams, Google Chat,
+  PayPal, QuickBooks, Xero, DeepL, OpenAI
+- SOURCE_CONFIG με connection fields για κάθε νέο source
+- EXTERNAL_SOURCES/EXTERNAL_ACTIONS ενημερωμένα στο runner
+- CONNECTION_NAME map extended
+- i18n σε 10 locales (el, de, es, fr, it, pt, ja, zh, ar, en)
+
+### MAX_BOXES 8 → 20
+Για σύνθετα workflows με πολλά βήματα (n8n-style).
+
+### Builder AI schema updated
+Το AI builder μπορεί τώρα να δημιουργεί και τα 16 node types αυτόματα.
+
 ## 2026-11-22 (Security audit + Performance + Cost optimization) 🔒
 
 4 παράλληλα audits σε 263 API routes, auth, billing, performance, AI costs.

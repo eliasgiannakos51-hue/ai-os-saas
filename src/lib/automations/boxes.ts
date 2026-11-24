@@ -299,6 +299,99 @@ export const ACTION_CONFIG: Partial<Record<ActionKind, ConfigField[]>> = {
     { key: "spreadsheet_id", label: "Spreadsheet ID", type: "text", placeholder: "1BxiM...", required: true },
     { key: "range", label: "Range", type: "text", placeholder: "Sheet1!A1" },
   ],
+  // n8n parity (2026-11-24): ACTION_CONFIG for new integrations
+  salesforce_create: [
+    { key: "api_key", label: "Salesforce Token", type: "password", placeholder: "00D...", required: true },
+    { key: "url", label: "Instance URL", type: "url", placeholder: "https://yourorg.salesforce.com" },
+  ],
+  pipedrive_create: [
+    { key: "api_key", label: "Pipedrive API Token", type: "password", placeholder: "abc123...", required: true },
+  ],
+  zoho_create: [
+    { key: "api_key", label: "Zoho API Key", type: "password", placeholder: "1000.abc...", required: true },
+  ],
+  monday_create: [
+    { key: "api_key", label: "Monday.com API Key", type: "password", placeholder: "eyJh...", required: true },
+    { key: "board_id", label: "Board ID", type: "text", placeholder: "123456789" },
+  ],
+  linear_create: [
+    { key: "api_key", label: "Linear API Key", type: "password", placeholder: "lin_api_...", required: true },
+  ],
+  baserow_create: [
+    { key: "api_key", label: "Baserow Token", type: "password", placeholder: "abc...", required: true },
+    { key: "url", label: "Baserow URL", type: "url", placeholder: "https://api.baserow.io" },
+  ],
+  mysql_insert: [
+    { key: "connection_string", label: "MySQL Connection", type: "password", placeholder: "mysql://user:pass@host/db", required: true },
+  ],
+  postgres_insert: [
+    { key: "connection_string", label: "PostgreSQL Connection", type: "password", placeholder: "postgresql://user:pass@host/db", required: true },
+  ],
+  mongodb_insert: [
+    { key: "connection_string", label: "MongoDB URI", type: "password", placeholder: "mongodb+srv://...", required: true },
+  ],
+  elasticsearch_index: [
+    { key: "url", label: "Elasticsearch URL", type: "url", placeholder: "https://es.example.com:9200", required: true },
+    { key: "api_key", label: "API Key", type: "password", placeholder: "abc123..." },
+  ],
+  bigquery_insert: [
+    { key: "api_key", label: "Service Account JSON", type: "textarea", placeholder: '{"type":"service_account",...}', required: true },
+  ],
+  zendesk_create: [
+    { key: "api_key", label: "Zendesk API Token", type: "password", placeholder: "abc...", required: true },
+    { key: "url", label: "Zendesk URL", type: "url", placeholder: "https://yourco.zendesk.com" },
+  ],
+  intercom_send: [
+    { key: "api_key", label: "Intercom Access Token", type: "password", placeholder: "dG9r...", required: true },
+  ],
+  freshdesk_create: [
+    { key: "api_key", label: "Freshdesk API Key", type: "password", placeholder: "abc...", required: true },
+    { key: "url", label: "Freshdesk URL", type: "url", placeholder: "https://yourco.freshdesk.com" },
+  ],
+  teams_send: [
+    { key: "webhook_url", label: "Teams Webhook URL", type: "url", placeholder: "https://outlook.office.com/webhook/...", required: true },
+  ],
+  google_chat_send: [
+    { key: "webhook_url", label: "Google Chat Webhook", type: "url", placeholder: "https://chat.googleapis.com/v1/spaces/...", required: true },
+  ],
+  woocommerce_update: [
+    { key: "url", label: "Store URL", type: "url", placeholder: "https://yourstore.com", required: true },
+    { key: "api_key", label: "Consumer Key", type: "password", placeholder: "ck_...", required: true },
+    { key: "secret", label: "Consumer Secret", type: "password", placeholder: "cs_..." },
+  ],
+  paypal_send: [
+    { key: "api_key", label: "PayPal Client ID", type: "password", placeholder: "AV...", required: true },
+    { key: "secret", label: "PayPal Secret", type: "password", placeholder: "EL...", required: true },
+  ],
+  quickbooks_create: [
+    { key: "api_key", label: "QuickBooks Access Token", type: "password", placeholder: "eyJ...", required: true },
+    { key: "realm_id", label: "Company ID", type: "text", placeholder: "123456789" },
+  ],
+  xero_create: [
+    { key: "api_key", label: "Xero Access Token", type: "password", placeholder: "eyJ...", required: true },
+    { key: "tenant_id", label: "Tenant ID", type: "text", placeholder: "abc-123-..." },
+  ],
+  deepl_translate: [
+    { key: "api_key", label: "DeepL API Key", type: "password", placeholder: "deadbeef-...", required: true },
+    { key: "target_lang", label: "Target Language", type: "text", placeholder: "EL" },
+  ],
+  openai_generate: [
+    { key: "api_key", label: "OpenAI API Key", type: "password", placeholder: "sk-...", required: true },
+  ],
+  dropbox_upload: [
+    { key: "api_key", label: "Dropbox Access Token", type: "password", placeholder: "sl.B...", required: true },
+  ],
+  onedrive_upload: [
+    { key: "api_key", label: "OneDrive Access Token", type: "password", placeholder: "EwB...", required: true },
+  ],
+  box_upload: [
+    { key: "api_key", label: "Box Access Token", type: "password", placeholder: "abc...", required: true },
+  ],
+  s3_upload: [
+    { key: "api_key", label: "AWS Access Key", type: "password", placeholder: "AKIA...", required: true },
+    { key: "secret", label: "AWS Secret Key", type: "password", placeholder: "wJal..." },
+    { key: "bucket", label: "Bucket Name", type: "text", placeholder: "my-bucket" },
+  ],
 };
 
 export const SOURCE_CONFIG: Partial<Record<ReadSource, ConfigField[]>> = {

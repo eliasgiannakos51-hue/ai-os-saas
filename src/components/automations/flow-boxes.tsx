@@ -714,6 +714,7 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
 }) {
   const { t, source, action, weekday } = useWords();
   const [draft, setDraft] = useState<Box>(box);
+  const [tab, setTab] = useState<"settings" | "output">("settings");
   const field = "mt-1 block min-h-[44px] w-full rounded-item bg-panel px-3 text-sm text-foreground";
   const label = "block text-xs text-muted";
 
@@ -866,7 +867,22 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
           </button>
         )}
       </div>
-      {body}
+      {/* n8n NDV-style tabs: Settings | Output */}
+      {lastOutput ? (
+        <div>
+          <div className="flex gap-0.5 rounded-lg p-0.5" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.2)" }}>
+            <button type="button" onClick={() => setTab("settings")} className={`rounded-md px-3 py-1 text-[10px] font-medium transition-colors ${tab === "settings" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>⚙ Settings</button>
+            <button type="button" onClick={() => setTab("output")} className={`rounded-md px-3 py-1 text-[10px] font-medium transition-colors ${tab === "output" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>📄 Output</button>
+          </div>
+          {tab === "settings" ? body : (
+            <div className="mt-2">
+              <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-panel p-3 text-[11px] text-foreground" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
+                {lastOutput}
+              </pre>
+            </div>
+          )}
+        </div>
+      ) : body}
       {/* Action buttons */}
       <div className="flex flex-wrap gap-2">
         {editable && (
@@ -883,15 +899,6 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
           </button>
         )}
       </div>
-      {/* n8n-style OUTPUT PREVIEW — shows the last run result for this node */}
-      {lastOutput && (
-        <div className="mt-2 space-y-1 border-t pt-2" style={{ borderColor: "rgb(var(--border) / 0.3)" }}>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted">📄 Output</p>
-          <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-panel p-3 text-[11px] text-foreground" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
-            {lastOutput}
-          </pre>
-        </div>
-      )}
     </div>
   );
 }

@@ -350,7 +350,7 @@ function boxesToEdges(boxes: Box[]): Edge[] {
     id: `e-${box.id}-${boxes[i + 1].id}`,
     source: box.id,
     target: boxes[i + 1].id,
-    type: "smoothstep",
+    type: "bezier",
     animated: false,
     style: { stroke: "#4b5563", strokeWidth: 2 },
   }));
@@ -435,9 +435,9 @@ function FlowCanvasInner({
     }
   }, [chosen, onDelete, onUndo]);
 
-  // Height based on number of rows
-  const rows = Math.ceil(boxes.length / 2);
-  const canvasHeight = Math.max(280, rows * 100 + 100);
+  // Height based on number of rows (5 nodes per row in horizontal layout)
+  const rows = Math.ceil((boxes.length + (onAdd ? 1 : 0)) / 5);
+  const canvasHeight = Math.max(300, rows * 140 + 60);
 
   return (
     <div

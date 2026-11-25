@@ -1,4 +1,4 @@
-import { readFlow, type Box } from "@/lib/automations/boxes";
+import { readBox, readFlow, type Box } from "@/lib/automations/boxes";
 import { readSteps, type RunStatus, type RunStep } from "@/lib/automations/run-steps";
 
 /**
@@ -46,11 +46,23 @@ const str = (v: unknown): string | null => (typeof v === "string" ? v : null);
 
 export function readShownFlow(row: Record<string, unknown>): ShownFlow {
   const flow = readFlow(row.boxes);
+  // If readFlow fails (e.g. missing start or action), try to salvage
+  // individual boxes so the UI can at least SHOW them instead of "cannot be read".
+  let boxes: Box[] = [];
+  if (flow.ok) {
+    boxes = flow.boxes;
+  } else if (Array.isArray(row.boxes) && row.boxes.length > 0) {
+    // Best-effort: parse each box individually, skip failures
+    for (const [i, item] of row.boxes.entries()) {
+      const box = readBox(item, `b${i + 1}`);
+      if (box) boxes.push(box);
+    }
+  }
   return {
     id: String(row.id ?? ""),
     name: String(row.name ?? ""),
     said: String(row.said ?? ""),
-    boxes: flow.ok ? flow.boxes : [],
+    boxes,
     version: Number(row.version) || 1,
     isActive: row.is_active === true,
     timeZone: str(row.time_zone) ?? "Europe/Athens",

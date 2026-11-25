@@ -536,9 +536,9 @@ function FlowCanvasInner({
 
   return (
     <div
-      className="flex-1 rounded-xl"
+      className="relative rounded-xl"
       style={{
-        minHeight: 280,
+        height: 500,
         border: "1px solid rgb(var(--border) / 0.3)",
       }}
       onKeyDown={onKeyDown}

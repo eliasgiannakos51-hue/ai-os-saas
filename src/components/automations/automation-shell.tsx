@@ -597,7 +597,7 @@ export function AutomationShell({
             </>
           ),
           body: (
-            <div className="space-y-5">
+            <div className="flex flex-1 flex-col gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span data-testid="flow-state" data-active={shown.isActive} className={`text-xs ${shown.isActive ? "text-foreground" : "text-muted"}`}>
                   {shown.isActive ? t("status.on") : t("status.off")}

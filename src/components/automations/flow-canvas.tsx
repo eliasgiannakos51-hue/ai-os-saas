@@ -401,16 +401,61 @@ function AddNode({ data }: NodeProps) {
 const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 
 /**
- * n8n CANVAS LAYOUT — exactly like n8n:
- * ONE horizontal line, left → right. fitView zooms out to show all.
- * The user pans/zooms to navigate. No rows, no wrapping.
+ * n8n CANVAS LAYOUT with visual grouping.
+ *
+ * Primary direction: LEFT → RIGHT.
+ * When there are many boxes, they group into "columns" of up to 3
+ * stacked vertically, then the next column goes right.
+ * This creates the n8n-style visual where you see branching paths.
+ *
+ * The grouping is: 1 node starts a column; if the NEXT nodes are
+ * the same category (e.g. 5 consecutive "action" boxes), they stack
+ * vertically in that column (up to 3), then overflow to the next column.
  */
+const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
+
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
-  const X_STEP = 210;
+  const X_STEP = 220;
+  const Y_STEP = 80;
+  const MAX_STACK = 3;    // max vertical stack per column
+
+  // Group consecutive same-kind boxes into vertical stacks
+  const positions: { x: number; y: number }[] = [];
+  let col = 0;
+  let stackCount = 0;
+  let lastKind = "";
+
+  for (let i = 0; i < boxes.length; i++) {
+    const box = boxes[i];
+    const sameAsPrev = box.kind === lastKind && !BRANCH_KINDS.has(box.kind);
+    const prevIsBranch = i > 0 && BRANCH_KINDS.has(boxes[i - 1].kind);
+
+    if (i === 0) {
+      // First box — always top left
+      positions.push({ x: 0, y: 0 });
+      stackCount = 1;
+    } else if (sameAsPrev && stackCount < MAX_STACK && !prevIsBranch) {
+      // Same kind, stack vertically
+      positions.push({ x: col * X_STEP, y: stackCount * Y_STEP });
+      stackCount++;
+    } else if (prevIsBranch && i + 1 < boxes.length && !BRANCH_KINDS.has(box.kind)) {
+      // After a branch node: offset down to show branching visual
+      col++;
+      positions.push({ x: col * X_STEP, y: Y_STEP * 0.5 });
+      stackCount = 1;
+    } else {
+      // New column
+      col++;
+      positions.push({ x: col * X_STEP, y: 0 });
+      stackCount = 1;
+    }
+    lastKind = box.kind;
+  }
+
   return boxes.map((box, i) => ({
     id: box.id,
     type: "automation",
-    position: { x: i * X_STEP, y: 0 },
+    position: positions[i],
     data: {
       box,
       kindName: kindNames[box.kind] ?? box.kind,
@@ -460,11 +505,12 @@ function FlowCanvasInner({
     const nodes = boxesToNodes(boxes, kindNames, describe);
     // Add "+" node at the end
     if (onAdd) {
-      const X_STEP = 210;
+      // Place "+" after the last node
+      const lastPos = nodes.length > 0 ? nodes[nodes.length - 1].position : { x: 0, y: 0 };
       nodes.push({
         id: "__add__",
         type: "addNode",
-        position: { x: boxes.length * X_STEP, y: 0 },
+        position: { x: lastPos.x + 220, y: lastPos.y },
         data: { onAdd, kindNames, theme: THEME },
         draggable: false,
         selectable: false,

@@ -391,30 +391,23 @@ function AddNode({ data }: NodeProps) {
 const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 
 /**
- * n8n CANVAS LAYOUT. Primary direction is LEFT → RIGHT. After every
- * 4 nodes, the flow steps DOWN one row and continues LEFT → RIGHT.
- * This creates a readable staircase pattern that you scroll/pan through.
- * React Flow handles infinite pan + zoom in all directions.
+ * n8n CANVAS LAYOUT — exactly like n8n:
+ * ONE horizontal line, left → right. fitView zooms out to show all.
+ * The user pans/zooms to navigate. No rows, no wrapping.
  */
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
-  const X_STEP = 230;    // horizontal gap between nodes
-  const Y_STEP = 110;    // vertical gap between rows
-  const COLS = 4;         // nodes per row before stepping down
-  return boxes.map((box, i) => {
-    const row = Math.floor(i / COLS);
-    const col = i % COLS;
-    return {
-      id: box.id,
-      type: "automation",
-      position: { x: col * X_STEP + row * 60, y: row * Y_STEP + 20 },
-      data: {
-        box,
-        kindName: kindNames[box.kind] ?? box.kind,
-        description: describe(box),
-        theme: THEME[box.kind],
-      },
-    };
-  });
+  const X_STEP = 210;
+  return boxes.map((box, i) => ({
+    id: box.id,
+    type: "automation",
+    position: { x: i * X_STEP, y: 0 },
+    data: {
+      box,
+      kindName: kindNames[box.kind] ?? box.kind,
+      description: describe(box),
+      theme: THEME[box.kind],
+    },
+  }));
 }
 
 /** Convert linear boxes to React Flow edges (each box → next box). */
@@ -453,16 +446,11 @@ function FlowCanvasInner({
     const nodes = boxesToNodes(boxes, kindNames, describe);
     // Add "+" node at the end
     if (onAdd) {
-      const X_STEP = 230;
-      const Y_STEP = 110;
-      const COLS = 4;
-      const nextIdx = boxes.length;
-      const row = Math.floor(nextIdx / COLS);
-      const col = nextIdx % COLS;
+      const X_STEP = 210;
       nodes.push({
         id: "__add__",
         type: "addNode",
-        position: { x: col * X_STEP + row * 60, y: row * Y_STEP + 20 },
+        position: { x: boxes.length * X_STEP, y: 0 },
         data: { onAdd, kindNames, theme: THEME },
         draggable: false,
         selectable: false,
@@ -507,17 +495,11 @@ function FlowCanvasInner({
     }
   }, [chosen, onDelete, onUndo]);
 
-  // React Flow REQUIRES an explicit pixel height — "100%" collapses to 0
-  // when the parent has no fixed height. Calculate from the number of rows.
-  const COLS = 4;
-  const totalRows = Math.ceil((boxes.length + (onAdd ? 1 : 0)) / COLS);
-  const canvasHeight = Math.max(400, Math.min(totalRows * 130 + 80, 800));
-
   return (
     <div
       className="rounded-xl"
       style={{
-        height: canvasHeight,
+        height: 280,
         border: "1px solid rgb(var(--border) / 0.3)",
       }}
       onKeyDown={onKeyDown}

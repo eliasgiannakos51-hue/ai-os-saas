@@ -276,27 +276,34 @@ function NodeIcon({ box }: { box: Box }) {
   return <Zap className={cls} />;
 }
 
-/** Custom node component rendered by React Flow. */
+/** Custom node component rendered by React Flow — n8n style. */
 function AutomationNode({ data, selected }: NodeProps) {
-  const { box, kindName, description, theme } = data as {
+  const { box, kindName, description, theme, index } = data as {
     box: Box;
     kindName: string;
     description: string;
     theme: (typeof THEME)[Box["kind"]];
+    index: number;
   };
   return (
     <div
-      className="flex items-center gap-2 rounded-lg bg-panel px-3 py-2 transition-shadow"
+      className="relative flex items-center gap-2 rounded-lg bg-panel px-3 py-2 transition-shadow"
       style={{
-        border: selected ? `2px solid ${theme.border}` : "1px solid rgb(var(--border) / 0.5)",
+        border: selected ? `2px solid ${theme.border}` : `1px solid ${theme.border}50`,
         boxShadow: selected ? `0 0 0 2px ${theme.border}40, 0 2px 8px rgba(0,0,0,0.2)` : "0 1px 4px rgba(0,0,0,0.12)",
-        minWidth: 140,
-        maxWidth: 200,
+        minWidth: 150,
+        maxWidth: 210,
         cursor: "grab",
       }}
     >
-      {/* Input handle (left) — n8n style: left-to-right flow */}
-      <Handle type="target" position={Position.Left} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
+      {/* Input handle (left) */}
+      <Handle type="target" position={Position.Left} style={{ background: theme.border, border: `2px solid ${theme.icon}`, width: 8, height: 8 }} />
+      {/* Node number badge — n8n style */}
+      {typeof index === "number" && (
+        <span className="absolute -top-2 -left-2 flex h-4 w-4 items-center justify-center rounded-full text-[7px] font-bold text-white" style={{ background: theme.border }}>
+          {index + 1}
+        </span>
+      )}
       {/* Icon */}
       <div
         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
@@ -309,8 +316,8 @@ function AutomationNode({ data, selected }: NodeProps) {
         <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kindName}</div>
         <div className="mt-0.5 truncate text-[10px] leading-tight text-foreground" title={description}>{description}</div>
       </div>
-      {/* Output handle (right) — n8n style */}
-      <Handle type="source" position={Position.Right} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
+      {/* Output handle (right) */}
+      <Handle type="source" position={Position.Right} style={{ background: theme.border, border: `2px solid ${theme.icon}`, width: 8, height: 8 }} />
     </div>
   );
 }
@@ -323,55 +330,57 @@ function AddNode({ data }: NodeProps) {
     theme: typeof THEME;
   };
   const [open, setOpen] = useState(false);
-  /** n8n-style categorized node picker. Groups make 30 nodes manageable. */
-  const categories: { label: string; kinds: Box["kind"][] }[] = [
-    { label: "Core", kinds: ["read", "ai", "condition", "approval", "action"] },
-    { label: "Flow", kinds: ["filter", "switch", "loop", "split", "merge", "error_handler", "no_op", "stop_error", "execute_workflow"] },
-    { label: "Data", kinds: ["sort", "limit", "remove_duplicates", "summarize", "set", "compare", "transform", "aggregate", "split_out", "rename_keys"] },
-    { label: "Parse", kinds: ["xml", "markdown", "html_extract", "spreadsheet_parse", "crypto"] },
-    { label: "Time", kinds: ["wait", "delay", "date_time"] },
-    { label: "AI", kinds: ["ai_agent", "llm_chain", "retrieval_qa", "summarization_chain", "text_classifier", "sentiment", "extract_info"] },
-    { label: "Code", kinds: ["code", "execute_command", "ssh", "graphql"] },
-    { label: "Files", kinds: ["read_file", "write_file", "ftp"] },
-    { label: "HTTP", kinds: ["respond_webhook", "http_response", "smtp_send"] },
-    { label: "Other", kinds: ["note"] },
+  const [search, setSearch] = useState("");
+  /** n8n-style categorized node picker with search. */
+  const ALL_KINDS: Box["kind"][] = [
+    "read", "ai", "condition", "approval", "action",
+    "filter", "switch", "loop", "split", "merge", "error_handler", "no_op", "stop_error", "execute_workflow",
+    "sort", "limit", "remove_duplicates", "summarize", "set", "compare", "transform", "aggregate", "split_out", "rename_keys",
+    "xml", "markdown", "html_extract", "spreadsheet_parse", "crypto",
+    "wait", "delay", "date_time",
+    "ai_agent", "llm_chain", "retrieval_qa", "summarization_chain", "text_classifier", "sentiment", "extract_info",
+    "code", "execute_command", "ssh", "graphql",
+    "read_file", "write_file", "ftp",
+    "respond_webhook", "http_response", "smtp_send",
+    "note",
   ];
-  const [activeTab, setActiveTab] = useState(0);
+  const filtered = search.trim()
+    ? ALL_KINDS.filter((k) => (kindNames[k] ?? k).toLowerCase().includes(search.toLowerCase()))
+    : ALL_KINDS.slice(0, 12); // show top 12 by default
   return (
     <div className="flex flex-col items-center">
       <Handle type="target" position={Position.Left} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={() => { setOpen(!open); setSearch(""); }}
         className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition-all hover:bg-panel hover:text-foreground"
         style={{ border: "1px dashed #4b5563" }}
       >
         <span className="text-lg leading-none">+</span>
       </button>
       {open && (
-        <div className="absolute top-10 z-10 w-56 rounded-lg bg-panel shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
-          {/* Category tabs */}
-          <div className="flex flex-wrap gap-0.5 border-b px-1.5 pt-1.5" style={{ borderColor: "rgb(var(--border) / 0.3)" }}>
-            {categories.map((cat, idx) => (
-              <button
-                key={cat.label}
-                type="button"
-                onClick={() => setActiveTab(idx)}
-                className={`rounded-t px-2 py-1 text-[8px] font-bold uppercase tracking-wider transition-colors ${activeTab === idx ? "bg-foreground/10 text-foreground" : "text-muted hover:text-foreground"}`}
-              >
-                {cat.label}
-              </button>
-            ))}
+        <div className="absolute top-10 z-10 w-60 rounded-lg bg-panel shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
+          {/* n8n-style search bar */}
+          <div className="px-2 pt-2">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search nodes..."
+              autoFocus
+              className="w-full rounded-md bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted outline-none"
+              style={{ border: "1px solid rgb(var(--border) / 0.4)" }}
+            />
           </div>
           {/* Nodes grid */}
-          <div className="grid grid-cols-2 gap-1 p-1.5">
-            {categories[activeTab].kinds.map((k) => {
+          <div className="grid grid-cols-2 gap-1 p-2" style={{ maxHeight: 240, overflowY: "auto" }}>
+            {filtered.map((k) => {
               const th = themes[k];
               return (
                 <button
                   key={k}
                   type="button"
-                  onClick={() => { setOpen(false); onAdd(k); }}
+                  onClick={() => { setOpen(false); setSearch(""); onAdd(k); }}
                   className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-panel-hover"
                 >
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded" style={{ background: th.icon, color: th.iconText }}>
@@ -381,6 +390,7 @@ function AddNode({ data }: NodeProps) {
                 </button>
               );
             })}
+            {filtered.length === 0 && <p className="col-span-2 py-2 text-center text-[10px] text-muted">No nodes found</p>}
           </div>
         </div>
       )}
@@ -406,20 +416,24 @@ function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe:
       kindName: kindNames[box.kind] ?? box.kind,
       description: describe(box),
       theme: THEME[box.kind],
+      index: i,
     },
   }));
 }
 
 /** Convert linear boxes to React Flow edges (each box → next box). */
 function boxesToEdges(boxes: Box[]): Edge[] {
-  return boxes.slice(0, -1).map((box, i) => ({
-    id: `e-${box.id}-${boxes[i + 1].id}`,
-    source: box.id,
-    target: boxes[i + 1].id,
-    type: "bezier",
-    animated: false,
-    style: { stroke: "#4b5563", strokeWidth: 2 },
-  }));
+  return boxes.slice(0, -1).map((box, i) => {
+    const sourceTheme = THEME[box.kind];
+    return {
+      id: `e-${box.id}-${boxes[i + 1].id}`,
+      source: box.id,
+      target: boxes[i + 1].id,
+      type: "bezier",
+      animated: false,
+      style: { stroke: sourceTheme?.border ?? "#4b5563", strokeWidth: 2, opacity: 0.6 },
+    };
+  });
 }
 
 function FlowCanvasInner({

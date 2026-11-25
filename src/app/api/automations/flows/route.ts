@@ -15,8 +15,8 @@ import { FLOW_COLUMNS, MAX_FLOWS, MAX_SAID_CHARS, flowGate, readTimeZone, refuse
 import { linkResultToProject, ownedProjectId } from "@/lib/projects/link-result";
 
 export const dynamic = "force-dynamic";
-// One forced-tool call of at most 1,500 tokens.
-export const maxDuration = 60;
+// Large automations (100+ nodes) need up to 16k tokens of output.
+export const maxDuration = 120;
 
 /**
  * AN AUTOMATION FROM ONE SENTENCE (MASTER 16, package 30), for

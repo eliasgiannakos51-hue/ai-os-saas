@@ -179,6 +179,28 @@ const NODE_THEME: Record<Box["kind"], { icon: string; iconText: string; label: s
   extract_info:      { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
   respond_webhook:   { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
   execute_command:   { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", bg: "#1a2e1a", bgHover: "#1a2e1a", text: "#fff", border: "#22c55e" },
+  // n8n remaining core (round 3):
+  aggregate:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  split_out:         { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  rename_keys:       { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  xml:               { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", bg: "#1a2e1a", bgHover: "#1a2e1a", text: "#fff", border: "#22c55e" },
+  markdown:          { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  crypto:            { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  spreadsheet_parse: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  no_op:             { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  stop_error:        { icon: "#5c1a1a", iconText: "#fca5a5", label: "#fca5a5", bg: "#5c1a1a", bgHover: "#5c1a1a", text: "#fff", border: "#ef4444" },
+  execute_workflow:  { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  read_file:         { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  write_file:        { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  smtp_send:         { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  ftp:               { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  ssh:               { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", bg: "#1a2e1a", bgHover: "#1a2e1a", text: "#fff", border: "#22c55e" },
+  graphql:           { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
+  ai_agent:          { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  llm_chain:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  retrieval_qa:      { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  summarization_chain: { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", bg: "#2d1b69", bgHover: "#2d1b69", text: "#fff", border: "#8b5cf6" },
+  http_response:     { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
 };
 
 /** Status → border highlight on the WHOLE node after a run. */
@@ -223,6 +245,28 @@ function useWords() {
     extract_info: "Extract Info",
     respond_webhook: "Respond Webhook",
     execute_command: "Execute Command",
+    // n8n remaining core (round 3):
+    aggregate: "Aggregate",
+    split_out: "Split Out",
+    rename_keys: "Rename Keys",
+    xml: "XML",
+    markdown: "Markdown",
+    crypto: "Crypto",
+    spreadsheet_parse: "Spreadsheet",
+    no_op: "No Op",
+    stop_error: "Stop & Error",
+    execute_workflow: "Sub-Workflow",
+    read_file: "Read File",
+    write_file: "Write File",
+    smtp_send: "SMTP Send",
+    ftp: "FTP",
+    ssh: "SSH",
+    graphql: "GraphQL",
+    ai_agent: "AI Agent",
+    llm_chain: "LLM Chain",
+    retrieval_qa: "Retrieval QA",
+    summarization_chain: "Summarize Chain",
+    http_response: "HTTP Response",
   };
   const source: Record<ReadSource, string> = {
     calendar_today: t("sources.calendar_today"),
@@ -435,6 +479,28 @@ function useWords() {
         return `Respond ${box.statusCode}`;
       case "execute_command":
         return box.command.slice(0, 40);
+      // n8n remaining core (round 3):
+      case "aggregate": return `Aggregate: ${box.operation}`;
+      case "split_out": return `Split: ${box.field}`;
+      case "rename_keys": return box.renames.length > 0 ? `Rename: ${box.renames[0].from} → ${box.renames[0].to}` : "Rename keys";
+      case "xml": return box.direction === "xml_to_json" ? "XML → JSON" : "JSON → XML";
+      case "markdown": return box.direction === "md_to_html" ? "MD → HTML" : "HTML → MD";
+      case "crypto": return `${box.operation}${box.algorithm ? ` (${box.algorithm})` : ""}`;
+      case "spreadsheet_parse": return `Parse ${box.format.toUpperCase()}`;
+      case "no_op": return "Pass through";
+      case "stop_error": return box.message.slice(0, 40);
+      case "execute_workflow": return `Run: ${box.workflowId}`;
+      case "read_file": return `Read: ${box.path.slice(0, 30)}`;
+      case "write_file": return `Write: ${box.path.slice(0, 30)}`;
+      case "smtp_send": return `Email via ${box.host}`;
+      case "ftp": return `FTP ${box.operation}: ${box.host}`;
+      case "ssh": return `SSH: ${box.command.slice(0, 30)}`;
+      case "graphql": return "GraphQL query";
+      case "ai_agent": return box.instruction.slice(0, 40);
+      case "llm_chain": return box.prompt.slice(0, 40);
+      case "retrieval_qa": return box.question.slice(0, 40);
+      case "summarization_chain": return "Summarize content";
+      case "http_response": return `Response ${box.statusCode}`;
       case "action":
         return action[box.do];
     }
@@ -475,7 +541,7 @@ function useNoteWords(): (step: RunStep) => string {
       split_done: "Split completed",
       merge_done: "Merge completed",
       delay_done: "Delay completed",
-      transform_done: "Transform completed",
+      transform_done: "Completed",
     };
     return note[step.note];
   };
@@ -575,6 +641,28 @@ function BoxIconInner({ box }: { box: Box }) {
   if (box.kind === "extract_info") return <FileOutput className={cls} aria-hidden="true" />;
   if (box.kind === "respond_webhook") return <Reply className={cls} aria-hidden="true" />;
   if (box.kind === "execute_command") return <Terminal className={cls} aria-hidden="true" />;
+  // n8n remaining core (round 3):
+  if (box.kind === "aggregate") return <Layers className={cls} aria-hidden="true" />;
+  if (box.kind === "split_out") return <GitBranch className={cls} aria-hidden="true" />;
+  if (box.kind === "rename_keys") return <Type className={cls} aria-hidden="true" />;
+  if (box.kind === "xml") return <Code2 className={cls} aria-hidden="true" />;
+  if (box.kind === "markdown") return <FileText className={cls} aria-hidden="true" />;
+  if (box.kind === "crypto") return <Hash className={cls} aria-hidden="true" />;
+  if (box.kind === "spreadsheet_parse") return <Table2 className={cls} aria-hidden="true" />;
+  if (box.kind === "no_op") return <ArrowUpDown className={cls} aria-hidden="true" />;
+  if (box.kind === "stop_error") return <AlertTriangle className={cls} aria-hidden="true" />;
+  if (box.kind === "execute_workflow") return <RefreshCw className={cls} aria-hidden="true" />;
+  if (box.kind === "read_file") return <FileText className={cls} aria-hidden="true" />;
+  if (box.kind === "write_file") return <FileOutput className={cls} aria-hidden="true" />;
+  if (box.kind === "smtp_send") return <Send className={cls} aria-hidden="true" />;
+  if (box.kind === "ftp") return <Globe className={cls} aria-hidden="true" />;
+  if (box.kind === "ssh") return <Terminal className={cls} aria-hidden="true" />;
+  if (box.kind === "graphql") return <Globe className={cls} aria-hidden="true" />;
+  if (box.kind === "ai_agent") return <Sparkles className={cls} aria-hidden="true" />;
+  if (box.kind === "llm_chain") return <Sparkles className={cls} aria-hidden="true" />;
+  if (box.kind === "retrieval_qa") return <Sparkles className={cls} aria-hidden="true" />;
+  if (box.kind === "summarization_chain") return <Sparkles className={cls} aria-hidden="true" />;
+  if (box.kind === "http_response") return <Reply className={cls} aria-hidden="true" />;
   if (box.kind === "action") {
     if (box.do === "send_telegram") return <Send className={cls} aria-hidden="true" />;
     if (box.do === "send_email" || box.do === "sendgrid_send") return <Mail className={cls} aria-hidden="true" />;

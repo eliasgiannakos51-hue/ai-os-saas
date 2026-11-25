@@ -31,7 +31,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, ArrowUpDown, BarChart3, Calendar, Clock, Code2, FileOutput, Filter, GitBranch, GitCompare, GitMerge, Hash, Heart, FileText, Layers, List, ListFilter, PauseCircle, RefreshCw, Reply, Scissors, Send, Sparkles, Split, Table2, Terminal, Timer, Type, Zap } from "lucide-react";
+import { AlertTriangle, ArrowUpDown, BarChart3, Calendar, Clock, Code2, FileOutput, Filter, GitBranch, GitCompare, GitMerge, Globe, Hash, Heart, FileText, Layers, List, ListFilter, PauseCircle, RefreshCw, Reply, Scissors, Send, Sparkles, Split, Table2, Terminal, Timer, Type, Zap } from "lucide-react";
 import type { Box, ReadSource, ActionKind, StartBox } from "@/lib/automations/boxes";
 import type { Connected } from "@/components/automations/flow-boxes";
 
@@ -69,6 +69,28 @@ const THEME: Record<Box["kind"], { icon: string; iconText: string; label: string
   extract_info:      { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
   respond_webhook:   { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
   execute_command:   { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
+  // n8n remaining core (round 3):
+  aggregate:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  split_out:         { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  rename_keys:       { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  xml:               { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
+  markdown:          { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  crypto:            { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  spreadsheet_parse: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  no_op:             { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  stop_error:        { icon: "#5c1a1a", iconText: "#fca5a5", label: "#fca5a5", border: "#ef4444" },
+  execute_workflow:  { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  read_file:         { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  write_file:        { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  smtp_send:         { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  ftp:               { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  ssh:               { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
+  graphql:           { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+  ai_agent:          { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  llm_chain:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  retrieval_qa:      { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  summarization_chain: { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
+  http_response:     { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
 };
 
 /** Translate box kind to display name. */
@@ -105,6 +127,13 @@ function useKindNames() {
     extract_info: "Extract Info",
     respond_webhook: "Respond Webhook",
     execute_command: "Execute Command",
+    aggregate: "Aggregate", split_out: "Split Out", rename_keys: "Rename Keys",
+    xml: "XML", markdown: "Markdown", crypto: "Crypto", spreadsheet_parse: "Spreadsheet",
+    no_op: "No Op", stop_error: "Stop & Error", execute_workflow: "Sub-Workflow",
+    read_file: "Read File", write_file: "Write File", smtp_send: "SMTP Send",
+    ftp: "FTP", ssh: "SSH", graphql: "GraphQL", ai_agent: "AI Agent",
+    llm_chain: "LLM Chain", retrieval_qa: "Retrieval QA",
+    summarization_chain: "Summarize Chain", http_response: "HTTP Response",
   };
 }
 
@@ -160,6 +189,28 @@ function useDescribe() {
     if (box.kind === "extract_info") return box.fields.slice(0, 2).join(", ");
     if (box.kind === "respond_webhook") return `Respond ${box.statusCode}`;
     if (box.kind === "execute_command") return box.command.slice(0, 30);
+    // n8n remaining core (round 3):
+    if (box.kind === "aggregate") return box.operation;
+    if (box.kind === "split_out") return box.field;
+    if (box.kind === "rename_keys") return "Rename";
+    if (box.kind === "xml") return box.direction === "xml_to_json" ? "XML→JSON" : "JSON→XML";
+    if (box.kind === "markdown") return box.direction === "md_to_html" ? "MD→HTML" : "HTML→MD";
+    if (box.kind === "crypto") return box.operation;
+    if (box.kind === "spreadsheet_parse") return box.format.toUpperCase();
+    if (box.kind === "no_op") return "Pass";
+    if (box.kind === "stop_error") return box.message.slice(0, 25);
+    if (box.kind === "execute_workflow") return box.workflowId.slice(0, 15);
+    if (box.kind === "read_file") return box.path.slice(0, 25);
+    if (box.kind === "write_file") return box.path.slice(0, 25);
+    if (box.kind === "smtp_send") return box.host.slice(0, 20);
+    if (box.kind === "ftp") return `${box.operation} ${box.host.slice(0, 15)}`;
+    if (box.kind === "ssh") return box.command.slice(0, 25);
+    if (box.kind === "graphql") return "GraphQL";
+    if (box.kind === "ai_agent") return box.instruction.slice(0, 30);
+    if (box.kind === "llm_chain") return box.prompt.slice(0, 30);
+    if (box.kind === "retrieval_qa") return box.question.slice(0, 30);
+    if (box.kind === "summarization_chain") return "Summarize";
+    if (box.kind === "http_response") return `${box.statusCode}`;
     if (box.kind === "action") return act(box.do);
     return "";
   };
@@ -199,6 +250,28 @@ function NodeIcon({ box }: { box: Box }) {
   if (box.kind === "extract_info") return <FileOutput className={cls} />;
   if (box.kind === "respond_webhook") return <Reply className={cls} />;
   if (box.kind === "execute_command") return <Terminal className={cls} />;
+  // n8n remaining core (round 3):
+  if (box.kind === "aggregate") return <Layers className={cls} />;
+  if (box.kind === "split_out") return <GitBranch className={cls} />;
+  if (box.kind === "rename_keys") return <Type className={cls} />;
+  if (box.kind === "xml") return <Code2 className={cls} />;
+  if (box.kind === "markdown") return <FileText className={cls} />;
+  if (box.kind === "crypto") return <Hash className={cls} />;
+  if (box.kind === "spreadsheet_parse") return <Table2 className={cls} />;
+  if (box.kind === "no_op") return <ArrowUpDown className={cls} />;
+  if (box.kind === "stop_error") return <AlertTriangle className={cls} />;
+  if (box.kind === "execute_workflow") return <RefreshCw className={cls} />;
+  if (box.kind === "read_file") return <FileText className={cls} />;
+  if (box.kind === "write_file") return <FileOutput className={cls} />;
+  if (box.kind === "smtp_send") return <Send className={cls} />;
+  if (box.kind === "ftp") return <Globe className={cls} />;
+  if (box.kind === "ssh") return <Terminal className={cls} />;
+  if (box.kind === "graphql") return <Globe className={cls} />;
+  if (box.kind === "ai_agent") return <Sparkles className={cls} />;
+  if (box.kind === "llm_chain") return <Sparkles className={cls} />;
+  if (box.kind === "retrieval_qa") return <Sparkles className={cls} />;
+  if (box.kind === "summarization_chain") return <Sparkles className={cls} />;
+  if (box.kind === "http_response") return <Reply className={cls} />;
   if (box.kind === "action") return <Send className={cls} />;
   return <Zap className={cls} />;
 }
@@ -253,11 +326,14 @@ function AddNode({ data }: NodeProps) {
   /** n8n-style categorized node picker. Groups make 30 nodes manageable. */
   const categories: { label: string; kinds: Box["kind"][] }[] = [
     { label: "Core", kinds: ["read", "ai", "condition", "approval", "action"] },
-    { label: "Flow", kinds: ["filter", "switch", "loop", "split", "merge", "error_handler"] },
-    { label: "Data", kinds: ["sort", "limit", "remove_duplicates", "summarize", "set", "compare", "transform"] },
+    { label: "Flow", kinds: ["filter", "switch", "loop", "split", "merge", "error_handler", "no_op", "stop_error", "execute_workflow"] },
+    { label: "Data", kinds: ["sort", "limit", "remove_duplicates", "summarize", "set", "compare", "transform", "aggregate", "split_out", "rename_keys"] },
+    { label: "Parse", kinds: ["xml", "markdown", "html_extract", "spreadsheet_parse", "crypto"] },
     { label: "Time", kinds: ["wait", "delay", "date_time"] },
-    { label: "AI", kinds: ["text_classifier", "sentiment", "extract_info"] },
-    { label: "Code", kinds: ["code", "html_extract", "execute_command", "respond_webhook"] },
+    { label: "AI", kinds: ["ai_agent", "llm_chain", "retrieval_qa", "summarization_chain", "text_classifier", "sentiment", "extract_info"] },
+    { label: "Code", kinds: ["code", "execute_command", "ssh", "graphql"] },
+    { label: "Files", kinds: ["read_file", "write_file", "ftp"] },
+    { label: "HTTP", kinds: ["respond_webhook", "http_response", "smtp_send"] },
     { label: "Other", kinds: ["note"] },
   ];
   const [activeTab, setActiveTab] = useState(0);

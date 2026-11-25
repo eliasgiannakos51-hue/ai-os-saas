@@ -871,7 +871,15 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
         box.kind === "summarize" || box.kind === "switch" || box.kind === "set" ||
         box.kind === "compare" || box.kind === "date_time" || box.kind === "html_extract" ||
         box.kind === "text_classifier" || box.kind === "sentiment" || box.kind === "extract_info" ||
-        box.kind === "respond_webhook" || box.kind === "execute_command") {
+        box.kind === "respond_webhook" || box.kind === "execute_command" ||
+        // n8n remaining core (round 3):
+        box.kind === "aggregate" || box.kind === "split_out" || box.kind === "rename_keys" ||
+        box.kind === "xml" || box.kind === "markdown" || box.kind === "crypto" ||
+        box.kind === "spreadsheet_parse" || box.kind === "no_op" || box.kind === "stop_error" ||
+        box.kind === "execute_workflow" || box.kind === "read_file" || box.kind === "write_file" ||
+        box.kind === "smtp_send" || box.kind === "ftp" || box.kind === "ssh" ||
+        box.kind === "graphql" || box.kind === "ai_agent" || box.kind === "llm_chain" ||
+        box.kind === "retrieval_qa" || box.kind === "summarization_chain" || box.kind === "http_response") {
       // All data transformation nodes: placeholder, pass through
       steps.push({ box: box.id, status: "ok", note: "transform_done" });
       continue;

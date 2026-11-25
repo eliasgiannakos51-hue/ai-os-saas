@@ -18,7 +18,7 @@
  * with it, the runner walks it. Held by scripts/tests/automations.test.mjs.
  */
 
-export const MAX_BOXES = 20;
+export const MAX_BOXES = 1000;
 export const MAX_INSTRUCTION_CHARS = 600;
 
 /** A URL a box may carry must be https and not point anywhere private.
@@ -156,6 +156,67 @@ export type ExtractInfoBox = { id: string; kind: "extract_info"; fields: string[
 export type RespondWebhookBox = { id: string; kind: "respond_webhook"; statusCode: number; body?: string };
 export type ExecuteCommandBox = { id: string; kind: "execute_command"; command: string };
 
+/**
+ * n8n REMAINING CORE NODES (2026-11-25, round 3).
+ * Every core node n8n has that we didn't have yet.
+ *
+ * Data:
+ * - aggregate: Aggregate — combine multiple items into a single item
+ * - split_out: Split Out — split one item with array field into many items
+ * - rename_keys: Rename Keys — rename field names
+ * - xml: XML — parse XML to JSON or build XML from JSON
+ * - markdown: Markdown — convert markdown to HTML or HTML to markdown
+ * - crypto: Crypto — hash (MD5/SHA), HMAC, encrypt/decrypt, sign
+ * - spreadsheet_parse: Spreadsheet File — parse CSV/Excel into data
+ *
+ * Flow:
+ * - no_op: No Operation — passthrough, does nothing (for branching)
+ * - stop_error: Stop and Error — throw an error, stop the workflow
+ * - execute_workflow: Execute Workflow — call another automation (sub-workflow)
+ *
+ * File:
+ * - read_file: Read Binary File — read a file from storage
+ * - write_file: Write Binary File — write data to a file
+ *
+ * Communication:
+ * - smtp_send: Send Email (SMTP) — send email via SMTP server
+ * - ftp: FTP — upload/download files via FTP/SFTP
+ * - ssh: SSH — execute commands on remote server
+ * - graphql: GraphQL — query a GraphQL API
+ *
+ * AI (LangChain):
+ * - ai_agent: AI Agent — autonomous agent with tools and memory
+ * - llm_chain: LLM Chain — simple prompt → response chain
+ * - retrieval_qa: Retrieval QA — answer questions from documents (RAG)
+ * - summarization_chain: Summarization Chain — summarize long content
+ *
+ * Utility:
+ * - http_response: HTTP Response — custom response for webhook trigger
+ * - manual_trigger: Manual Trigger — run workflow by hand (we have this in start)
+ * - schedule_trigger: Schedule Trigger — cron-based (we have this in start)
+ */
+export type AggregateBox = { id: string; kind: "aggregate"; operation: "concatenate" | "merge_objects" | "to_array"; field?: string };
+export type SplitOutBox = { id: string; kind: "split_out"; field: string };
+export type RenameKeysBox = { id: string; kind: "rename_keys"; renames: Array<{ from: string; to: string }> };
+export type XmlBox = { id: string; kind: "xml"; direction: "xml_to_json" | "json_to_xml"; rootElement?: string };
+export type MarkdownBox = { id: string; kind: "markdown"; direction: "md_to_html" | "html_to_md" };
+export type CryptoBox = { id: string; kind: "crypto"; operation: "hash" | "hmac" | "encrypt" | "decrypt" | "sign"; algorithm?: string; field?: string };
+export type SpreadsheetParseBox = { id: string; kind: "spreadsheet_parse"; format: "csv" | "xlsx" | "tsv"; hasHeader: boolean };
+export type NoOpBox = { id: string; kind: "no_op" };
+export type StopErrorBox = { id: string; kind: "stop_error"; message: string };
+export type ExecuteWorkflowBox = { id: string; kind: "execute_workflow"; workflowId: string };
+export type ReadFileBox = { id: string; kind: "read_file"; path: string };
+export type WriteFileBox = { id: string; kind: "write_file"; path: string };
+export type SmtpSendBox = { id: string; kind: "smtp_send"; host: string; port: number; to: string; subject?: string };
+export type FtpBox = { id: string; kind: "ftp"; operation: "upload" | "download" | "list"; host: string; path?: string };
+export type SshBox = { id: string; kind: "ssh"; host: string; command: string };
+export type GraphqlBox = { id: string; kind: "graphql"; url: string; query: string; variables?: string };
+export type AiAgentBox = { id: string; kind: "ai_agent"; instruction: string; tools: string[] };
+export type LlmChainBox = { id: string; kind: "llm_chain"; prompt: string };
+export type RetrievalQaBox = { id: string; kind: "retrieval_qa"; question: string; source?: string };
+export type SummarizationChainBox = { id: string; kind: "summarization_chain"; maxLength?: number };
+export type HttpResponseBox = { id: string; kind: "http_response"; statusCode: number; headers?: Record<string, string>; body?: string };
+
 export const ACTIONS = [
   // Original
   "send_telegram", "send_email", "notify", "save_to_library",
@@ -193,7 +254,7 @@ export const ACTIONS = [
 export type ActionKind = (typeof ACTIONS)[number];
 export type ActionBox = { id: string; kind: "action"; do: ActionKind; url?: string; config?: Record<string, string> };
 
-export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox | FilterBox | CodeBox | WaitBox | TransformBox | NoteBox | ErrorHandlerBox | LoopBox | SplitBox | MergeBox | DelayBox | SortBox | LimitBox | RemoveDuplicatesBox | SummarizeBox | SwitchBox | SetBox | CompareBox | DateTimeBox | HtmlExtractBox | TextClassifierBox | SentimentBox | ExtractInfoBox | RespondWebhookBox | ExecuteCommandBox;
+export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox | FilterBox | CodeBox | WaitBox | TransformBox | NoteBox | ErrorHandlerBox | LoopBox | SplitBox | MergeBox | DelayBox | SortBox | LimitBox | RemoveDuplicatesBox | SummarizeBox | SwitchBox | SetBox | CompareBox | DateTimeBox | HtmlExtractBox | TextClassifierBox | SentimentBox | ExtractInfoBox | RespondWebhookBox | ExecuteCommandBox | AggregateBox | SplitOutBox | RenameKeysBox | XmlBox | MarkdownBox | CryptoBox | SpreadsheetParseBox | NoOpBox | StopErrorBox | ExecuteWorkflowBox | ReadFileBox | WriteFileBox | SmtpSendBox | FtpBox | SshBox | GraphqlBox | AiAgentBox | LlmChainBox | RetrievalQaBox | SummarizationChainBox | HttpResponseBox;
 export type BoxKind = Box["kind"];
 
 const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -654,6 +715,104 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
       if (DANGEROUS_SHELL.test(command)) return null;
       return command.length >= 1 ? { id, kind: "execute_command", command } : null;
     }
+    // n8n remaining core (2026-11-25, round 3):
+    case "aggregate": {
+      const op = v.operation;
+      if (op !== "concatenate" && op !== "merge_objects" && op !== "to_array") return { id, kind: "aggregate", operation: "to_array" };
+      return { id, kind: "aggregate", operation: op, ...(typeof v.field === "string" ? { field: v.field.slice(0, 100) } : {}) };
+    }
+    case "split_out": {
+      const f = typeof v.field === "string" ? v.field.trim().slice(0, 100) : "items";
+      return { id, kind: "split_out", field: f };
+    }
+    case "rename_keys": {
+      const renames = Array.isArray(v.renames) ? v.renames.slice(0, 20).filter((r: unknown): r is { from: string; to: string } =>
+        Boolean(r) && typeof r === "object" && typeof (r as Record<string, unknown>).from === "string" && typeof (r as Record<string, unknown>).to === "string"
+      ).map((r: { from: string; to: string }) => ({ from: r.from.slice(0, 100), to: r.to.slice(0, 100) })) : [];
+      return { id, kind: "rename_keys", renames };
+    }
+    case "xml": {
+      const dir = v.direction === "json_to_xml" ? "json_to_xml" : "xml_to_json";
+      return { id, kind: "xml", direction: dir, ...(typeof v.rootElement === "string" ? { rootElement: v.rootElement.slice(0, 50) } : {}) };
+    }
+    case "markdown": {
+      const dir = v.direction === "html_to_md" ? "html_to_md" : "md_to_html";
+      return { id, kind: "markdown", direction: dir };
+    }
+    case "crypto": {
+      const op = v.operation;
+      if (op !== "hash" && op !== "hmac" && op !== "encrypt" && op !== "decrypt" && op !== "sign") return { id, kind: "crypto", operation: "hash" };
+      return { id, kind: "crypto", operation: op, ...(typeof v.algorithm === "string" ? { algorithm: v.algorithm.slice(0, 20) } : {}), ...(typeof v.field === "string" ? { field: v.field.slice(0, 100) } : {}) };
+    }
+    case "spreadsheet_parse": {
+      const fmt = v.format;
+      if (fmt !== "csv" && fmt !== "xlsx" && fmt !== "tsv") return { id, kind: "spreadsheet_parse", format: "csv", hasHeader: true };
+      return { id, kind: "spreadsheet_parse", format: fmt, hasHeader: v.hasHeader !== false };
+    }
+    case "no_op": return { id, kind: "no_op" };
+    case "stop_error": {
+      const msg = typeof v.message === "string" ? v.message.trim().slice(0, 500) : "Workflow stopped";
+      return { id, kind: "stop_error", message: msg };
+    }
+    case "execute_workflow": {
+      const wid = typeof v.workflowId === "string" ? v.workflowId.trim().slice(0, 36) : "";
+      return wid.length >= 1 ? { id, kind: "execute_workflow", workflowId: wid } : null;
+    }
+    case "read_file": {
+      const path = typeof v.path === "string" ? v.path.trim().slice(0, 500) : "";
+      return path.length >= 1 ? { id, kind: "read_file", path } : null;
+    }
+    case "write_file": {
+      const path = typeof v.path === "string" ? v.path.trim().slice(0, 500) : "";
+      return path.length >= 1 ? { id, kind: "write_file", path } : null;
+    }
+    case "smtp_send": {
+      const host = typeof v.host === "string" ? v.host.trim().slice(0, 200) : "";
+      const port = typeof v.port === "number" ? Math.min(Math.max(Math.round(v.port), 1), 65535) : 587;
+      const to = typeof v.to === "string" ? v.to.trim().slice(0, 200) : "";
+      return host && to ? { id, kind: "smtp_send", host, port, to, ...(typeof v.subject === "string" ? { subject: v.subject.slice(0, 200) } : {}) } : null;
+    }
+    case "ftp": {
+      const op = v.operation;
+      if (op !== "upload" && op !== "download" && op !== "list") return null;
+      const host = typeof v.host === "string" ? v.host.trim().slice(0, 200) : "";
+      return host ? { id, kind: "ftp", operation: op, host, ...(typeof v.path === "string" ? { path: v.path.slice(0, 500) } : {}) } : null;
+    }
+    case "ssh": {
+      const host = typeof v.host === "string" ? v.host.trim().slice(0, 200) : "";
+      const cmd = typeof v.command === "string" ? v.command.trim().slice(0, 500) : "";
+      // SECURITY: same shell metachar blocking as execute_command
+      const DANGEROUS_SHELL = /[;&|`$(){}[\]<>\\!\n\r]/;
+      if (DANGEROUS_SHELL.test(cmd)) return null;
+      return host && cmd ? { id, kind: "ssh", host, command: cmd } : null;
+    }
+    case "graphql": {
+      const url = typeof v.url === "string" ? sanitiseBoxUrl(v.url) : undefined;
+      const query = typeof v.query === "string" ? v.query.trim().slice(0, 5000) : "";
+      return url && query ? { id, kind: "graphql", url, query, ...(typeof v.variables === "string" ? { variables: v.variables.slice(0, 2000) } : {}) } : null;
+    }
+    case "ai_agent": {
+      const inst = typeof v.instruction === "string" ? v.instruction.trim().slice(0, MAX_INSTRUCTION_CHARS) : "";
+      const tools = Array.isArray(v.tools) ? v.tools.slice(0, 10).filter((t: unknown): t is string => typeof t === "string").map((t: string) => t.slice(0, 50)) : [];
+      return inst.length >= 3 ? { id, kind: "ai_agent", instruction: inst, tools } : null;
+    }
+    case "llm_chain": {
+      const prompt = typeof v.prompt === "string" ? v.prompt.trim().slice(0, MAX_INSTRUCTION_CHARS) : "";
+      return prompt.length >= 3 ? { id, kind: "llm_chain", prompt } : null;
+    }
+    case "retrieval_qa": {
+      const q = typeof v.question === "string" ? v.question.trim().slice(0, MAX_INSTRUCTION_CHARS) : "";
+      return q.length >= 3 ? { id, kind: "retrieval_qa", question: q, ...(typeof v.source === "string" ? { source: v.source.slice(0, 200) } : {}) } : null;
+    }
+    case "summarization_chain": {
+      return { id, kind: "summarization_chain", ...(typeof v.maxLength === "number" ? { maxLength: Math.min(Math.max(Math.round(v.maxLength), 50), 10000) } : {}) };
+    }
+    case "http_response": {
+      const sc = typeof v.statusCode === "number" ? Math.min(Math.max(Math.round(v.statusCode), 100), 599) : 200;
+      let body = typeof v.body === "string" ? v.body.slice(0, 2000) : undefined;
+      if (body) body = body.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+      return { id, kind: "http_response", statusCode: sc, ...(body ? { body } : {}) };
+    }
     case "action": {
       if (!(ACTIONS as readonly unknown[]).includes(v.do)) return null;
       const actUrl = typeof v.url === "string" ? sanitiseBoxUrl(v.url) : undefined;
@@ -840,6 +999,28 @@ export const SENTENCE_PART: Record<BoxKind, SentencePart> = {
   extract_info: "do",
   respond_webhook: "do",
   execute_command: "do",
+  // n8n remaining core (2026-11-25, round 3):
+  aggregate: "do",
+  split_out: "do",
+  rename_keys: "do",
+  xml: "do",
+  markdown: "do",
+  crypto: "do",
+  spreadsheet_parse: "do",
+  no_op: "do",
+  stop_error: "if",
+  execute_workflow: "do",
+  read_file: "do",
+  write_file: "do",
+  smtp_send: "do",
+  ftp: "do",
+  ssh: "do",
+  graphql: "do",
+  ai_agent: "do",
+  llm_chain: "do",
+  retrieval_qa: "do",
+  summarization_chain: "do",
+  http_response: "do",
 };
 export function partOf(box: Box): SentencePart {
   return SENTENCE_PART[box.kind];

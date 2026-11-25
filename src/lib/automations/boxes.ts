@@ -820,7 +820,10 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
       return { id, kind: "action", do: v.do as ActionKind, ...(actUrl ? { url: actUrl } : {}), ...(actCfg ? { config: actCfg } : {}) };
     }
     default:
-      return null;
+      // Unknown kind: preserve as a note rather than breaking the whole flow.
+      // This prevents "These boxes cannot be read any more" when old code
+      // encounters boxes created by a newer version with more kinds.
+      return { id, kind: "note", text: `[${String(v.kind)}]` };
   }
 }
 
@@ -837,7 +840,7 @@ export function readFlow(raw: unknown): FlowVerdict {
   const boxes: Box[] = [];
   for (const [i, item] of raw.entries()) {
     const box = readBox(item, `b${i + 1}`);
-    if (!box) return { ok: false, reason: "bad_box" };
+    if (!box) continue; // Skip unparseable boxes instead of failing the whole flow
     boxes.push(box);
   }
   if (new Set(boxes.map((b) => b.id)).size !== boxes.length) return { ok: false, reason: "duplicate_id" };
@@ -845,7 +848,11 @@ export function readFlow(raw: unknown): FlowVerdict {
   if (starts.length === 0) return { ok: false, reason: "no_start" };
   if (starts.length > 1) return { ok: false, reason: "two_starts" };
   if (boxes[0].kind !== "start") return { ok: false, reason: "start_not_first" };
-  if (!boxes.some((b) => b.kind === "action")) return { ok: false, reason: "no_action" };
+  // At least one "doing" box — an action, or any utility/AI/communication node.
+  // The old rule required kind==="action" only, but with 51 node types many
+  // workflows legitimately have no plain "action" box (e.g. all smtp_send, graphql, etc.)
+  const DOING_KINDS = new Set(["action", "ai", "transform", "code", "smtp_send", "ftp", "ssh", "graphql", "ai_agent", "llm_chain", "retrieval_qa", "summarization_chain", "execute_command", "execute_workflow", "respond_webhook", "http_response", "write_file", "text_classifier", "sentiment", "extract_info"]);
+  if (!boxes.some((b) => DOING_KINDS.has(b.kind))) return { ok: false, reason: "no_action" };
   const start = boxes[0] as StartBox;
   if (start.when !== "file_uploaded" && boxes.some((b) => b.kind === "read" && b.source === "uploaded_file")) {
     return { ok: false, reason: "file_read_without_upload" };

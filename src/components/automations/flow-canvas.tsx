@@ -507,12 +507,17 @@ function FlowCanvasInner({
     }
   }, [chosen, onDelete, onUndo]);
 
+  // React Flow REQUIRES an explicit pixel height — "100%" collapses to 0
+  // when the parent has no fixed height. Calculate from the number of rows.
+  const COLS = 4;
+  const totalRows = Math.ceil((boxes.length + (onAdd ? 1 : 0)) / COLS);
+  const canvasHeight = Math.max(400, Math.min(totalRows * 130 + 80, 800));
+
   return (
     <div
       className="rounded-xl"
       style={{
-        height: "100%",
-        minHeight: 400,
+        height: canvasHeight,
         border: "1px solid rgb(var(--border) / 0.3)",
       }}
       onKeyDown={onKeyDown}

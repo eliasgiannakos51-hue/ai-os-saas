@@ -618,6 +618,13 @@ function FlowCanvasInner({
           )}
         </div>
       )}
+      {/* n8n-style status bar — bottom of canvas */}
+      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between rounded-b-xl px-3 py-1" style={{ background: "rgb(var(--panel) / 0.9)", borderTop: "1px solid rgb(var(--border) / 0.2)" }}>
+        <span className="text-[10px] text-muted">{boxes.length} nodes</span>
+        <span className="text-[10px] text-muted">
+          Del: delete · Ctrl+D: duplicate · 1: fit · 0: 100%
+        </span>
+      </div>
     </div>
   );
 }

@@ -874,7 +874,7 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
         })}
       </ol>
       </FlowCanvas>
-      {!preview && <p className="mt-3 text-center text-xs text-muted">{t("simple.hint")}</p>}
+      {/* Hint removed — unnecessary text (2026-11-25) */}
     </div>
   );
 }

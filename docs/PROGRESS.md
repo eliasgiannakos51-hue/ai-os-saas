@@ -3,6 +3,30 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-25 (UX cleanup + security audit + categorized picker) 🧹
+
+### Καθαρισμός κειμένων σε όλο το Ionexa
+- Automations: help, made, tried, ran, choose, historyEmpty — κοντύτερα
+- Images help: 1 πρόταση αντί 2
+- Projects help: 1 πρόταση αντί 3
+- Pricing team banner: 1 πρόταση αντί 4
+- Αφαιρέθηκε Simple mode hint κάτω από τον canvas
+- Ίδιες αλλαγές και στα Ελληνικά (el.json)
+
+### Security audit (263 routes)
+- ✅ Όλα τα routes με auth
+- ✅ Κανένα SQL injection, XSS, CSRF, hardcoded secrets
+- ✅ Input validation σε όλα
+
+### UX βελτιώσεις
+- **Categorized node picker**: 7 categories (Core, Flow, Data, Time, AI, Code, Other) αντί flat list 29 nodes
+- **BoxRow picker**: 16 most-used nodes αντί 29, με σωστά icons
+- **Canvas height**: σωστό για 5-column horizontal layout
+- **Bezier edges**: πιο ομαλές καμπύλες σαν n8n
+
+### ACTION_CONFIG πλήρες
+- 25 νέα action types με config fields (Salesforce, MySQL, MongoDB, PayPal, QuickBooks κλπ)
+
 ## 2026-11-24 (n8n full parity: 150 capabilities + 16 node types) 🚀
 
 Ολοκληρωτική αναβάθμιση automations σε επίπεδο n8n.

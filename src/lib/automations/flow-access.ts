@@ -36,7 +36,7 @@ export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 export const MAX_FLOWS = 20;
 export const MAX_ACTIVE_FLOWS = 10;
 /** What one sentence may be. */
-export const MAX_SAID_CHARS = 2000;
+export const MAX_SAID_CHARS = 10000;
 
 export const FLOW_COLUMNS = "id, name, said, boxes, version, is_active, time_zone, next_run_at, last_run_at, cost_limit, busy_since, created_at";
 export const RUN_COLUMNS = "id, flow_id, started_by, status, steps, state, credits_charged, error, approval_expires_at, started_at, finished_at";

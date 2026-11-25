@@ -358,7 +358,7 @@
     "contactSales": "Contact Sales",
     "getPlan": "Get {plan}",
     "teamBannerTitle": "Building with a team?",
-    "teamBannerBody": "Give teammates your plan: each member signs in to their own account and gets your plan's tier, not a limited guest view. Work is not shared between accounts yet — each person keeps their own. On Professional, add members for +{price}/member/month, billed monthly per seat. Ultimate and Enterprise include unlimited team seats at no extra charge. Manage invites and remove access anytime from the Team page in Settings.",
+    "teamBannerBody": "Each member gets your plan. Professional: +{price}/member/month. Ultimate and Enterprise: unlimited seats included.",
     "comparePlans": "Compare plans",
     "feature": "Feature",
     "backToHome": "← Back to Ionexa AI",
@@ -3655,7 +3655,7 @@
     },
     "images": {
       "name": "Image",
-      "help": "Say what you want to see. You get 4 versions; press one to change it in words or download it at full resolution.",
+      "help": "Describe what you want to see.",
       "placeholder": "Describe the image you want",
       "placeholderEdit": "What should change in image {n}?",
       "aspect": "Shape",
@@ -4149,7 +4149,7 @@
     },
     "flows": {
       "name": "Projects",
-      "help": "Write in one sentence what you want made, e.g. “Make a site for my campsite, with pictures, and posts to announce it”. You see the plan and its cost, approve it, and everything goes into one project.",
+      "help": "Describe what you want made.",
       "placeholder": "What do you want made?",
       "planIntro": "This is the plan. Nothing starts before you approve it.",
       "kinds": {

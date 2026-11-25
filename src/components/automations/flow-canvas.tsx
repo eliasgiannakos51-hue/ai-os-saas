@@ -495,9 +495,20 @@ function FlowCanvasInner({
     onChoose(node.id);
   }, [onChoose]);
 
+  // Right-click context menu state
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
+  const onNodeContextMenu = useCallback((e: React.MouseEvent, node: Node) => {
+    e.preventDefault();
+    if (node.id === "__add__") return;
+    setContextMenu({ x: e.clientX, y: e.clientY, nodeId: node.id });
+  }, []);
+  const closeContext = useCallback(() => setContextMenu(null), []);
+
+  const reactFlowInstance = useReactFlow();
+
   // Keyboard shortcuts — n8n style
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {
-    // Delete: remove selected node
+    // Delete/Backspace: remove selected node
     if ((e.key === "Delete" || e.key === "Backspace") && chosen && onDelete) {
       e.preventDefault();
       onDelete(chosen);
@@ -507,7 +518,21 @@ function FlowCanvasInner({
       e.preventDefault();
       onUndo();
     }
-  }, [chosen, onDelete, onUndo]);
+    // Ctrl+D: duplicate selected node
+    if ((e.ctrlKey || e.metaKey) && e.key === "d" && chosen && onAdd) {
+      e.preventDefault();
+      const box = boxes.find((b) => b.id === chosen);
+      if (box && box.kind !== "start") onAdd(box.kind);
+    }
+    // 1: zoom to fit (n8n shortcut)
+    if (e.key === "1" && !e.ctrlKey && !e.metaKey) {
+      reactFlowInstance.fitView({ padding: 0.2, duration: 300 });
+    }
+    // 0: zoom to 100%
+    if (e.key === "0" && !e.ctrlKey && !e.metaKey) {
+      reactFlowInstance.zoomTo(1, { duration: 300 });
+    }
+  }, [chosen, onDelete, onUndo, onAdd, boxes, reactFlowInstance]);
 
   return (
     <div
@@ -524,7 +549,10 @@ function FlowCanvasInner({
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onNodeClick={onNodeClick}
+        onNodeClick={(e, n) => { closeContext(); onNodeClick(e, n); }}
+        onNodeDoubleClick={(_, n) => { if (n.id !== "__add__") onChoose(n.id); }}
+        onNodeContextMenu={onNodeContextMenu}
+        onPaneClick={closeContext}
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.2 }}
@@ -553,6 +581,43 @@ function FlowCanvasInner({
           style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)", borderRadius: 8, height: 80, width: 120 }}
         />
       </ReactFlow>
+      {/* n8n-style right-click context menu */}
+      {contextMenu && (
+        <div
+          className="fixed z-50 rounded-lg bg-panel py-1 shadow-xl"
+          style={{ left: contextMenu.x, top: contextMenu.y, border: "1px solid rgb(var(--border))", minWidth: 140 }}
+        >
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground hover:bg-panel-hover"
+            onClick={() => { onChoose(contextMenu.nodeId); closeContext(); }}
+          >
+            Edit
+          </button>
+          {onAdd && (
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground hover:bg-panel-hover"
+              onClick={() => {
+                const box = boxes.find((b) => b.id === contextMenu.nodeId);
+                if (box && box.kind !== "start") onAdd(box.kind);
+                closeContext();
+              }}
+            >
+              Duplicate
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-danger hover:bg-panel-hover"
+              onClick={() => { onDelete(contextMenu.nodeId); closeContext(); }}
+            >
+              Delete
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

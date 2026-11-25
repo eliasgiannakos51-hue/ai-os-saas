@@ -391,18 +391,22 @@ function AddNode({ data }: NodeProps) {
 const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 
 /**
- * Convert linear boxes to React Flow nodes in n8n HORIZONTAL layout.
- * ALL nodes go left → right in a single line. The canvas is infinite
- * and scrollable — React Flow handles pan/zoom in all directions.
- * No wrapping to rows. This is exactly how n8n works.
+ * n8n CANVAS LAYOUT. Primary direction is LEFT → RIGHT. After every
+ * 4 nodes, the flow steps DOWN one row and continues LEFT → RIGHT.
+ * This creates a readable staircase pattern that you scroll/pan through.
+ * React Flow handles infinite pan + zoom in all directions.
  */
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
   const X_STEP = 230;    // horizontal gap between nodes
+  const Y_STEP = 110;    // vertical gap between rows
+  const COLS = 4;         // nodes per row before stepping down
   return boxes.map((box, i) => {
+    const row = Math.floor(i / COLS);
+    const col = i % COLS;
     return {
       id: box.id,
       type: "automation",
-      position: { x: i * X_STEP + 20, y: 100 },
+      position: { x: col * X_STEP + row * 60, y: row * Y_STEP + 20 },
       data: {
         box,
         kindName: kindNames[box.kind] ?? box.kind,
@@ -449,12 +453,16 @@ function FlowCanvasInner({
     const nodes = boxesToNodes(boxes, kindNames, describe);
     // Add "+" node at the end
     if (onAdd) {
-      // Place "+" to the right of the last node (always horizontal)
       const X_STEP = 230;
+      const Y_STEP = 110;
+      const COLS = 4;
+      const nextIdx = boxes.length;
+      const row = Math.floor(nextIdx / COLS);
+      const col = nextIdx % COLS;
       nodes.push({
         id: "__add__",
         type: "addNode",
-        position: { x: boxes.length * X_STEP + 20, y: 100 },
+        position: { x: col * X_STEP + row * 60, y: row * Y_STEP + 20 },
         data: { onAdd, kindNames, theme: THEME },
         draggable: false,
         selectable: false,
@@ -503,7 +511,8 @@ function FlowCanvasInner({
     <div
       className="rounded-xl"
       style={{
-        height: 350,
+        height: "100%",
+        minHeight: 400,
         border: "1px solid rgb(var(--border) / 0.3)",
       }}
       onKeyDown={onKeyDown}

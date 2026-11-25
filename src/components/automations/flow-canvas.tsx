@@ -391,25 +391,18 @@ function AddNode({ data }: NodeProps) {
 const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 
 /**
- * Convert linear boxes to React Flow nodes in a HORIZONTAL layout
- * exactly like n8n: left → right, with rows wrapping when the
- * canvas gets too wide. Each row holds up to COLS nodes; when a row
- * is full the next row starts below it, flowing left → right again.
+ * Convert linear boxes to React Flow nodes in n8n HORIZONTAL layout.
+ * ALL nodes go left → right in a single line. The canvas is infinite
+ * and scrollable — React Flow handles pan/zoom in all directions.
+ * No wrapping to rows. This is exactly how n8n works.
  */
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
-  const COLS = 5;        // nodes per row before wrapping
-  const X_STEP = 220;    // horizontal gap between nodes
-  const Y_STEP = 120;    // vertical gap between rows
+  const X_STEP = 230;    // horizontal gap between nodes
   return boxes.map((box, i) => {
-    const row = Math.floor(i / COLS);
-    const col = i % COLS;
-    // n8n layout: always left → right, new row below
-    const x = col * X_STEP;
-    const y = row * Y_STEP;
     return {
       id: box.id,
       type: "automation",
-      position: { x: x + 20, y: y + 20 },
+      position: { x: i * X_STEP + 20, y: 100 },
       data: {
         box,
         kindName: kindNames[box.kind] ?? box.kind,
@@ -456,17 +449,12 @@ function FlowCanvasInner({
     const nodes = boxesToNodes(boxes, kindNames, describe);
     // Add "+" node at the end
     if (onAdd) {
-      // Place "+" to the right of the last node (horizontal n8n layout)
-      const COLS = 5;
-      const X_STEP = 220;
-      const Y_STEP = 120;
-      const nextIdx = boxes.length;
-      const row = Math.floor(nextIdx / COLS);
-      const col = nextIdx % COLS;
+      // Place "+" to the right of the last node (always horizontal)
+      const X_STEP = 230;
       nodes.push({
         id: "__add__",
         type: "addNode",
-        position: { x: col * X_STEP + 20, y: row * Y_STEP + 20 },
+        position: { x: boxes.length * X_STEP + 20, y: 100 },
         data: { onAdd, kindNames, theme: THEME },
         draggable: false,
         selectable: false,
@@ -511,15 +499,11 @@ function FlowCanvasInner({
     }
   }, [chosen, onDelete, onUndo]);
 
-  // Height based on number of rows (5 nodes per row in horizontal layout)
-  const rows = Math.ceil((boxes.length + (onAdd ? 1 : 0)) / 5);
-  const canvasHeight = Math.max(300, rows * 140 + 60);
-
   return (
     <div
       className="rounded-xl"
       style={{
-        height: canvasHeight,
+        height: 350,
         border: "1px solid rgb(var(--border) / 0.3)",
       }}
       onKeyDown={onKeyDown}
@@ -533,7 +517,10 @@ function FlowCanvasInner({
         onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.3 }}
+        fitViewOptions={{ padding: 0.2 }}
+        panOnDrag
+        zoomOnScroll
+        panOnScroll
         proOptions={{ hideAttribution: true }}
         style={{ background: "transparent" }}
         deleteKeyCode={null}

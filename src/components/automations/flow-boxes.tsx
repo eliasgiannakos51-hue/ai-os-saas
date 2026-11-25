@@ -691,8 +691,8 @@ export function BoxRow({
   const noteWords = useNoteWords();
   /** Which "+" was clicked — shows the type picker at that index. */
   const [addAt, setAddAt] = useState<number | null>(null);
-  /** The 5 addable kinds (start is never added manually). */
-  const ADD_KINDS: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action", "error_handler", "loop", "split", "merge", "delay", "note", "sort", "limit", "remove_duplicates", "summarize", "switch", "set", "compare", "date_time", "html_extract", "text_classifier", "sentiment", "extract_info", "respond_webhook", "execute_command"];
+  /** Categorized node picker — most-used first, then by category. */
+  const ADD_KINDS: Box["kind"][] = ["read", "ai", "action", "condition", "filter", "code", "transform", "approval", "wait", "loop", "error_handler", "switch", "sort", "limit", "set", "note"];
   return (
     <FlowCanvas>
     <ol data-testid="flow-boxes" data-live={progress ? progress.live : undefined} aria-busy={progress?.live || undefined} className="flex flex-col items-center gap-0">
@@ -771,16 +771,8 @@ export function BoxRow({
                     className="flex flex-col items-center gap-0.5 rounded-lg px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-panel-hover"
                     style={{ color: th.border }}
                   >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full text-white" style={{ background: th.bg }}>
-                      {k === "read" && <Table2 className="h-3.5 w-3.5" />}
-                      {k === "ai" && <Sparkles className="h-3.5 w-3.5" />}
-                      {k === "filter" && <Filter className="h-3.5 w-3.5" />}
-                      {k === "code" && <Hash className="h-3.5 w-3.5" />}
-                      {k === "transform" && <Layers className="h-3.5 w-3.5" />}
-                      {k === "wait" && <Clock className="h-3.5 w-3.5" />}
-                      {k === "condition" && <Filter className="h-3.5 w-3.5" />}
-                      {k === "approval" && <PauseCircle className="h-3.5 w-3.5" />}
-                      {k === "action" && <Send className="h-3.5 w-3.5" />}
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: th.icon, color: th.iconText }}>
+                      <BoxIconInner box={{ kind: k, id: "_" } as Box} />
                     </span>
                     {kind[k]}
                   </button>

@@ -250,7 +250,17 @@ function AddNode({ data }: NodeProps) {
     theme: typeof THEME;
   };
   const [open, setOpen] = useState(false);
-  const kinds: Box["kind"][] = ["read", "ai", "filter", "code", "transform", "wait", "condition", "approval", "action", "error_handler", "loop", "split", "merge", "delay", "note", "sort", "limit", "remove_duplicates", "summarize", "switch", "set", "compare", "date_time", "html_extract", "text_classifier", "sentiment", "extract_info", "respond_webhook", "execute_command"];
+  /** n8n-style categorized node picker. Groups make 30 nodes manageable. */
+  const categories: { label: string; kinds: Box["kind"][] }[] = [
+    { label: "Core", kinds: ["read", "ai", "condition", "approval", "action"] },
+    { label: "Flow", kinds: ["filter", "switch", "loop", "split", "merge", "error_handler"] },
+    { label: "Data", kinds: ["sort", "limit", "remove_duplicates", "summarize", "set", "compare", "transform"] },
+    { label: "Time", kinds: ["wait", "delay", "date_time"] },
+    { label: "AI", kinds: ["text_classifier", "sentiment", "extract_info"] },
+    { label: "Code", kinds: ["code", "html_extract", "execute_command", "respond_webhook"] },
+    { label: "Other", kinds: ["note"] },
+  ];
+  const [activeTab, setActiveTab] = useState(0);
   return (
     <div className="flex flex-col items-center">
       <Handle type="target" position={Position.Left} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
@@ -263,28 +273,39 @@ function AddNode({ data }: NodeProps) {
         <span className="text-lg leading-none">+</span>
       </button>
       {open && (
-        <div className="absolute top-10 z-10 flex gap-1 rounded-lg bg-panel p-1.5 shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
-          {kinds.map((k) => {
-            const th = themes[k];
-            return (
+        <div className="absolute top-10 z-10 w-56 rounded-lg bg-panel shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
+          {/* Category tabs */}
+          <div className="flex flex-wrap gap-0.5 border-b px-1.5 pt-1.5" style={{ borderColor: "rgb(var(--border) / 0.3)" }}>
+            {categories.map((cat, idx) => (
               <button
-                key={k}
+                key={cat.label}
                 type="button"
-                onClick={() => { setOpen(false); onAdd(k); }}
-                className="flex flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[8px] font-bold uppercase tracking-wider transition-colors hover:bg-panel-hover"
-                style={{ color: th.label }}
+                onClick={() => setActiveTab(idx)}
+                className={`rounded-t px-2 py-1 text-[8px] font-bold uppercase tracking-wider transition-colors ${activeTab === idx ? "bg-foreground/10 text-foreground" : "text-muted hover:text-foreground"}`}
               >
-                <span className="flex h-6 w-6 items-center justify-center rounded-md" style={{ background: th.icon, color: th.iconText }}>
-                  {k === "read" && <Table2 className="h-3 w-3" />}
-                  {k === "ai" && <Sparkles className="h-3 w-3" />}
-                  {k === "condition" && <Filter className="h-3 w-3" />}
-                  {k === "approval" && <PauseCircle className="h-3 w-3" />}
-                  {k === "action" && <Send className="h-3 w-3" />}
-                </span>
-                {kindNames[k]}
+                {cat.label}
               </button>
-            );
-          })}
+            ))}
+          </div>
+          {/* Nodes grid */}
+          <div className="grid grid-cols-2 gap-1 p-1.5">
+            {categories[activeTab].kinds.map((k) => {
+              const th = themes[k];
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => { setOpen(false); onAdd(k); }}
+                  className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-panel-hover"
+                >
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded" style={{ background: th.icon, color: th.iconText }}>
+                    <NodeIcon box={{ kind: k, id: "_" } as Box} />
+                  </span>
+                  <span className="truncate text-[9px] font-medium text-foreground">{kindNames[k]}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

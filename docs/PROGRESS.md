@@ -3,6 +3,35 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-25 (n8n 100% parity: 51 nodes + 1000 boxes + full UX) 🚀
+
+### Πλήρης n8n core parity
+- **51 node types** — κάθε core node του n8n (21 νέα: Aggregate, Split Out,
+  Rename Keys, XML, Markdown, Crypto, Spreadsheet Parse, No Op, Stop & Error,
+  Execute Workflow, Read/Write File, SMTP Send, FTP, SSH, GraphQL, AI Agent,
+  LLM Chain, Retrieval QA, Summarization Chain, HTTP Response)
+- **MAX_BOXES = 1000** (ήταν 20)
+- **MAX_SAID_CHARS = 10000** (ήταν 2000) — μεγάλες περιγραφές
+- **MAX_TOKENS = 16000** (ήταν 2500) — builder output για 100+ nodes
+- **ACTION_CONFIG** για 25+ νέα integrations
+
+### Canvas n8n-identical
+- **Οριζόντιο layout** — μία γραμμή αριστερά→δεξιά, fitView zoom
+- **Search bar** στο node picker — φιλτράρει 51 nodes instant
+- **Node number badges** — 1, 2, 3... πάνω αριστερά
+- **Χρωματιστά edges + handles** — ταιριάζουν με node theme
+- **Right-click context menu** — Edit, Duplicate, Delete
+- **Double-click** ανοίγει node editor
+- **Keyboard shortcuts** — Del, Ctrl+D, 1 (fit), 0 (100%)
+- **Status bar** — node count + shortcut hints
+- **Pan/zoom/scroll** σε όλες τις κατευθύνσεις
+
+### Resilience
+- readBox default → note (δεν σπάει flow)
+- readFlow skip bad boxes (δεν αποτυγχάνει)
+- readShownFlow salvage individual boxes
+- no_action check accepts 20 "doing" node types
+
 ## 2026-11-25 (UX cleanup + security audit + categorized picker) 🧹
 
 ### Καθαρισμός κειμένων σε όλο το Ionexa

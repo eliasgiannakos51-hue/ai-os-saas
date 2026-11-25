@@ -95,7 +95,30 @@ UTILITY NODES (use these to build powerful workflows like n8n):
 - extract_info: fields — AI extraction of structured data. Use for "extract name and email from".
 - respond_webhook: statusCode + body — respond to incoming webhook.
 
-COMPLEX DESCRIPTIONS. When the person writes a long description with multiple steps, break it into AS MANY BOXES AS NEEDED. Use ALL the box types that fit — utility nodes make workflows more powerful. A description with "sort", "filter", "deduplicate", "loop", "batch", "if fails retry", "classify", "extract", "wait" etc. should use the matching utility node, NOT just an AI box. The person expects a COMPLEX, PROFESSIONAL workflow with 8-15+ boxes, like n8n. Prefer MORE boxes with specific utility nodes over fewer boxes that try to do everything in one AI step. ONE automation has ONE start; if the person describes two separate schedules, pick the one that fits best and note the other in "unsupported".`;
+MORE UTILITY NODES:
+- aggregate: operation (concatenate|merge_objects|to_array) — combine many items into one.
+- split_out: field — split one item with array into many items.
+- rename_keys: renames [{from, to}] — rename field names.
+- xml: direction (xml_to_json|json_to_xml) — convert XML.
+- markdown: direction (md_to_html|html_to_md) — convert markdown.
+- crypto: operation (hash|hmac|encrypt|decrypt|sign) — hash or encrypt data.
+- spreadsheet_parse: format (csv|xlsx|tsv) + hasHeader — parse spreadsheet files.
+- no_op: passthrough node, does nothing (for branching).
+- stop_error: message — throw error and stop workflow.
+- execute_workflow: workflowId — call another automation (sub-workflow).
+- read_file: path — read a file.
+- write_file: path — write data to a file.
+- smtp_send: host + port + to — send email via SMTP.
+- ftp: operation (upload|download|list) + host — FTP file transfer.
+- ssh: host + command — execute command on remote server.
+- graphql: url + query — query a GraphQL API.
+- ai_agent: instruction + tools[] — autonomous AI agent with tools.
+- llm_chain: prompt — simple LLM prompt-response.
+- retrieval_qa: question + source — answer from documents (RAG).
+- summarization_chain: maxLength — summarize long content.
+- http_response: statusCode + body — custom HTTP response.
+
+COMPLEX DESCRIPTIONS. When the person writes a LONG description with many steps, create ONE BOX PER STEP. Every verb is a box: "read" = read box, "sort" = sort box, "filter" = filter box, "send" = action box, "classify" = text_classifier box, "extract" = extract_info box, "summarize" = summarization_chain or summarize box, "hash" = crypto box, "convert XML" = xml box, "loop" = loop box, "retry" = error_handler box, "wait" = delay box. Count the steps in the description and make AT LEAST that many boxes. A description with 50 steps should produce ~50 boxes. A description with 100 steps should produce ~100 boxes. NEVER collapse multiple steps into one AI box — each step gets its own specific node type. The limit is ${MAX_BOXES} boxes. ONE automation has ONE start; if the person describes two separate schedules, pick the one that fits best and note the other in "unsupported".`;
 
 const BUILD_TOOL: AiToolSpec = {
   name: "set_automation",

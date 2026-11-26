@@ -606,70 +606,54 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
  * groups of same-kind nodes after a branch stack vertically
  * in one column, creating the "parallel paths" look.
  */
-const NODE_SIZE = 64;   // smaller squares for compact layout
-const X_STEP = 100;     // tight horizontal spacing
-const Y_STEP = 90;      // vertical distance for branching paths
-const CENTER_Y = 200;   // center line Y position
+/**
+ * WATERFALL LAYOUT — the layout that actually works for 100+ nodes.
+ *
+ * Nodes flow LEFT→RIGHT in rows of COLS_PER_ROW (10).
+ * At the end of a row, the flow drops DOWN to the next row.
+ * Within each row: horizontal connections (right→left).
+ * Between rows: vertical drop connection (bottom→top).
+ *
+ * Branch nodes (condition/switch) fan out: 2-3 nodes spread
+ * vertically within the row, then continue horizontally.
+ *
+ * This uses the FULL canvas area — no tiny dots on a single line.
+ */
+const NODE_SIZE = 64;
+const X_STEP = 105;      // horizontal spacing between nodes
+const Y_STEP = 100;      // vertical spacing between rows
+const COLS_PER_ROW = 10; // nodes per row before dropping down
 
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
-const MERGE_KINDS = new Set(["merge", "aggregate"]);
 
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
   if (boxes.length === 0) return [];
 
   const positions: { x: number; y: number }[] = [];
-
-  let x = 0;
-  let currentY = CENTER_Y;
-  let inFanOut = false;
-  let fanOutCount = 0;
-  let fanOutX = 0;
-  let fanOutBaseY = CENTER_Y;
+  let col = 0;
+  let row = 0;
 
   for (let i = 0; i < boxes.length; i++) {
     const box = boxes[i];
-    const isBranch = BRANCH_KINDS.has(box.kind);
-    const isMerge = MERGE_KINDS.has(box.kind);
     const prevIsBranch = i > 0 && BRANCH_KINDS.has(boxes[i - 1].kind);
 
     if (i === 0) {
-      // First node — left side, centered
-      positions.push({ x: 0, y: CENTER_Y });
-      x = 0;
+      positions.push({ x: 0, y: 0 });
+      col = 0;
+      row = 0;
     } else if (prevIsBranch) {
-      // Start fan-out: first node after a branch
-      inFanOut = true;
-      fanOutCount = 0;
-      fanOutX = x + X_STEP;
-      fanOutBaseY = currentY;
-
-      // Place first fan node ABOVE center
-      const fanY = fanOutBaseY - Y_STEP;
-      positions.push({ x: fanOutX, y: fanY });
-      currentY = fanY;
-      x = fanOutX;
-      fanOutCount = 1;
-    } else if (inFanOut && fanOutCount < 3 && !isBranch && !isMerge) {
-      // Continue fan-out: stack vertically at same X
-      let fanY: number;
-      if (fanOutCount === 1) fanY = fanOutBaseY;         // center
-      else fanY = fanOutBaseY + Y_STEP;                  // below
-
-      positions.push({ x: fanOutX, y: fanY });
-      currentY = fanY;
-      fanOutCount++;
+      // After branch: shift down slightly to show branching visual
+      col++;
+      if (col >= COLS_PER_ROW) { col = 0; row++; }
+      positions.push({ x: col * X_STEP, y: row * Y_STEP + 40 });
     } else {
-      // Normal: move RIGHT
-      inFanOut = false;
-      fanOutCount = 0;
-      x += X_STEP;
-
-      // Merge node: come back to center
-      if (isMerge) {
-        currentY = CENTER_Y;
+      col++;
+      if (col >= COLS_PER_ROW) {
+        // Drop to next row
+        col = 0;
+        row++;
       }
-
-      positions.push({ x, y: currentY });
+      positions.push({ x: col * X_STEP, y: row * Y_STEP });
     }
   }
 
@@ -688,24 +672,31 @@ function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe:
 }
 
 /**
- * Edges connect each box to the next. Always right→left handles
- * (horizontal flow). Bezier curves like n8n.
+ * Edges: smart handle routing.
+ * - Same row, next col: right→left (horizontal)
+ * - Row wrap (last col → first col of next row): right→left with bezier
  */
-function boxesToEdges(boxes: Box[]): Edge[] {
-  return boxes.slice(0, -1).map((box, i) => ({
-    id: `e-${box.id}-${boxes[i + 1].id}`,
-    source: box.id,
-    sourceHandle: "right",
-    target: boxes[i + 1].id,
-    targetHandle: "left",
-    type: "default",  // bezier curves — n8n style
-    animated: false,
-    style: {
-      stroke: "#9ca3af",    // visible gray — works at any zoom
-      strokeWidth: 2,
-      opacity: 0.6,
-    },
-  }));
+function boxesToEdges(boxes: Box[], positions: { x: number; y: number }[]): Edge[] {
+  return boxes.slice(0, -1).map((box, i) => {
+    const sp = positions[i];
+    const tp = positions[i + 1];
+    const goesLeft = tp && sp && tp.x < sp.x; // row wrap: target is to the left
+
+    return {
+      id: `e-${box.id}-${boxes[i + 1].id}`,
+      source: box.id,
+      sourceHandle: "right",
+      target: boxes[i + 1].id,
+      targetHandle: "left",
+      type: goesLeft ? "smoothstep" : "default", // smoothstep for row wraps (cleaner)
+      animated: false,
+      style: {
+        stroke: "#9ca3af",
+        strokeWidth: 2,
+        opacity: 0.55,
+      },
+    };
+  });
 }
 
 /* ───────────────────── CANVAS INNER ───────────────────── */
@@ -734,7 +725,7 @@ function FlowCanvasInner({
     const nodes = boxesToNodes(boxes, kindNames, describe);
 
     if (onAdd) {
-      const lastPos = nodes.length > 0 ? nodes[nodes.length - 1].position : { x: 0, y: CENTER_Y };
+      const lastPos = nodes.length > 0 ? nodes[nodes.length - 1].position : { x: 0, y: 0 };
       nodes.push({
         id: "__add__",
         type: "addNode",
@@ -745,7 +736,8 @@ function FlowCanvasInner({
       });
     }
 
-    const edges = boxesToEdges(boxes);
+    const posArr = nodes.map((n) => n.position);
+    const edges = boxesToEdges(boxes, posArr);
     if (onAdd && boxes.length > 0) {
       edges.push({
         id: `e-${boxes[boxes.length - 1].id}-__add__`,

@@ -299,13 +299,17 @@ function NodeIcon({ box, size = 18 }: { box: Box; size?: number }) {
  *  │ ▌          operation desc   │
  *  └─────────────────────────────┘
  *
- * n8n EXACT node — studied from screenshots:
- *  ┌────────────────────────┐
- *  │  (●)  Node Name        │   ← circular colored icon, bold name
- *  │       operation info   │   ← subtle subtitle
- *  └────────────────────────┘
+ * n8n EXACT node design (from n8n source: GRID_SIZE=16, node=6×6=96×96px):
  *
- * 142×52px, 10px radius, circular icon (n8n signature), two text lines.
+ *       ┌──────────┐
+ *       │          │
+ *       │   (●)    │  ← 96×96 square card, big circular icon centered
+ *       │          │
+ *       └──────────┘
+ *         Node Name    ← label BELOW the card (not inside)
+ *
+ * Square card, big centered circular icon with brand color, name below.
+ * This is n8n's actual design — verified from their source code.
  */
 function AutomationNode({ data, selected }: NodeProps) {
   const { box, kindName, description, theme } = data as {
@@ -321,101 +325,96 @@ function AutomationNode({ data, selected }: NodeProps) {
   return (
     <div
       style={{
-        width: 142,
-        height: 52,
-        borderRadius: 10,
-        cursor: "grab",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
-        background: "rgb(var(--panel))",
-        border: selected
-          ? `2px solid ${theme.accent}`
-          : "1px solid rgb(var(--border) / 0.18)",
-        boxShadow: selected
-          ? `0 0 0 2px ${theme.accent}22, 0 3px 10px rgba(0,0,0,0.15)`
-          : "0 1px 3px rgba(0,0,0,0.08)",
-        position: "relative",
-        transition: "box-shadow 0.15s, border-color 0.15s",
+        cursor: "grab",
+        width: 96,
       }}
       title={`${kindName}: ${description}`}
     >
-      {/* Input handle (left) — not on start node */}
-      {!isStart && (
-        <Handle
-          type="target"
-          position={Position.Left}
-          style={{
-            background: "rgb(var(--panel))",
-            border: `2px solid ${theme.accent}`,
-            width: 9,
-            height: 9,
-            left: -5,
-          }}
-        />
-      )}
-
-      {/* n8n CIRCULAR icon — the signature look */}
+      {/* The square card */}
       <div
         style={{
-          marginLeft: 10,
-          width: 30,
-          height: 30,
-          borderRadius: "50%",
+          width: 96,
+          height: 96,
+          borderRadius: 12,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: theme.accent,
-          color: "#fff",
-          flexShrink: 0,
+          background: "rgb(var(--panel))",
+          border: selected
+            ? `2px solid ${theme.accent}`
+            : "1px solid rgb(var(--border) / 0.18)",
+          boxShadow: selected
+            ? `0 0 0 3px ${theme.accent}25, 0 4px 14px rgba(0,0,0,0.18)`
+            : "0 1px 4px rgba(0,0,0,0.08)",
+          position: "relative",
+          transition: "box-shadow 0.15s, border-color 0.15s",
         }}
       >
-        <NodeIcon box={box} size={14} />
-      </div>
+        {/* Input handle (left) — not on start node */}
+        {!isStart && (
+          <Handle
+            type="target"
+            position={Position.Left}
+            style={{
+              background: "rgb(var(--panel))",
+              border: `2px solid ${theme.accent}`,
+              width: 10,
+              height: 10,
+              left: -5,
+            }}
+          />
+        )}
 
-      {/* Two lines: name + subtitle */}
-      <div style={{ marginLeft: 8, overflow: "hidden", flex: 1, paddingRight: 8 }}>
+        {/* n8n big CIRCULAR icon — centered in the square */}
         <div
           style={{
-            fontSize: 11.5,
-            fontWeight: 600,
-            color: "rgb(var(--foreground))",
-            lineHeight: "15px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            width: 42,
+            height: 42,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: theme.accent,
+            color: "#fff",
           }}
         >
-          {kindName}
+          <NodeIcon box={box} size={20} />
         </div>
-        {description && (
-          <div
-            style={{
-              fontSize: 9.5,
-              color: "rgb(var(--foreground) / 0.4)",
-              lineHeight: "12px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              marginTop: 1,
-            }}
-          >
-            {description}
-          </div>
-        )}
+
+        {/* Output handle (right) */}
+        <Handle
+          type="source"
+          position={Position.Right}
+          style={{
+            background: "rgb(var(--panel))",
+            border: `2px solid ${theme.accent}`,
+            width: 10,
+            height: 10,
+            right: -5,
+          }}
+        />
       </div>
 
-      {/* Output handle (right) */}
-      <Handle
-        type="source"
-        position={Position.Right}
+      {/* Label BELOW the card — n8n's actual design */}
+      <div
         style={{
-          background: "rgb(var(--panel))",
-          border: `2px solid ${theme.accent}`,
-          width: 9,
-          height: 9,
-          right: -5,
+          marginTop: 6,
+          maxWidth: 110,
+          textAlign: "center",
+          fontSize: 11,
+          fontWeight: 500,
+          color: "rgb(var(--foreground) / 0.75)",
+          lineHeight: "14px",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
         }}
-      />
+      >
+        {kindName}
+      </div>
     </div>
   );
 }
@@ -604,13 +603,13 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
  * the nodes that follow, simulating parallel paths.
  * Same-kind consecutive nodes stack vertically in a column.
  */
-const NODE_W = 142;
-const NODE_H = 52;
-const X_GAP = 50;      // horizontal gap — balanced like n8n
-const Y_GAP = 16;      // vertical gap between stacked nodes
-const X_STEP = NODE_W + X_GAP;  // 192px per column
-const Y_STEP = NODE_H + Y_GAP;  // 68px per stack row
-const MAX_STACK = 5;
+const NODE_W = 96;    // n8n: GRID_SIZE * 6 = 96
+const NODE_H = 120;   // 96px card + ~24px label below
+const X_GAP = 56;     // horizontal gap between nodes
+const Y_GAP = 20;     // vertical gap between stacked nodes
+const X_STEP = NODE_W + X_GAP;  // 152px per column
+const Y_STEP = NODE_H + Y_GAP;  // 140px per stack row
+const MAX_STACK = 4;
 
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
 

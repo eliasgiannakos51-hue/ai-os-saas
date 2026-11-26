@@ -3,6 +3,25 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-26 (Canvas redesign — exact n8n visual match)
+
+### Complete canvas visual overhaul to match n8n
+- **Node design**: Wide rectangles (164×56px) with icon LEFT, label RIGHT —
+  exactly like n8n (was 80×80 squares with tiny label below)
+- **Colored left accent stripe** — 4px per node, category-specific color
+- **n8n color system** — green triggers, blue data, purple AI, orange flow
+  control, teal transform, red errors — matching n8n's brand colors
+- **Icon in rounded square** with light tinted background (n8n style)
+- **Two-line text**: bold name + subtle description subtitle
+- **Wider spacing** (244px columns vs 120px) — proper breathing room
+- **Bezier curve connections** (was smoothstep/angular)
+- **Categorized node picker** — 11 categories (Triggers, Actions, Flow,
+  Transform, Convert, Timing, AI, Dev, Files, HTTP, Other) with search
+- **Cleaner handles** — white fill with colored border (n8n exact)
+- **No input handle on start node** — like n8n triggers
+- **Subtle shadows** matching n8n's elevation system
+- **MiniMap** colors now match node category accent colors
+
 ## 2026-11-25 (n8n 100% parity: 51 nodes + 1000 boxes + full UX) 🚀
 
 ### Πλήρης n8n core parity

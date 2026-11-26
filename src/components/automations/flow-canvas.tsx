@@ -4,14 +4,15 @@
  * n8n-STYLE VISUAL CANVAS using React Flow (@xyflow/react).
  *
  * Renders the automation's boxes as draggable nodes on an interactive
- * canvas with zoom, pan, and curved connections — exactly like n8n.
- * The linear boxes[] array is converted to React Flow nodes + edges.
+ * canvas with zoom, pan, and bezier connections — matching n8n's exact
+ * visual design: wide rectangular nodes with icon left, label right,
+ * colored left accent stripe, and proper horizontal flow.
  *
- * Clicking a node selects it (onChoose). Dragging repositions it.
- * The canvas has a dot-grid background like n8n.
+ * Run: src/components/automations/automation-shell.tsx uses this via
+ * FlowCanvasView (the exported wrapper).
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import {
   ReactFlow,
   Background,
@@ -31,69 +32,89 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, ArrowUpDown, BarChart3, Calendar, Clock, Code2, FileOutput, Filter, GitBranch, GitCompare, GitMerge, Globe, Hash, Heart, FileText, Layers, List, ListFilter, PauseCircle, RefreshCw, Reply, Scissors, Send, Sparkles, Split, Table2, Terminal, Timer, Type, Zap } from "lucide-react";
+import { AlertTriangle, ArrowUpDown, BarChart3, Calendar, Clock, Code2, FileOutput, Filter, GitBranch, GitCompare, GitMerge, Globe, Hash, Heart, FileText, Layers, List, ListFilter, PauseCircle, RefreshCw, Reply, Scissors, Send, Sparkles, Split, Table2, Terminal, Timer, Type, Zap, Play, Mail, Database, Webhook, ChevronRight, Plus, Search, X } from "lucide-react";
 import type { Box, ReadSource, ActionKind, StartBox } from "@/lib/automations/boxes";
 import type { Connected } from "@/components/automations/flow-boxes";
 
-/** Blue/gray theme — matches the rest of the automation UI. */
-const THEME: Record<Box["kind"], { icon: string; iconText: string; label: string; border: string }> = {
-  start:     { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  read:      { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  ai:        { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  condition: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  approval:  { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  action:    { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  filter:    { icon: "#4a2c0a", iconText: "#fbbf24", label: "#fbbf24", border: "#f59e0b" },
-  code:      { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
-  wait:      { icon: "#3b1a3b", iconText: "#e879f9", label: "#e879f9", border: "#d946ef" },
-  transform: { icon: "#1e3a5f", iconText: "#38bdf8", label: "#38bdf8", border: "#0ea5e9" },
-  note:      { icon: "#3a3a1a", iconText: "#fde68a", label: "#fde68a", border: "#fbbf24" },
-  // n8n advanced nodes (2026-11-24):
-  error_handler: { icon: "#5c1a1a", iconText: "#fca5a5", label: "#fca5a5", border: "#ef4444" },
-  loop:          { icon: "#1a3a5c", iconText: "#93c5fd", label: "#93c5fd", border: "#3b82f6" },
-  split:         { icon: "#1a4a3a", iconText: "#6ee7b7", label: "#6ee7b7", border: "#10b981" },
-  merge:         { icon: "#3a1a4a", iconText: "#c4b5fd", label: "#c4b5fd", border: "#8b5cf6" },
-  delay:         { icon: "#3a2a1a", iconText: "#fdba74", label: "#fdba74", border: "#f97316" },
-  // n8n data transformation + flow control (round 2):
-  sort:              { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  limit:             { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  remove_duplicates: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  summarize:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  switch:            { icon: "#4a2c0a", iconText: "#fbbf24", label: "#fbbf24", border: "#f59e0b" },
-  set:               { icon: "#1e3a5f", iconText: "#38bdf8", label: "#38bdf8", border: "#0ea5e9" },
-  compare:           { icon: "#1a4a3a", iconText: "#6ee7b7", label: "#6ee7b7", border: "#10b981" },
-  date_time:         { icon: "#3b1a3b", iconText: "#e879f9", label: "#e879f9", border: "#d946ef" },
-  html_extract:      { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
-  text_classifier:   { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  sentiment:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  extract_info:      { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  respond_webhook:   { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  execute_command:   { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
-  // n8n remaining core (round 3):
-  aggregate:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  split_out:         { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  rename_keys:       { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  xml:               { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
-  markdown:          { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  crypto:            { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  spreadsheet_parse: { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  no_op:             { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  stop_error:        { icon: "#5c1a1a", iconText: "#fca5a5", label: "#fca5a5", border: "#ef4444" },
-  execute_workflow:  { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  read_file:         { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  write_file:        { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  smtp_send:         { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  ftp:               { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  ssh:               { icon: "#1a2e1a", iconText: "#4ade80", label: "#4ade80", border: "#22c55e" },
-  graphql:           { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
-  ai_agent:          { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  llm_chain:         { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  retrieval_qa:      { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  summarization_chain: { icon: "#2d1b69", iconText: "#a78bfa", label: "#a78bfa", border: "#8b5cf6" },
-  http_response:     { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", border: "#3b82f6" },
+/* ───────────────────── n8n COLOR SYSTEM ───────────────────── */
+
+/**
+ * n8n uses distinct brand colors per node category.
+ * Each node has: accent (left stripe + icon bg), iconColor, and a subtle tint.
+ */
+const THEME: Record<Box["kind"], { accent: string; iconBg: string; iconColor: string }> = {
+  // Triggers — green
+  start:     { accent: "#00b050", iconBg: "#e6f9ef", iconColor: "#00b050" },
+  // Data sources — blue
+  read:      { accent: "#1a73e8", iconBg: "#e8f0fe", iconColor: "#1a73e8" },
+  // AI — purple
+  ai:        { accent: "#7c3aed", iconBg: "#f3e8ff", iconColor: "#7c3aed" },
+  // Flow control — orange/amber
+  condition: { accent: "#ff6d00", iconBg: "#fff3e0", iconColor: "#ff6d00" },
+  approval:  { accent: "#ff6d00", iconBg: "#fff3e0", iconColor: "#ff6d00" },
+  filter:    { accent: "#ff6d00", iconBg: "#fff3e0", iconColor: "#ff6d00" },
+  switch:    { accent: "#ff6d00", iconBg: "#fff3e0", iconColor: "#ff6d00" },
+  // Actions — blue
+  action:    { accent: "#1a73e8", iconBg: "#e8f0fe", iconColor: "#1a73e8" },
+  // Code — dark green
+  code:      { accent: "#0d7377", iconBg: "#e0f2f1", iconColor: "#0d7377" },
+  // Wait/timing — purple-pink
+  wait:      { accent: "#9c27b0", iconBg: "#f3e5f5", iconColor: "#9c27b0" },
+  delay:     { accent: "#9c27b0", iconBg: "#f3e5f5", iconColor: "#9c27b0" },
+  date_time: { accent: "#9c27b0", iconBg: "#f3e5f5", iconColor: "#9c27b0" },
+  // Transform — teal
+  transform: { accent: "#0097a7", iconBg: "#e0f7fa", iconColor: "#0097a7" },
+  // Note — warm gray
+  note:      { accent: "#8d6e63", iconBg: "#efebe9", iconColor: "#8d6e63" },
+  // Error handling — red
+  error_handler: { accent: "#d32f2f", iconBg: "#ffebee", iconColor: "#d32f2f" },
+  stop_error:    { accent: "#d32f2f", iconBg: "#ffebee", iconColor: "#d32f2f" },
+  // Loop/branching — blue
+  loop:          { accent: "#1565c0", iconBg: "#e3f2fd", iconColor: "#1565c0" },
+  split:         { accent: "#00897b", iconBg: "#e0f2f1", iconColor: "#00897b" },
+  merge:         { accent: "#6a1b9a", iconBg: "#f3e5f5", iconColor: "#6a1b9a" },
+  // Data ops — teal/blue
+  sort:              { accent: "#0097a7", iconBg: "#e0f7fa", iconColor: "#0097a7" },
+  limit:             { accent: "#0097a7", iconBg: "#e0f7fa", iconColor: "#0097a7" },
+  remove_duplicates: { accent: "#0097a7", iconBg: "#e0f7fa", iconColor: "#0097a7" },
+  summarize:         { accent: "#7c3aed", iconBg: "#f3e8ff", iconColor: "#7c3aed" },
+  set:               { accent: "#0097a7", iconBg: "#e0f7fa", iconColor: "#0097a7" },
+  compare:           { accent: "#0097a7", iconBg: "#e0f7fa", iconColor: "#0097a7" },
+  aggregate:         { accent: "#0097a7", iconBg: "#e0f7fa", iconColor: "#0097a7" },
+  split_out:         { accent: "#0097a7", iconBg: "#e0f7fa", iconColor: "#0097a7" },
+  rename_keys:       { accent: "#0097a7", iconBg: "#e0f7fa", iconColor: "#0097a7" },
+  // Format conversion — green
+  xml:               { accent: "#2e7d32", iconBg: "#e8f5e9", iconColor: "#2e7d32" },
+  markdown:          { accent: "#2e7d32", iconBg: "#e8f5e9", iconColor: "#2e7d32" },
+  html_extract:      { accent: "#2e7d32", iconBg: "#e8f5e9", iconColor: "#2e7d32" },
+  spreadsheet_parse: { accent: "#2e7d32", iconBg: "#e8f5e9", iconColor: "#2e7d32" },
+  crypto:            { accent: "#2e7d32", iconBg: "#e8f5e9", iconColor: "#2e7d32" },
+  // AI tools — purple
+  text_classifier:      { accent: "#7c3aed", iconBg: "#f3e8ff", iconColor: "#7c3aed" },
+  sentiment:            { accent: "#7c3aed", iconBg: "#f3e8ff", iconColor: "#7c3aed" },
+  extract_info:         { accent: "#7c3aed", iconBg: "#f3e8ff", iconColor: "#7c3aed" },
+  ai_agent:             { accent: "#7c3aed", iconBg: "#f3e8ff", iconColor: "#7c3aed" },
+  llm_chain:            { accent: "#7c3aed", iconBg: "#f3e8ff", iconColor: "#7c3aed" },
+  retrieval_qa:         { accent: "#7c3aed", iconBg: "#f3e8ff", iconColor: "#7c3aed" },
+  summarization_chain:  { accent: "#7c3aed", iconBg: "#f3e8ff", iconColor: "#7c3aed" },
+  // Network/IO — blue
+  respond_webhook:   { accent: "#1a73e8", iconBg: "#e8f0fe", iconColor: "#1a73e8" },
+  http_response:     { accent: "#1a73e8", iconBg: "#e8f0fe", iconColor: "#1a73e8" },
+  graphql:           { accent: "#1a73e8", iconBg: "#e8f0fe", iconColor: "#1a73e8" },
+  smtp_send:         { accent: "#1a73e8", iconBg: "#e8f0fe", iconColor: "#1a73e8" },
+  ftp:               { accent: "#1a73e8", iconBg: "#e8f0fe", iconColor: "#1a73e8" },
+  ssh:               { accent: "#0d7377", iconBg: "#e0f2f1", iconColor: "#0d7377" },
+  // Exec/files — dark teal
+  execute_command:   { accent: "#0d7377", iconBg: "#e0f2f1", iconColor: "#0d7377" },
+  execute_workflow:  { accent: "#6a1b9a", iconBg: "#f3e5f5", iconColor: "#6a1b9a" },
+  read_file:         { accent: "#1a73e8", iconBg: "#e8f0fe", iconColor: "#1a73e8" },
+  write_file:        { accent: "#1a73e8", iconBg: "#e8f0fe", iconColor: "#1a73e8" },
+  // Pass-through
+  no_op:             { accent: "#78909c", iconBg: "#eceff1", iconColor: "#78909c" },
 };
 
-/** Translate box kind to display name. */
+/* ───────────────────── KIND NAMES & DESCRIPTIONS ───────────────────── */
+
 function useKindNames() {
   const t = useTranslations("dashboard.automations");
   return {
@@ -115,32 +136,30 @@ function useKindNames() {
     delay: "Delay",
     sort: "Sort",
     limit: "Limit",
-    remove_duplicates: "Remove Duplicates",
+    remove_duplicates: "Deduplicate",
     summarize: "Summarize",
     switch: "Switch",
     set: "Set",
     compare: "Compare",
-    date_time: "Date & Time",
-    html_extract: "HTML Extract",
-    text_classifier: "Text Classifier",
+    date_time: "Date/Time",
+    html_extract: "HTML",
+    text_classifier: "Classifier",
     sentiment: "Sentiment",
-    extract_info: "Extract Info",
-    respond_webhook: "Respond Webhook",
+    extract_info: "Extract",
+    respond_webhook: "Webhook Response",
     execute_command: "Execute Command",
     aggregate: "Aggregate", split_out: "Split Out", rename_keys: "Rename Keys",
     xml: "XML", markdown: "Markdown", crypto: "Crypto", spreadsheet_parse: "Spreadsheet",
     no_op: "No Op", stop_error: "Stop & Error", execute_workflow: "Sub-Workflow",
-    read_file: "Read File", write_file: "Write File", smtp_send: "SMTP Send",
+    read_file: "Read File", write_file: "Write File", smtp_send: "Send Email",
     ftp: "FTP", ssh: "SSH", graphql: "GraphQL", ai_agent: "AI Agent",
     llm_chain: "LLM Chain", retrieval_qa: "Retrieval QA",
     summarization_chain: "Summarize Chain", http_response: "HTTP Response",
   };
 }
 
-/** Short description for a box. Uses t() with fallback to key name. */
 function useDescribe() {
   const t = useTranslations("dashboard.automations");
-  // Dynamic lookup — avoids maintaining a 100-entry Record manually
   const src = (key: string) => { try { return t(`sources.${key}` as never); } catch { return key.replace(/_/g, " "); } };
   const act = (key: string) => { try { return t(`actions.${key}` as never); } catch { return key.replace(/_/g, " "); } };
   const weekday = [t("weekdays.d1"), t("weekdays.d2"), t("weekdays.d3"), t("weekdays.d4"), t("weekdays.d5"), t("weekdays.d6"), t("weekdays.d7")];
@@ -160,55 +179,52 @@ function useDescribe() {
       return t("start.file");
     }
     if (box.kind === "read") return src(box.source);
-    if (box.kind === "ai") return box.instruction.slice(0, 50);
+    if (box.kind === "ai") return box.instruction.slice(0, 40);
     if (box.kind === "condition") return t("condition");
     if (box.kind === "approval") return t("approval");
-    if (box.kind === "filter") return box.expression.slice(0, 40);
-    if (box.kind === "code") return `${box.language}: ${box.code.slice(0, 30)}`;
+    if (box.kind === "filter") return box.expression.slice(0, 30);
+    if (box.kind === "code") return `${box.language}`;
     if (box.kind === "wait") return `${box.duration} ${box.unit}`;
-    if (box.kind === "transform") return box.instruction.slice(0, 40);
-    if (box.kind === "note") return box.text.slice(0, 30) || "Note";
-    // n8n advanced nodes:
-    if (box.kind === "error_handler") return `On error: ${box.fallbackAction}`;
-    if (box.kind === "loop") return `Loop (max ${box.maxIterations})`;
-    if (box.kind === "split") return `Batch ${box.batchSize}`;
-    if (box.kind === "merge") return `Merge: ${box.mode}`;
+    if (box.kind === "transform") return box.instruction.slice(0, 30);
+    if (box.kind === "note") return box.text.slice(0, 25) || "Note";
+    if (box.kind === "error_handler") return box.fallbackAction;
+    if (box.kind === "loop") return `max ${box.maxIterations}`;
+    if (box.kind === "split") return `batch ${box.batchSize}`;
+    if (box.kind === "merge") return box.mode;
     if (box.kind === "delay") return `${box.delay} ${box.unit}`;
-    // n8n data transformation + flow control (round 2):
-    if (box.kind === "sort") return `Sort by ${box.field}`;
-    if (box.kind === "limit") return `First ${box.maxItems}`;
-    if (box.kind === "remove_duplicates") return `Dedup ${box.field}`;
+    if (box.kind === "sort") return box.field;
+    if (box.kind === "limit") return `${box.maxItems} items`;
+    if (box.kind === "remove_duplicates") return box.field;
     if (box.kind === "summarize") return `${box.operation}(${box.field})`;
-    if (box.kind === "switch") return `Route: ${box.field}`;
+    if (box.kind === "switch") return box.field;
     if (box.kind === "set") return "Set fields";
     if (box.kind === "compare") return box.mode.replace(/_/g, " ");
-    if (box.kind === "date_time") return `Date: ${box.operation}`;
-    if (box.kind === "html_extract") return box.selector.slice(0, 30);
+    if (box.kind === "date_time") return box.operation;
+    if (box.kind === "html_extract") return box.selector.slice(0, 25);
     if (box.kind === "text_classifier") return box.categories.slice(0, 2).join(", ");
-    if (box.kind === "sentiment") return "Sentiment";
+    if (box.kind === "sentiment") return "Analyze";
     if (box.kind === "extract_info") return box.fields.slice(0, 2).join(", ");
-    if (box.kind === "respond_webhook") return `Respond ${box.statusCode}`;
-    if (box.kind === "execute_command") return box.command.slice(0, 30);
-    // n8n remaining core (round 3):
+    if (box.kind === "respond_webhook") return `${box.statusCode}`;
+    if (box.kind === "execute_command") return box.command.slice(0, 25);
     if (box.kind === "aggregate") return box.operation;
     if (box.kind === "split_out") return box.field;
     if (box.kind === "rename_keys") return "Rename";
-    if (box.kind === "xml") return box.direction === "xml_to_json" ? "XML→JSON" : "JSON→XML";
-    if (box.kind === "markdown") return box.direction === "md_to_html" ? "MD→HTML" : "HTML→MD";
+    if (box.kind === "xml") return box.direction === "xml_to_json" ? "XML → JSON" : "JSON → XML";
+    if (box.kind === "markdown") return box.direction === "md_to_html" ? "MD → HTML" : "HTML → MD";
     if (box.kind === "crypto") return box.operation;
     if (box.kind === "spreadsheet_parse") return box.format.toUpperCase();
-    if (box.kind === "no_op") return "Pass";
-    if (box.kind === "stop_error") return box.message.slice(0, 25);
+    if (box.kind === "no_op") return "Pass through";
+    if (box.kind === "stop_error") return box.message.slice(0, 20);
     if (box.kind === "execute_workflow") return box.workflowId.slice(0, 15);
-    if (box.kind === "read_file") return box.path.slice(0, 25);
-    if (box.kind === "write_file") return box.path.slice(0, 25);
-    if (box.kind === "smtp_send") return box.host.slice(0, 20);
-    if (box.kind === "ftp") return `${box.operation} ${box.host.slice(0, 15)}`;
-    if (box.kind === "ssh") return box.command.slice(0, 25);
-    if (box.kind === "graphql") return "GraphQL";
-    if (box.kind === "ai_agent") return box.instruction.slice(0, 30);
-    if (box.kind === "llm_chain") return box.prompt.slice(0, 30);
-    if (box.kind === "retrieval_qa") return box.question.slice(0, 30);
+    if (box.kind === "read_file") return box.path.slice(0, 20);
+    if (box.kind === "write_file") return box.path.slice(0, 20);
+    if (box.kind === "smtp_send") return box.host.slice(0, 15);
+    if (box.kind === "ftp") return `${box.operation}`;
+    if (box.kind === "ssh") return box.command.slice(0, 20);
+    if (box.kind === "graphql") return "Query";
+    if (box.kind === "ai_agent") return box.instruction.slice(0, 25);
+    if (box.kind === "llm_chain") return box.prompt.slice(0, 25);
+    if (box.kind === "retrieval_qa") return box.question.slice(0, 25);
     if (box.kind === "summarization_chain") return "Summarize";
     if (box.kind === "http_response") return `${box.statusCode}`;
     if (box.kind === "action") return act(box.do);
@@ -216,178 +232,368 @@ function useDescribe() {
   };
 }
 
-/** Icon for a box kind. */
-function NodeIcon({ box }: { box: Box }) {
-  const cls = "h-4 w-4";
-  if (box.kind === "start") return <Clock className={cls} />;
-  if (box.kind === "read") return <Table2 className={cls} />;
-  if (box.kind === "ai") return <Sparkles className={cls} />;
-  if (box.kind === "condition") return <Filter className={cls} />;
-  if (box.kind === "approval") return <PauseCircle className={cls} />;
-  if (box.kind === "filter") return <Filter className={cls} />;
-  if (box.kind === "code") return <Hash className={cls} />;
-  if (box.kind === "wait") return <Clock className={cls} />;
-  if (box.kind === "transform") return <Layers className={cls} />;
-  if (box.kind === "note") return <FileText className={cls} />;
-  // n8n advanced nodes:
-  if (box.kind === "error_handler") return <AlertTriangle className={cls} />;
-  if (box.kind === "loop") return <RefreshCw className={cls} />;
-  if (box.kind === "split") return <GitBranch className={cls} />;
-  if (box.kind === "merge") return <GitMerge className={cls} />;
-  if (box.kind === "delay") return <Timer className={cls} />;
-  // n8n data transformation + flow control (round 2):
-  if (box.kind === "sort") return <ArrowUpDown className={cls} />;
-  if (box.kind === "limit") return <ListFilter className={cls} />;
-  if (box.kind === "remove_duplicates") return <Scissors className={cls} />;
-  if (box.kind === "summarize") return <BarChart3 className={cls} />;
-  if (box.kind === "switch") return <Split className={cls} />;
-  if (box.kind === "set") return <Type className={cls} />;
-  if (box.kind === "compare") return <GitCompare className={cls} />;
-  if (box.kind === "date_time") return <Calendar className={cls} />;
-  if (box.kind === "html_extract") return <Code2 className={cls} />;
-  if (box.kind === "text_classifier") return <List className={cls} />;
-  if (box.kind === "sentiment") return <Heart className={cls} />;
-  if (box.kind === "extract_info") return <FileOutput className={cls} />;
-  if (box.kind === "respond_webhook") return <Reply className={cls} />;
-  if (box.kind === "execute_command") return <Terminal className={cls} />;
-  // n8n remaining core (round 3):
-  if (box.kind === "aggregate") return <Layers className={cls} />;
-  if (box.kind === "split_out") return <GitBranch className={cls} />;
-  if (box.kind === "rename_keys") return <Type className={cls} />;
-  if (box.kind === "xml") return <Code2 className={cls} />;
-  if (box.kind === "markdown") return <FileText className={cls} />;
-  if (box.kind === "crypto") return <Hash className={cls} />;
-  if (box.kind === "spreadsheet_parse") return <Table2 className={cls} />;
-  if (box.kind === "no_op") return <ArrowUpDown className={cls} />;
-  if (box.kind === "stop_error") return <AlertTriangle className={cls} />;
-  if (box.kind === "execute_workflow") return <RefreshCw className={cls} />;
-  if (box.kind === "read_file") return <FileText className={cls} />;
-  if (box.kind === "write_file") return <FileOutput className={cls} />;
-  if (box.kind === "smtp_send") return <Send className={cls} />;
-  if (box.kind === "ftp") return <Globe className={cls} />;
-  if (box.kind === "ssh") return <Terminal className={cls} />;
-  if (box.kind === "graphql") return <Globe className={cls} />;
-  if (box.kind === "ai_agent") return <Sparkles className={cls} />;
-  if (box.kind === "llm_chain") return <Sparkles className={cls} />;
-  if (box.kind === "retrieval_qa") return <Sparkles className={cls} />;
-  if (box.kind === "summarization_chain") return <Sparkles className={cls} />;
-  if (box.kind === "http_response") return <Reply className={cls} />;
-  if (box.kind === "action") return <Send className={cls} />;
-  return <Zap className={cls} />;
+/* ───────────────────── NODE ICON ───────────────────── */
+
+function NodeIcon({ box, size = 18 }: { box: Box; size?: number }) {
+  const s = { width: size, height: size };
+  if (box.kind === "start") return <Play style={s} />;
+  if (box.kind === "read") return <Database style={s} />;
+  if (box.kind === "ai") return <Sparkles style={s} />;
+  if (box.kind === "condition") return <GitBranch style={s} />;
+  if (box.kind === "approval") return <PauseCircle style={s} />;
+  if (box.kind === "filter") return <Filter style={s} />;
+  if (box.kind === "code") return <Code2 style={s} />;
+  if (box.kind === "wait") return <Clock style={s} />;
+  if (box.kind === "transform") return <Layers style={s} />;
+  if (box.kind === "note") return <FileText style={s} />;
+  if (box.kind === "error_handler") return <AlertTriangle style={s} />;
+  if (box.kind === "loop") return <RefreshCw style={s} />;
+  if (box.kind === "split") return <GitBranch style={s} />;
+  if (box.kind === "merge") return <GitMerge style={s} />;
+  if (box.kind === "delay") return <Timer style={s} />;
+  if (box.kind === "sort") return <ArrowUpDown style={s} />;
+  if (box.kind === "limit") return <ListFilter style={s} />;
+  if (box.kind === "remove_duplicates") return <Scissors style={s} />;
+  if (box.kind === "summarize") return <BarChart3 style={s} />;
+  if (box.kind === "switch") return <Split style={s} />;
+  if (box.kind === "set") return <Type style={s} />;
+  if (box.kind === "compare") return <GitCompare style={s} />;
+  if (box.kind === "date_time") return <Calendar style={s} />;
+  if (box.kind === "html_extract") return <Code2 style={s} />;
+  if (box.kind === "text_classifier") return <List style={s} />;
+  if (box.kind === "sentiment") return <Heart style={s} />;
+  if (box.kind === "extract_info") return <FileOutput style={s} />;
+  if (box.kind === "respond_webhook") return <Webhook style={s} />;
+  if (box.kind === "execute_command") return <Terminal style={s} />;
+  if (box.kind === "aggregate") return <Layers style={s} />;
+  if (box.kind === "split_out") return <GitBranch style={s} />;
+  if (box.kind === "rename_keys") return <Type style={s} />;
+  if (box.kind === "xml") return <Code2 style={s} />;
+  if (box.kind === "markdown") return <FileText style={s} />;
+  if (box.kind === "crypto") return <Hash style={s} />;
+  if (box.kind === "spreadsheet_parse") return <Table2 style={s} />;
+  if (box.kind === "no_op") return <ChevronRight style={s} />;
+  if (box.kind === "stop_error") return <AlertTriangle style={s} />;
+  if (box.kind === "execute_workflow") return <RefreshCw style={s} />;
+  if (box.kind === "read_file") return <FileText style={s} />;
+  if (box.kind === "write_file") return <FileOutput style={s} />;
+  if (box.kind === "smtp_send") return <Mail style={s} />;
+  if (box.kind === "ftp") return <Globe style={s} />;
+  if (box.kind === "ssh") return <Terminal style={s} />;
+  if (box.kind === "graphql") return <Globe style={s} />;
+  if (box.kind === "ai_agent") return <Sparkles style={s} />;
+  if (box.kind === "llm_chain") return <Sparkles style={s} />;
+  if (box.kind === "retrieval_qa") return <Sparkles style={s} />;
+  if (box.kind === "summarization_chain") return <Sparkles style={s} />;
+  if (box.kind === "http_response") return <Reply style={s} />;
+  if (box.kind === "action") return <Send style={s} />;
+  return <Zap style={s} />;
 }
 
+/* ───────────────────── n8n NODE COMPONENT ───────────────────── */
+
 /**
- * n8n EXACT node design: square card, big centered icon, label below.
- * Compact — many nodes fit on screen. No description inside the node.
+ * n8n-EXACT node design:
+ *  ┌─────────────────────────────┐
+ *  │ ▌  [icon]  Node Name        │
+ *  │ ▌          operation desc   │
+ *  └─────────────────────────────┘
+ *
+ * Wide rectangle (160×56px), colored left accent stripe (4px),
+ * icon in a rounded square, name + subtitle, clean shadow.
  */
 function AutomationNode({ data, selected }: NodeProps) {
-  const { box, kindName, description, theme } = data as {
+  const { box, kindName, description, theme, index } = data as {
     box: Box;
     kindName: string;
     description: string;
     theme: (typeof THEME)[Box["kind"]];
+    index: number;
   };
+
+  const isStart = box.kind === "start";
+
   return (
     <div
-      className="relative flex flex-col items-center rounded-xl transition-shadow"
       style={{
-        border: selected ? `2.5px solid ${theme.border}` : "1.5px solid rgb(var(--border) / 0.3)",
-        boxShadow: selected ? `0 0 0 3px ${theme.border}30, 0 4px 16px rgba(0,0,0,0.3)` : "0 2px 8px rgba(0,0,0,0.2)",
-        width: 80,
-        height: 80,
+        width: 164,
+        height: 56,
+        borderRadius: 8,
+        overflow: "hidden",
         cursor: "grab",
+        display: "flex",
+        alignItems: "center",
         background: "rgb(var(--panel))",
+        border: selected
+          ? `2px solid ${theme.accent}`
+          : "1px solid rgb(var(--border) / 0.25)",
+        boxShadow: selected
+          ? `0 0 0 3px ${theme.accent}25, 0 4px 12px rgba(0,0,0,0.15)`
+          : "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06)",
+        position: "relative",
+        transition: "box-shadow 0.15s, border-color 0.15s",
       }}
       title={`${kindName}: ${description}`}
     >
-      {/* Input handle (left) */}
-      <Handle type="target" position={Position.Left} style={{ background: theme.border, border: "2px solid rgb(var(--panel))", width: 9, height: 9 }} />
-      {/* Big centered icon */}
+      {/* n8n colored LEFT ACCENT STRIPE */}
       <div
-        className="mt-2.5 flex h-9 w-9 items-center justify-center rounded-lg"
-        style={{ background: theme.icon, color: theme.iconText }}
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 4,
+          background: theme.accent,
+          borderRadius: "8px 0 0 8px",
+        }}
+      />
+
+      {/* Input handle (left) — not on start node */}
+      {!isStart && (
+        <Handle
+          type="target"
+          position={Position.Left}
+          style={{
+            background: "rgb(var(--panel))",
+            border: `2px solid ${theme.accent}`,
+            width: 10,
+            height: 10,
+            left: -5,
+          }}
+        />
+      )}
+
+      {/* Icon container */}
+      <div
+        style={{
+          marginLeft: 14,
+          width: 32,
+          height: 32,
+          borderRadius: 6,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: theme.iconBg,
+          color: theme.iconColor,
+          flexShrink: 0,
+        }}
       >
-        <NodeIcon box={box} />
+        <NodeIcon box={box} size={16} />
       </div>
-      {/* Label below icon */}
-      <span className="mt-1 w-full truncate px-1 text-center text-[8px] font-semibold uppercase tracking-wide" style={{ color: theme.border }}>
-        {kindName}
-      </span>
+
+      {/* Text: name + description */}
+      <div style={{ marginLeft: 10, overflow: "hidden", flex: 1, paddingRight: 10 }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: "rgb(var(--foreground))",
+            lineHeight: "16px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {kindName}
+        </div>
+        {description && (
+          <div
+            style={{
+              fontSize: 10,
+              color: "rgb(var(--foreground) / 0.5)",
+              lineHeight: "14px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              marginTop: 1,
+            }}
+          >
+            {description}
+          </div>
+        )}
+      </div>
+
       {/* Output handle (right) */}
-      <Handle type="source" position={Position.Right} style={{ background: theme.border, border: "2px solid rgb(var(--panel))", width: 9, height: 9 }} />
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{
+          background: "rgb(var(--panel))",
+          border: `2px solid ${theme.accent}`,
+          width: 10,
+          height: 10,
+          right: -5,
+        }}
+      />
     </div>
   );
 }
 
-/** "+" add-node button rendered as a React Flow node at the end. */
+/* ───────────────────── "+" ADD NODE ───────────────────── */
+
 function AddNode({ data }: NodeProps) {
-  const { onAdd, kindNames, theme: themes } = data as {
+  const { onAdd, kindNames, themes } = data as {
     onAdd: (kind: Box["kind"]) => void;
     kindNames: Record<string, string>;
-    theme: typeof THEME;
+    themes: typeof THEME;
   };
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  /** n8n-style categorized node picker with search. */
-  const ALL_KINDS: Box["kind"][] = [
-    "read", "ai", "condition", "approval", "action",
-    "filter", "switch", "loop", "split", "merge", "error_handler", "no_op", "stop_error", "execute_workflow",
-    "sort", "limit", "remove_duplicates", "summarize", "set", "compare", "transform", "aggregate", "split_out", "rename_keys",
-    "xml", "markdown", "html_extract", "spreadsheet_parse", "crypto",
-    "wait", "delay", "date_time",
-    "ai_agent", "llm_chain", "retrieval_qa", "summarization_chain", "text_classifier", "sentiment", "extract_info",
-    "code", "execute_command", "ssh", "graphql",
-    "read_file", "write_file", "ftp",
-    "respond_webhook", "http_response", "smtp_send",
-    "note",
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open && inputRef.current) inputRef.current.focus();
+  }, [open]);
+
+  /* Categorized n8n node picker */
+  const CATEGORIES: { label: string; kinds: Box["kind"][] }[] = [
+    { label: "Triggers", kinds: ["read"] },
+    { label: "Actions", kinds: ["action", "ai", "approval"] },
+    { label: "Flow", kinds: ["condition", "switch", "filter", "loop", "split", "merge", "error_handler", "no_op", "stop_error", "execute_workflow"] },
+    { label: "Transform", kinds: ["transform", "set", "sort", "limit", "remove_duplicates", "summarize", "compare", "aggregate", "split_out", "rename_keys"] },
+    { label: "Convert", kinds: ["xml", "markdown", "html_extract", "spreadsheet_parse", "crypto"] },
+    { label: "Timing", kinds: ["wait", "delay", "date_time"] },
+    { label: "AI", kinds: ["ai_agent", "llm_chain", "retrieval_qa", "summarization_chain", "text_classifier", "sentiment", "extract_info"] },
+    { label: "Dev", kinds: ["code", "execute_command", "ssh", "graphql"] },
+    { label: "Files", kinds: ["read_file", "write_file", "ftp"] },
+    { label: "HTTP", kinds: ["respond_webhook", "http_response", "smtp_send"] },
+    { label: "Other", kinds: ["note"] },
   ];
-  const filtered = search.trim()
-    ? ALL_KINDS.filter((k) => (kindNames[k] ?? k).toLowerCase().includes(search.toLowerCase()))
-    : ALL_KINDS.slice(0, 12); // show top 12 by default
+
+  const allKinds = CATEGORIES.flatMap((c) => c.kinds);
+  const q = search.trim().toLowerCase();
+  const filteredCategories = q
+    ? [{ label: "Results", kinds: allKinds.filter((k) => (kindNames[k] ?? k).toLowerCase().includes(q)) }]
+    : CATEGORIES;
+
   return (
-    <div className="flex flex-col items-center">
-      <Handle type="target" position={Position.Left} style={{ background: "#4b5563", border: "2px solid #374151", width: 8, height: 8 }} />
+    <div style={{ position: "relative" }}>
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{ background: "#6b7280", border: "2px solid #4b5563", width: 8, height: 8 }}
+      />
       <button
         type="button"
         onClick={() => { setOpen(!open); setSearch(""); }}
-        className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition-all hover:bg-panel hover:text-foreground"
-        style={{ border: "1px dashed #4b5563" }}
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "2px dashed rgb(var(--border) / 0.4)",
+          background: "rgb(var(--panel))",
+          color: "rgb(var(--foreground) / 0.4)",
+          cursor: "pointer",
+          fontSize: 20,
+          transition: "all 0.15s",
+        }}
       >
-        <span className="text-lg leading-none">+</span>
+        <Plus style={{ width: 18, height: 18 }} />
       </button>
+
       {open && (
-        <div className="absolute top-10 z-10 w-60 rounded-lg bg-panel shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
-          {/* n8n-style search bar */}
-          <div className="px-2 pt-2">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search nodes..."
-              autoFocus
-              className="w-full rounded-md bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted outline-none"
-              style={{ border: "1px solid rgb(var(--border) / 0.4)" }}
-            />
+        <div
+          style={{
+            position: "absolute",
+            top: 44,
+            left: -100,
+            zIndex: 50,
+            width: 280,
+            borderRadius: 10,
+            background: "rgb(var(--panel))",
+            border: "1px solid rgb(var(--border) / 0.3)",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+            overflow: "hidden",
+          }}
+        >
+          {/* Search input */}
+          <div style={{ padding: "10px 10px 6px", borderBottom: "1px solid rgb(var(--border) / 0.15)" }}>
+            <div style={{ position: "relative" }}>
+              <Search style={{ position: "absolute", left: 8, top: 7, width: 14, height: 14, color: "rgb(var(--foreground) / 0.3)" }} />
+              <input
+                ref={inputRef}
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search nodes..."
+                style={{
+                  width: "100%",
+                  padding: "6px 8px 6px 28px",
+                  borderRadius: 6,
+                  border: "1px solid rgb(var(--border) / 0.3)",
+                  background: "rgb(var(--background))",
+                  color: "rgb(var(--foreground))",
+                  fontSize: 12,
+                  outline: "none",
+                }}
+              />
+            </div>
           </div>
-          {/* Nodes grid */}
-          <div className="grid grid-cols-2 gap-1 p-2" style={{ maxHeight: 240, overflowY: "auto" }}>
-            {filtered.map((k) => {
-              const th = themes[k];
+
+          {/* Categories + items */}
+          <div style={{ maxHeight: 320, overflowY: "auto", padding: "4px 0" }}>
+            {filteredCategories.map((cat) => {
+              if (cat.kinds.length === 0) return null;
               return (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => { setOpen(false); setSearch(""); onAdd(k); }}
-                  className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-panel-hover"
-                >
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded" style={{ background: th.icon, color: th.iconText }}>
-                    <NodeIcon box={{ kind: k, id: "_" } as Box} />
-                  </span>
-                  <span className="truncate text-[9px] font-medium text-foreground">{kindNames[k]}</span>
-                </button>
+                <div key={cat.label}>
+                  <div style={{ padding: "6px 12px 3px", fontSize: 10, fontWeight: 600, color: "rgb(var(--foreground) / 0.35)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    {cat.label}
+                  </div>
+                  {cat.kinds.map((k) => {
+                    const th = themes[k];
+                    return (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => { setOpen(false); setSearch(""); onAdd(k); }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          width: "100%",
+                          padding: "6px 12px",
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          borderRadius: 0,
+                          transition: "background 0.1s",
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = "rgb(var(--foreground) / 0.05)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                      >
+                        <div
+                          style={{
+                            width: 26,
+                            height: 26,
+                            borderRadius: 5,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: th.iconBg,
+                            color: th.iconColor,
+                            flexShrink: 0,
+                          }}
+                        >
+                          <NodeIcon box={{ kind: k, id: "_" } as Box} size={14} />
+                        </div>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: "rgb(var(--foreground))" }}>
+                          {kindNames[k] ?? k}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               );
             })}
-            {filtered.length === 0 && <p className="col-span-2 py-2 text-center text-[10px] text-muted">No nodes found</p>}
+            {q && filteredCategories[0]?.kinds.length === 0 && (
+              <div style={{ padding: "16px 12px", textAlign: "center", fontSize: 12, color: "rgb(var(--foreground) / 0.4)" }}>
+                No nodes found
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -397,54 +603,57 @@ function AddNode({ data }: NodeProps) {
 
 const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 
+/* ───────────────────── n8n LAYOUT ALGORITHM ───────────────────── */
+
 /**
- * n8n CANVAS LAYOUT with visual grouping.
+ * n8n CANVAS LAYOUT — exact horizontal flow.
  *
- * Primary direction: LEFT → RIGHT.
- * When there are many boxes, they group into "columns" of up to 3
- * stacked vertically, then the next column goes right.
- * This creates the n8n-style visual where you see branching paths.
- *
- * The grouping is: 1 node starts a column; if the NEXT nodes are
- * the same category (e.g. 5 consecutive "action" boxes), they stack
- * vertically in that column (up to 3), then overflow to the next column.
+ * Primary direction: LEFT → RIGHT with 250px column spacing.
+ * Branching nodes (condition/switch/filter) create Y offsets for
+ * the nodes that follow, simulating parallel paths.
+ * Same-kind consecutive nodes stack vertically in a column.
  */
+const NODE_W = 164;
+const NODE_H = 56;
+const X_GAP = 80;      // gap between nodes horizontally
+const Y_GAP = 24;      // gap between stacked nodes vertically
+const X_STEP = NODE_W + X_GAP;  // 244px per column
+const Y_STEP = NODE_H + Y_GAP;  // 80px per stack row
+const MAX_STACK = 4;
+
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
 
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
-  const X_STEP = 120;
-  const Y_STEP = 95;
-  const MAX_STACK = 3;    // max vertical stack per column
+  if (boxes.length === 0) return [];
 
-  // Group consecutive same-kind boxes into vertical stacks
   const positions: { x: number; y: number }[] = [];
   let col = 0;
-  let stackCount = 0;
+  let stackInCol = 0;
   let lastKind = "";
 
   for (let i = 0; i < boxes.length; i++) {
     const box = boxes[i];
-    const sameAsPrev = box.kind === lastKind && !BRANCH_KINDS.has(box.kind);
+    const isBranch = BRANCH_KINDS.has(box.kind);
     const prevIsBranch = i > 0 && BRANCH_KINDS.has(boxes[i - 1].kind);
+    const sameAsPrev = box.kind === lastKind && !isBranch;
 
     if (i === 0) {
-      // First box — always top left
       positions.push({ x: 0, y: 0 });
-      stackCount = 1;
-    } else if (sameAsPrev && stackCount < MAX_STACK && !prevIsBranch) {
-      // Same kind, stack vertically
-      positions.push({ x: col * X_STEP, y: stackCount * Y_STEP });
-      stackCount++;
-    } else if (prevIsBranch && i + 1 < boxes.length && !BRANCH_KINDS.has(box.kind)) {
-      // After a branch node: offset down to show branching visual
+      stackInCol = 1;
+    } else if (sameAsPrev && stackInCol < MAX_STACK && !prevIsBranch) {
+      // Stack vertically — same kind, same column
+      positions.push({ x: col * X_STEP, y: stackInCol * Y_STEP });
+      stackInCol++;
+    } else if (prevIsBranch) {
+      // After branch: shift right AND down to show branching
       col++;
-      positions.push({ x: col * X_STEP, y: Y_STEP * 0.5 });
-      stackCount = 1;
+      positions.push({ x: col * X_STEP, y: Math.round(Y_STEP * 0.6) });
+      stackInCol = 1;
     } else {
       // New column
       col++;
       positions.push({ x: col * X_STEP, y: 0 });
-      stackCount = 1;
+      stackInCol = 1;
     }
     lastKind = box.kind;
   }
@@ -471,12 +680,18 @@ function boxesToEdges(boxes: Box[]): Edge[] {
       id: `e-${box.id}-${boxes[i + 1].id}`,
       source: box.id,
       target: boxes[i + 1].id,
-      type: "smoothstep",
+      type: "default",  // bezier curves — like n8n
       animated: false,
-      style: { stroke: sourceTheme?.border ?? "#4b5563", strokeWidth: 2, opacity: 0.5 },
+      style: {
+        stroke: sourceTheme?.accent ?? "#6b7280",
+        strokeWidth: 2,
+        opacity: 0.45,
+      },
     };
   });
 }
+
+/* ───────────────────── CANVAS INNER ───────────────────── */
 
 function FlowCanvasInner({
   boxes,
@@ -500,32 +715,30 @@ function FlowCanvasInner({
 
   const initialNodes = useMemo(() => {
     const nodes = boxesToNodes(boxes, kindNames, describe);
-    // Add "+" node at the end
     if (onAdd) {
-      // Place "+" after the last node
       const lastPos = nodes.length > 0 ? nodes[nodes.length - 1].position : { x: 0, y: 0 };
       nodes.push({
         id: "__add__",
         type: "addNode",
-        position: { x: lastPos.x + 220, y: lastPos.y },
-        data: { onAdd, kindNames, theme: THEME },
+        position: { x: lastPos.x + X_STEP + 20, y: lastPos.y + 10 },
+        data: { onAdd, kindNames, themes: THEME },
         draggable: false,
         selectable: false,
       });
     }
     return nodes;
   }, [boxes, kindNames, describe, onAdd]);
+
   const initialEdges = useMemo(() => {
     const edges = boxesToEdges(boxes);
-    // Connect last box to "+" node
     if (onAdd && boxes.length > 0) {
       edges.push({
         id: `e-${boxes[boxes.length - 1].id}-__add__`,
         source: boxes[boxes.length - 1].id,
         target: "__add__",
-        type: "smoothstep",
+        type: "default",
         animated: false,
-        style: { stroke: "#4b5563", strokeWidth: 1.5, strokeDasharray: "4 3" },
+        style: { stroke: "#6b7280", strokeWidth: 1.5, strokeDasharray: "6 4", opacity: 0.3 },
       });
     }
     return edges;
@@ -535,10 +748,10 @@ function FlowCanvasInner({
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    onChoose(node.id);
+    if (node.id !== "__add__") onChoose(node.id);
   }, [onChoose]);
 
-  // Right-click context menu state
+  // Right-click context menu
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const onNodeContextMenu = useCallback((e: React.MouseEvent, node: Node) => {
     e.preventDefault();
@@ -549,29 +762,24 @@ function FlowCanvasInner({
 
   const reactFlowInstance = useReactFlow();
 
-  // Keyboard shortcuts — n8n style
+  // n8n keyboard shortcuts
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {
-    // Delete/Backspace: remove selected node
     if ((e.key === "Delete" || e.key === "Backspace") && chosen && onDelete) {
       e.preventDefault();
       onDelete(chosen);
     }
-    // Ctrl+Z: undo
     if ((e.ctrlKey || e.metaKey) && e.key === "z" && onUndo) {
       e.preventDefault();
       onUndo();
     }
-    // Ctrl+D: duplicate selected node
     if ((e.ctrlKey || e.metaKey) && e.key === "d" && chosen && onAdd) {
       e.preventDefault();
       const box = boxes.find((b) => b.id === chosen);
       if (box && box.kind !== "start") onAdd(box.kind);
     }
-    // 1: zoom to fit (n8n shortcut)
     if (e.key === "1" && !e.ctrlKey && !e.metaKey) {
-      reactFlowInstance.fitView({ padding: 0.2, duration: 300 });
+      reactFlowInstance.fitView({ padding: 0.15, duration: 300 });
     }
-    // 0: zoom to 100%
     if (e.key === "0" && !e.ctrlKey && !e.metaKey) {
       reactFlowInstance.zoomTo(1, { duration: 300 });
     }
@@ -579,10 +787,12 @@ function FlowCanvasInner({
 
   return (
     <div
-      className="relative rounded-xl"
       style={{
-        height: 500,
-        border: "1px solid rgb(var(--border) / 0.3)",
+        height: 520,
+        borderRadius: 10,
+        border: "1px solid rgb(var(--border) / 0.2)",
+        overflow: "hidden",
+        position: "relative",
       }}
       onKeyDown={onKeyDown}
       tabIndex={0}
@@ -598,54 +808,82 @@ function FlowCanvasInner({
         onPaneClick={closeContext}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
+        fitViewOptions={{ padding: 0.15 }}
         panOnDrag
         zoomOnScroll
         panOnScroll
         proOptions={{ hideAttribution: true }}
         style={{ background: "transparent" }}
         deleteKeyCode={null}
+        defaultEdgeOptions={{ type: "default" }}
       >
         <Background
           variant={BackgroundVariant.Dots}
-          gap={16}
+          gap={20}
           size={1}
-          color="rgb(var(--foreground) / 0.08)"
+          color="rgb(var(--foreground) / 0.06)"
         />
-        {/* n8n-style zoom controls — bottom left */}
         <Controls
           showInteractive={false}
-          style={{ background: "rgb(var(--panel))", border: "1px solid rgb(var(--border) / 0.3)", borderRadius: 8 }}
+          style={{
+            background: "rgb(var(--panel))",
+            border: "1px solid rgb(var(--border) / 0.2)",
+            borderRadius: 8,
+            boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+          }}
         />
-        {/* Mini-map — bottom right, like n8n */}
         <MiniMap
-          nodeColor={() => "#3b82f6"}
-          maskColor="rgb(var(--panel) / 0.8)"
-          style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)", borderRadius: 8, height: 80, width: 120 }}
+          nodeColor={(n) => {
+            const th = THEME[(n.data as { box: Box })?.box?.kind];
+            return th?.accent ?? "#6b7280";
+          }}
+          maskColor="rgb(var(--panel) / 0.85)"
+          style={{
+            background: "rgb(var(--panel) / 0.7)",
+            border: "1px solid rgb(var(--border) / 0.2)",
+            borderRadius: 8,
+            height: 80,
+            width: 130,
+          }}
         />
       </ReactFlow>
-      {/* n8n-style right-click context menu */}
+
+      {/* Context menu */}
       {contextMenu && (
         <div
-          className="fixed z-50 rounded-lg bg-panel py-1 shadow-xl"
-          style={{ left: contextMenu.x, top: contextMenu.y, border: "1px solid rgb(var(--border))", minWidth: 140 }}
+          style={{
+            position: "fixed",
+            left: contextMenu.x,
+            top: contextMenu.y,
+            zIndex: 50,
+            minWidth: 150,
+            borderRadius: 8,
+            background: "rgb(var(--panel))",
+            border: "1px solid rgb(var(--border) / 0.3)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+            padding: "4px 0",
+          }}
         >
           <button
             type="button"
-            className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground hover:bg-panel-hover"
             onClick={() => { onChoose(contextMenu.nodeId); closeContext(); }}
+            style={{ display: "flex", width: "100%", alignItems: "center", gap: 8, padding: "7px 14px", border: "none", background: "transparent", cursor: "pointer", fontSize: 12, color: "rgb(var(--foreground))", textAlign: "left" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgb(var(--foreground) / 0.05)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
             Edit
           </button>
           {onAdd && (
             <button
               type="button"
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground hover:bg-panel-hover"
               onClick={() => {
                 const box = boxes.find((b) => b.id === contextMenu.nodeId);
                 if (box && box.kind !== "start") onAdd(box.kind);
                 closeContext();
               }}
+              style={{ display: "flex", width: "100%", alignItems: "center", gap: 8, padding: "7px 14px", border: "none", background: "transparent", cursor: "pointer", fontSize: 12, color: "rgb(var(--foreground))", textAlign: "left" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgb(var(--foreground) / 0.05)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
               Duplicate
             </button>
@@ -653,26 +891,43 @@ function FlowCanvasInner({
           {onDelete && (
             <button
               type="button"
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-danger hover:bg-panel-hover"
               onClick={() => { onDelete(contextMenu.nodeId); closeContext(); }}
+              style={{ display: "flex", width: "100%", alignItems: "center", gap: 8, padding: "7px 14px", border: "none", background: "transparent", cursor: "pointer", fontSize: 12, color: "#ef4444", textAlign: "left" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgb(var(--foreground) / 0.05)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
               Delete
             </button>
           )}
         </div>
       )}
-      {/* n8n-style status bar — bottom of canvas */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between rounded-b-xl px-3 py-1" style={{ background: "rgb(var(--panel) / 0.9)", borderTop: "1px solid rgb(var(--border) / 0.2)" }}>
-        <span className="text-[10px] text-muted">{boxes.length} nodes</span>
-        <span className="text-[10px] text-muted">
-          Del: delete · Ctrl+D: duplicate · 1: fit · 0: 100%
-        </span>
+
+      {/* Status bar */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "5px 14px",
+          background: "rgb(var(--panel) / 0.95)",
+          borderTop: "1px solid rgb(var(--border) / 0.15)",
+          fontSize: 10,
+          color: "rgb(var(--foreground) / 0.35)",
+        }}
+      >
+        <span>{boxes.length} node{boxes.length !== 1 ? "s" : ""}</span>
+        <span>Del · Ctrl+D · 1: fit · 0: 100%</span>
       </div>
     </div>
   );
 }
 
-/** Wrapper that provides ReactFlowProvider. */
+/* ───────────────────── EXPORT ───────────────────── */
+
 export function FlowCanvasView(props: {
   boxes: Box[];
   chosen: string | null;

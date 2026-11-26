@@ -323,16 +323,16 @@ function AutomationNode({ data, selected }: NodeProps) {
         flexDirection: "column",
         alignItems: "center",
         cursor: "grab",
-        width: 96,
+        width: 64,
       }}
       title={`${kindName}: ${description}`}
     >
       {/* The square card */}
       <div
         style={{
-          width: 96,
-          height: 96,
-          borderRadius: 12,
+          width: 64,
+          height: 64,
+          borderRadius: 10,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -356,9 +356,9 @@ function AutomationNode({ data, selected }: NodeProps) {
             style={{
               background: "rgb(var(--panel))",
               border: `2px solid ${theme.accent}`,
-              width: 10,
-              height: 10,
-              left: -5,
+              width: 8,
+              height: 8,
+              left: -4,
             }}
           />
         )}
@@ -366,8 +366,8 @@ function AutomationNode({ data, selected }: NodeProps) {
         {/* n8n big CIRCULAR icon — centered in the square */}
         <div
           style={{
-            width: 42,
-            height: 42,
+            width: 32,
+            height: 32,
             borderRadius: "50%",
             display: "flex",
             alignItems: "center",
@@ -376,7 +376,7 @@ function AutomationNode({ data, selected }: NodeProps) {
             color: "#fff",
           }}
         >
-          <NodeIcon box={box} size={20} />
+          <NodeIcon box={box} size={16} />
         </div>
 
         {/* Output handle — right side */}
@@ -387,23 +387,23 @@ function AutomationNode({ data, selected }: NodeProps) {
           style={{
             background: "rgb(var(--panel))",
             border: `2px solid ${theme.accent}`,
-            width: 10,
-            height: 10,
-            right: -5,
+            width: 8,
+            height: 8,
+            right: -4,
           }}
         />
       </div>
 
-      {/* Label BELOW the card — n8n's actual design */}
+      {/* Label BELOW the card */}
       <div
         style={{
-          marginTop: 6,
-          maxWidth: 110,
+          marginTop: 4,
+          maxWidth: 80,
           textAlign: "center",
-          fontSize: 11,
+          fontSize: 9,
           fontWeight: 500,
-          color: "rgb(var(--foreground) / 0.75)",
-          lineHeight: "14px",
+          color: "rgb(var(--foreground) / 0.65)",
+          lineHeight: "12px",
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
@@ -606,11 +606,10 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
  * groups of same-kind nodes after a branch stack vertically
  * in one column, creating the "parallel paths" look.
  */
-const NODE_SIZE = 96;   // n8n: GRID_SIZE * 6 = 96px square
-const LABEL_H = 24;     // label below the card
-const X_STEP = 144;     // horizontal distance between columns
-const Y_STEP = 130;     // vertical distance for branching paths
-const CENTER_Y = 300;   // center line Y position
+const NODE_SIZE = 64;   // smaller squares for compact layout
+const X_STEP = 100;     // tight horizontal spacing
+const Y_STEP = 90;      // vertical distance for branching paths
+const CENTER_Y = 200;   // center line Y position
 
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
 const MERGE_KINDS = new Set(["merge", "aggregate"]);
@@ -702,9 +701,9 @@ function boxesToEdges(boxes: Box[]): Edge[] {
     type: "default",  // bezier curves — n8n style
     animated: false,
     style: {
-      stroke: "#6b7280",    // n8n: neutral gray lines, NOT colored
-      strokeWidth: 2.5,
-      opacity: 0.5,
+      stroke: "#9ca3af",    // visible gray — works at any zoom
+      strokeWidth: 2,
+      opacity: 0.6,
     },
   }));
 }
@@ -827,7 +826,8 @@ function FlowCanvasInner({
         onPaneClick={closeContext}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.15 }}
+        fitViewOptions={{ padding: 0.1, maxZoom: 1.5 }}
+        minZoom={0.15}
         panOnDrag
         zoomOnScroll
         panOnScroll

@@ -181,11 +181,11 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
 const NOT_PROBEABLE = {
+  "20261130000000_automation_runs_waiting_idx.sql":
+    "only creates a partial INDEX on automation_runs (user_id, approval_expires_at) WHERE status = 'waiting_approval'. Canaries probe tables, columns and functions; an index is invisible to the database API the probe reads through, and its absence only makes four queries slower, never wrong. Held by npm run db:pending, which derives indexes too.",
   // 20261115000001 and 20261115000002 were here until they fell out of
   // the newest-12 window on 2026-11-11 (5 new migrations: ionexa_payments,
   // agent_approvals, payments_subscriptions, payments_coupons, payments_invoices).
-  "20261116000000_push_subscriptions_server_written.sql":
-    "only drops two policies and revokes INSERT and UPDATE on push_subscriptions from the signed-in role; it adds no table, column or function. The service role the probe reads through bypasses both policies and privileges, so it cannot see the difference. Held instead by scripts/tests/server-written-tables.dbtest.mjs as the signed-in role on a real Postgres, and by the file's own SELF-CHECK, which raises when pasted if the revoke did not take.",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

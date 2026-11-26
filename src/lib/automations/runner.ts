@@ -19,6 +19,8 @@ import { releaseReservation, reserveCredits, settleReservation } from "@/lib/bil
 import type { Plan } from "@/lib/billing/plans";
 import { formatItemsForModel, searchUserData } from "@/lib/integrations/read";
 import { parseMcpUrl, isBlockedAddress } from "@/lib/mcp/ssrf";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { matchesSearch } from "@/lib/text/search-match";
 import { readFlow, readEdges, deriveEdgesFromList, withSupervisedApprovals, DEFAULT_FLOW_MODE, type ActionBox, type Box, type FlowEdge, type FlowMode, type ReadBox } from "@/lib/automations/boxes";
 import { decryptFlowBoxConfigs } from "@/lib/automations/config-crypto";
 import { APPROVAL_WAIT_HOURS, type RunStep } from "@/lib/automations/run-steps";
@@ -641,14 +643,18 @@ async function storeStepOutput(ctx: RunContext, boxId: string, output: string): 
     // Strip sensitive values before storing
     const SENSITIVE = /password|token|secret|api_key|private_key/i;
     const cleaned = output.replace(/("(?:password|token|secret|api_key|private_key|access_token|bot_token|connection_string|consumer_secret)":\s*)"[^"]*"/gi, '$1"***"');
-    await admin.from("automation_run_step_outputs").insert({
+    const { error } = await admin.from("automation_run_step_outputs").insert({
       run_id: ctx.runId,
       user_id: ctx.user.id,
       box_id: boxId,
       output: { text: cleaned.slice(0, 8000) },
     });
-  } catch {
-    // Step outputs are optional — don't fail the run
+    // Step outputs are optional — a failed write never fails the run, but it
+    // is logged: this used to be a bare catch around a call that returns its
+    // error instead of throwing, so a missing table was silent.
+    if (error) logApiError("automations:run", error, { stage: "step_output", box: boxId });
+  } catch (err) {
+    logApiError("automations:run", err, { stage: "step_output", box: boxId });
   }
 }
 
@@ -692,21 +698,24 @@ function pickNextBoxes(
     return { port, nextIds: targets.map((e) => e.to) };
   }
 
-  // Switch: route by matching field value
+  // Switch: the FIRST rule whose value appears in the text picks its own
+  // output (rule.output → port "route_<output>"). The old version compared
+  // the text with the port's NUMBER ("route_2" → "2"), so a route fired
+  // when the text happened to contain that digit and never because of the
+  // rule the person wrote.
   if (box.kind === "switch") {
-    const fieldVal = text.trim().toLowerCase();
-    // Try to match route labels
-    for (const edge of outEdges) {
-      if (edge.fromPort.startsWith("route_")) {
-        const routeLabel = edge.fromPort.replace("route_", "");
-        if (fieldVal.includes(routeLabel.toLowerCase())) {
-          return { port: edge.fromPort, nextIds: [edge.to] };
-        }
-      }
+    for (const rule of box.rules) {
+      // matchesSearch folds case and accents on both sides, and an empty
+      // rule value would match everything, so it is skipped first.
+      if (!rule.value.trim() || !matchesSearch(text, rule.value)) continue;
+      const port = `route_${rule.output}`;
+      const hit = outEdges.filter((e) => e.fromPort === port);
+      if (hit.length > 0) return { port, nextIds: hit.map((e) => e.to) };
     }
-    // Fallback: use first route or "main"
-    const fallback = outEdges.find((e) => e.fromPort === "fallback") ?? outEdges[0];
-    return { port: fallback.fromPort, nextIds: [fallback.to] };
+    // No rule matched (or its output goes nowhere): the fallback port, else
+    // nothing at all — never an arbitrary first edge.
+    const fallback = outEdges.filter((e) => e.fromPort === "fallback");
+    return { port: "fallback", nextIds: fallback.map((e) => e.to) };
   }
 
   // Loop: iterate or done
@@ -771,7 +780,16 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
   // When explicit graph edges exist, the runner follows them after IF/Switch
   // nodes to route to the correct path. When edges are null (all existing
   // automations), the linear for-loop below runs unchanged.
-  const graphEdges = readEdges(ctx.flow.edges);
+  // Both behind their switches (lib/flags/flags.ts), read once per run: off,
+  // the edges are ignored (the linear loop runs) and no output row is written.
+  const [realLogicOn, runOutputsOn] = await Promise.all([
+    isFeatureOn("automation-real-logic", ctx.user),
+    isFeatureOn("automation-run-outputs", ctx.user),
+  ]);
+  const graphEdges = realLogicOn ? readEdges(ctx.flow.edges) : null;
+  const storeOutput = async (boxId: string, output: string): Promise<void> => {
+    if (runOutputsOn) await storeStepOutput(ctx, boxId, output);
+  };
   const loopCounters = new Map<string, number>();
 
   for (let i = ctx.resume?.at ?? 0; i < boxes.length; i++) {
@@ -790,7 +808,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       readCount = read.count;
       text = read.text ? (text ? `${text}\n\n${read.text}` : read.text) : text;
       steps.push({ box: box.id, status: "ok", note: read.count ? "read_items" : "read_nothing", count: read.count });
-      void storeStepOutput(ctx, box.id, text);
+      await storeOutput(box.id, text);
       continue;
     }
     if (box.kind === "condition") {
@@ -873,7 +891,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       }
       text = out.text;
       steps.push({ box: box.id, status: "ok", note: "ai_done", credits: settlement.creditsCharged });
-      void storeStepOutput(ctx, box.id, text);
+      await storeOutput(box.id, text);
       continue;
     }
     if (box.kind === "approval") {
@@ -1052,7 +1070,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
         if (subResult.output) text = subResult.output;
         steps.push({ box: box.id, status: subResult.status === "done" ? "ok" : "failed", note: subResult.status === "done" ? "transform_done" : "failed", credits: subResult.credits });
         if (subResult.status !== "done") return { status: "failed", steps, credits, error: `${box.id}:sub_failed` };
-        void storeStepOutput(ctx, box.id, text);
+        await storeOutput(box.id, text);
       } catch {
         steps.push({ box: box.id, status: "failed", note: "failed" });
         return { status: "failed", steps, credits, error: `${box.id}:sub_error` };
@@ -1077,7 +1095,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       }
       text = out.text;
       steps.push({ box: box.id, status: "ok", note: "ai_done" });
-      void storeStepOutput(ctx, box.id, text);
+      await storeOutput(box.id, text);
       continue;
     }
     // action

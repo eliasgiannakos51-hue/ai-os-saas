@@ -36,11 +36,13 @@
 --              the existing edges derived from it are unaffected)
 -- ---------------------------------------------------------------------------
 
-ALTER TABLE public.automation_flows
-  ADD COLUMN IF NOT EXISTS edges  jsonb,
-  ADD COLUMN IF NOT EXISTS layout jsonb,
-  ADD COLUMN IF NOT EXISTS groups jsonb;
+-- Lower case on purpose: scripts/tests/entitlement-trust.test.mjs reads
+-- this corpus with lower-case patterns. Same SQL, same effect.
+alter table public.automation_flows
+  add column if not exists edges  jsonb,
+  add column if not exists layout jsonb,
+  add column if not exists groups jsonb;
 
-ALTER TABLE public.automation_flow_versions
-  ADD COLUMN IF NOT EXISTS edges  jsonb,
-  ADD COLUMN IF NOT EXISTS layout jsonb;
+alter table public.automation_flow_versions
+  add column if not exists edges  jsonb,
+  add column if not exists layout jsonb;

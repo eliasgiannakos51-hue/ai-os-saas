@@ -16,7 +16,7 @@ import { linkResultToProject, ownedProjectId } from "@/lib/projects/link-result"
 
 export const dynamic = "force-dynamic";
 // Large automations (100+ nodes) need up to 16k tokens of output.
-export const maxDuration = 120;
+export const maxDuration = 120; // @function-limit 120
 
 /**
  * AN AUTOMATION FROM ONE SENTENCE (MASTER 16, package 30), for

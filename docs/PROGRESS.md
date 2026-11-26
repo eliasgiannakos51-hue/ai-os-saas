@@ -1,3 +1,17 @@
+## 2026-11-26 (fix/n8n-canvas-switches — διορθώσεις του n8n canvas)
+
+Μετράται με: `npm run gates`, `node scripts/tests/<όνομα>.test.mjs` (μετρήθηκε 2026-11-26).
+
+- **Οι 4 διακόπτες διαβάζονται πια.** `automation-canvas-cards` και `automation-groups-subflows` στο `app/dashboard/[module]/page.tsx` → props του `AutomationShell`· `automation-real-logic` και `automation-run-outputs` στο `lib/automations/runner.ts` (μία φορά ανά run). Κλειστοί = η συμπεριφορά πριν: χωρίς αποθηκευμένες ακμές/θέσεις/ομάδες στον καμβά, γραμμικός βρόχος στο runner, καμία εγγραφή εξόδων. Ανοιχτοί μόνο για staff (DEFAULT_AUDIENCE).
+- **Switch**: ο πρώτος κανόνας (`rules[].value`) που εμφανίζεται στο κείμενο διαλέγει τη θύρα `route_<output>`· αλλιώς `fallback`· αλλιώς τίποτα (πριν: έψαχνε τον ΑΡΙΘΜΟ της θύρας μέσα στο κείμενο).
+- **Έξοδοι βημάτων**: `await` αντί για `void`, και το error του insert καταγράφεται (πριν χανόταν σιωπηλά).
+- **`alive`** στο `automation-shell.tsx` ξανά `simplePro && level === "pro"`: ο καμβάς ρωτούσε για run κάθε δευτερόλεπτο και για όσους ΔΕΝ έχουν τον διακόπτη.
+- Κλείστηκαν gates που ήταν ήδη κόκκινα από πριν: i18n (405 κλειδιά, 9 γλώσσες), `gdpr-coverage` (πίνακας `automation_run_step_outputs`), `schema-canaries` (2 canaries + 1 εξαίρεση), `function-limits`, `accent-search`, `sql-spellings`, `automation-modes`.
+
+**Ακόμα κόκκινα (ήταν κόκκινα και πριν από αυτό το PR, μετρήθηκε 2026-11-26):** automations (113 checks — η οθόνη Simple/Pro, `BoxEditor`, `FlowSteps` και το «μέρος της πρότασης» δεν υπάρχουν πια στο shell μετά το «Clean UI»), mutation-anchors / mutation-suite-shape (το ίδιο), design-tokens, rtl, i18n-coverage, message-slices, baselines / comment-claims, first-run-strings, glossary, pricing-promises, untrusted-boundaries, write-guards. Χρειάζεται απόφαση του owner αν το Simple/Pro επιστρέφει ή οι έλεγχοι ξαναγράφονται.
+
+**Διόρθωση προηγούμενου κειμένου:** η καταχώρηση «n8n spec — full implementation» παρακάτω υπερέβαινε την πραγματικότητα. Merge και Code είναι ακόμα placeholders, το Loop δεν περνά στοιχεία, και δεν έγινε έλεγχος σε browser.
+
 # Ημερολόγιο
 
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο

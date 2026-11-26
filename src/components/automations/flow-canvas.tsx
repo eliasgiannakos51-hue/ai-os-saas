@@ -39,6 +39,7 @@ import { useTranslations } from "next-intl";
 import { AlertTriangle, ArrowUpDown, BarChart3, Calendar, Check, Clock, Code2, FileOutput, Filter, GitBranch, GitCompare, GitMerge, Globe, Hash, Heart, FileText, Layers, List, ListFilter, PauseCircle, RefreshCw, Reply, Scissors, Send, Sparkles, Split, Table2, Terminal, Timer, Type, X as XIcon, Zap, Play, Mail, Database, Webhook, ChevronRight, Plus, Search } from "lucide-react";
 import type { Box, StartBox, FlowEdge, FlowGroup, NodePosition } from "@/lib/automations/boxes";
 import type { Connected } from "@/components/automations/flow-boxes";
+import { matchesSearch } from "@/lib/text/search-match";
 import type { BoxState, RunProgress } from "@/lib/automations/run-progress";
 import type { ShownFlow } from "@/lib/automations/flow-view";
 
@@ -407,9 +408,9 @@ function AddNode({ data }: NodeProps) {
   ];
 
   const allKinds = CATEGORIES.flatMap((c) => c.kinds);
-  const q = search.trim().toLowerCase();
+  const q = search.trim();
   const cats = q
-    ? [{ label: "Results", kinds: allKinds.filter((k) => (kindNames[k] ?? k).toLowerCase().includes(q)) }]
+    ? [{ label: "Results", kinds: allKinds.filter((k) => matchesSearch(kindNames[k] ?? k, q)) }]
     : CATEGORIES;
 
   return (

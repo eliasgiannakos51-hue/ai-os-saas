@@ -62,6 +62,8 @@ export function AutomationShell({
   initialSaid,
   simplePro = false,
   templates = false,
+  canvasCards = false,
+  groupsSubflows = false,
   initialMinutesSaved = null,
   initialDoneRuns = 0,
   initialModes = null,
@@ -95,6 +97,12 @@ export function AutomationShell({
    *  switch "automation-templates"): the «Έτοιμες αυτοματοποιήσεις»
    *  option under the field, and the gallery it opens. */
   templates?: boolean;
+  /** The switch "automation-canvas-cards" (read in app/dashboard/[module]/page.tsx):
+   *  closed, the canvas gets no saved edges and no saved positions and draws
+   *  from the order of the boxes, as before. */
+  canvasCards?: boolean;
+  /** The switch "automation-groups-subflows": closed, no group is drawn. */
+  groupsSubflows?: boolean;
   /** The minutes each automation saves, as typed — or null when the switch
    *  "automation-time-saved" is closed to this reader or the database has
    *  no such column yet (lib/automations/page-data.ts): then neither the
@@ -219,9 +227,7 @@ export function AutomationShell({
   // every box (lib/automations/runner.ts), and while the run is going this
   // screen reads them back once a second. When it is not going, nothing
   // is asked and nothing moves.
-  // Live run progress works in BOTH modes — the user should see which
-  // box is running regardless of Simple/Pro.
-  const alive = true;
+  const alive = simplePro && level === "pro";
   const shownRuns = shown ? runs.filter((r) => r.flowId === shown.id) : [];
   const followed = shown ? followedRun(shownRuns, watch && watch.flowId === shown.id ? watch : null) : null;
   const progress = shown && alive ? runProgress(shown.boxes, followed) : null;
@@ -619,9 +625,9 @@ export function AutomationShell({
                   onChoose={(id) => setChosen((c) => (c === id ? null : id))}
                   connected={connected}
                   progress={progress}
-                  graphEdges={shown.edges}
-                  savedLayout={shown.layout}
-                  groups={shown.groups}
+                  graphEdges={canvasCards ? shown.edges : null}
+                  savedLayout={canvasCards ? shown.layout : null}
+                  groups={groupsSubflows ? shown.groups : null}
                   onDelete={(boxId) => {
                     const boxes = shown.boxes.filter((b) => b.id !== boxId && b.kind !== "start" ? true : b.kind === "start");
                     if (boxes.length < 2) return;

@@ -281,6 +281,9 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "automation_flows", label: "automation_flows", scope: "user_content" },
   { table: "automation_flow_versions", label: "automation_flow_versions", scope: "user_content" },
   { table: "automation_runs", label: "automation_runs", scope: "user_content" },
+  // 2026-11-26: what each box of a run took in and gave out (what the
+  // automation made from the person's own data), kept per run.
+  { table: "automation_run_step_outputs", label: "automation_run_step_outputs", scope: "user_content" },
   // MASTER 16, package 36. The sentence a flow was made from, the colour
   // its steps shared, and which row each step made.
   { table: "project_flows", label: "project_flows", scope: "user_content" },

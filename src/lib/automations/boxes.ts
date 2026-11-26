@@ -257,6 +257,112 @@ export type ActionBox = { id: string; kind: "action"; do: ActionKind; url?: stri
 export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox | FilterBox | CodeBox | WaitBox | TransformBox | NoteBox | ErrorHandlerBox | LoopBox | SplitBox | MergeBox | DelayBox | SortBox | LimitBox | RemoveDuplicatesBox | SummarizeBox | SwitchBox | SetBox | CompareBox | DateTimeBox | HtmlExtractBox | TextClassifierBox | SentimentBox | ExtractInfoBox | RespondWebhookBox | ExecuteCommandBox | AggregateBox | SplitOutBox | RenameKeysBox | XmlBox | MarkdownBox | CryptoBox | SpreadsheetParseBox | NoOpBox | StopErrorBox | ExecuteWorkflowBox | ReadFileBox | WriteFileBox | SmtpSendBox | FtpBox | SshBox | GraphqlBox | AiAgentBox | LlmChainBox | RetrievalQaBox | SummarizationChainBox | HttpResponseBox;
 export type BoxKind = Box["kind"];
 
+/* ───────────────────── GRAPH EDGES (Phase 2, n8n spec §5) ───────────────────── */
+
+/**
+ * An edge connects one output port of a box to one input port of another.
+ * When the edges array is absent or null, the flow is a linear list:
+ * box[0] → box[1] → ... → box[n].
+ *
+ * Port names:
+ *   "main"       — the default single output/input
+ *   "true"       — IF/condition true output
+ *   "false"      — IF/condition false output
+ *   "route_0"... — Switch routes
+ *   "loop"       — Loop: iterate again
+ *   "done"       — Loop: finished
+ *   "error"      — Error handler output
+ */
+export type FlowEdge = {
+  id: string;
+  from: string;      // box id
+  fromPort: string;  // output port name
+  to: string;        // box id
+  toPort: string;    // input port name
+};
+
+/** Visual group (spec §10): cosmetic only, the runner ignores it. */
+export type FlowGroup = {
+  id: string;
+  name: string;
+  boxIds: string[];
+  collapsed: boolean;
+};
+
+/** Node position on canvas. */
+export type NodePosition = { x: number; y: number };
+
+/** Full graph data alongside boxes. */
+export type FlowGraph = {
+  boxes: Box[];
+  edges: FlowEdge[];
+  layout: Record<string, NodePosition>;
+  groups: FlowGroup[];
+};
+
+/**
+ * Derive edges from a linear boxes array: box[i].main → box[i+1].main.
+ * Used when no explicit edges exist (backward compat with all old automations).
+ */
+export function deriveEdgesFromList(boxes: Box[]): FlowEdge[] {
+  return boxes.slice(0, -1).map((box, i) => ({
+    id: `e-${box.id}-${boxes[i + 1].id}`,
+    from: box.id,
+    fromPort: "main",
+    to: boxes[i + 1].id,
+    toPort: "main",
+  }));
+}
+
+/** Read edges from the database column. Returns null if absent/invalid. */
+export function readEdges(raw: unknown): FlowEdge[] | null {
+  if (!Array.isArray(raw)) return null;
+  const edges: FlowEdge[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const e = item as Record<string, unknown>;
+    if (typeof e.id !== "string" || typeof e.from !== "string" || typeof e.to !== "string") continue;
+    edges.push({
+      id: e.id,
+      from: e.from,
+      fromPort: typeof e.fromPort === "string" ? e.fromPort : "main",
+      to: e.to,
+      toPort: typeof e.toPort === "string" ? e.toPort : "main",
+    });
+  }
+  return edges.length > 0 ? edges : null;
+}
+
+/** Read layout positions from the database column. */
+export function readLayout(raw: unknown): Record<string, NodePosition> | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const layout: Record<string, NodePosition> = {};
+  for (const [key, val] of Object.entries(raw as Record<string, unknown>)) {
+    if (val && typeof val === "object" && "x" in val && "y" in val) {
+      layout[key] = { x: Number((val as { x: unknown }).x) || 0, y: Number((val as { y: unknown }).y) || 0 };
+    }
+  }
+  return Object.keys(layout).length > 0 ? layout : null;
+}
+
+/** Read groups from the database column. */
+export function readGroups(raw: unknown): FlowGroup[] | null {
+  if (!Array.isArray(raw)) return null;
+  const groups: FlowGroup[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const g = item as Record<string, unknown>;
+    if (typeof g.id !== "string" || typeof g.name !== "string") continue;
+    groups.push({
+      id: g.id,
+      name: g.name,
+      boxIds: Array.isArray(g.boxIds) ? g.boxIds.filter((x): x is string => typeof x === "string") : [],
+      collapsed: g.collapsed === true,
+    });
+  }
+  return groups.length > 0 ? groups : null;
+}
+
 const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const BOX_ID = /^[a-z0-9-]{1,24}$/;
 

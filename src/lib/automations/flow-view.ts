@@ -1,4 +1,4 @@
-import { readBox, readFlow, type Box } from "@/lib/automations/boxes";
+import { readBox, readFlow, readEdges, readLayout, readGroups, deriveEdgesFromList, type Box, type FlowEdge, type FlowGroup, type NodePosition } from "@/lib/automations/boxes";
 import { readSteps, type RunStatus, type RunStep } from "@/lib/automations/run-steps";
 
 /**
@@ -16,6 +16,12 @@ export type ShownFlow = {
   name: string;
   said: string;
   boxes: Box[];
+  /** Graph edges. Null = linear list (derive from boxes order). */
+  edges: FlowEdge[] | null;
+  /** User-set node positions. Null = auto-layout. */
+  layout: Record<string, NodePosition> | null;
+  /** Visual groups. Null = no groups. */
+  groups: FlowGroup[] | null;
   version: number;
   isActive: boolean;
   timeZone: string;
@@ -58,11 +64,21 @@ export function readShownFlow(row: Record<string, unknown>): ShownFlow {
       if (box) boxes.push(box);
     }
   }
+  // Graph data: edges, layout, groups (Phase 2).
+  // If edges is null/absent, derive from linear boxes order.
+  const parsedEdges = readEdges(row.edges);
+  const edges = parsedEdges ?? (boxes.length > 1 ? deriveEdgesFromList(boxes) : null);
+  const layout = readLayout(row.layout);
+  const groups = readGroups(row.groups);
+
   return {
     id: String(row.id ?? ""),
     name: String(row.name ?? ""),
     said: String(row.said ?? ""),
     boxes,
+    edges,
+    layout,
+    groups,
     version: Number(row.version) || 1,
     isActive: row.is_active === true,
     timeZone: str(row.time_zone) ?? "Europe/Athens",

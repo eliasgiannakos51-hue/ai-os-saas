@@ -619,6 +619,9 @@ export function AutomationShell({
                   onChoose={(id) => setChosen((c) => (c === id ? null : id))}
                   connected={connected}
                   progress={progress}
+                  graphEdges={shown.edges}
+                  savedLayout={shown.layout}
+                  groups={shown.groups}
                   onDelete={(boxId) => {
                     const boxes = shown.boxes.filter((b) => b.id !== boxId && b.kind !== "start" ? true : b.kind === "start");
                     if (boxes.length < 2) return;

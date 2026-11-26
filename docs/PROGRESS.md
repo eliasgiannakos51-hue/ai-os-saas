@@ -3,7 +3,7 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
-## 2026-11-26 (Phase 1 — n8n canvas cards, spec §4)
+## 2026-11-26 (Phase 1+2 — n8n canvas cards + graph model)
 
 ### n8n Phase 1: Κάρτες κόμβων (spec §4, flag: automation-canvas-cards)
 - **80×80 κάρτες** με στρογγυλό εικονίδιο (36px) στο κέντρο
@@ -20,6 +20,20 @@
 - **Bezier + smoothstep**: bezier σε κανονικές γραμμές, smoothstep σε row wraps
 - **n8n χρώματα ανά κατηγορία**: πράσινο triggers, μπλε data, μωβ AI, πορτοκαλί flow
 - **Categorized picker**: 11 κατηγορίες + search, icons σε στρογγυλά χρωματιστά
+
+### n8n Phase 2: Γράφος (spec §5, migration: 20261126000000_automation_graph.sql)
+- **FlowEdge type**: `{id, from, fromPort, to, toPort}` — ports: main, true, false,
+  route_0..N, loop, done, error
+- **NodePosition**: `{x, y}` ανά box — αποθηκεύεται στη βάση, drag & drop
+- **FlowGroup**: `{id, name, boxIds, collapsed}` — visual groups (spec §10)
+- **deriveEdgesFromList()**: αν edges=null, παράγει edges από τη σειρά boxes (backward compat)
+- **readEdges/readLayout/readGroups**: parsers για τα νέα columns
+- **ShownFlow**: +edges, +layout, +groups
+- **graphToEdges()**: μετατρέπει FlowEdge[] σε React Flow edges με χρωματιστά labels
+  (πράσινο=true, κόκκινο=false, κόκκινο=error)
+- **Canvas**: χρησιμοποιεί savedLayout αν υπάρχει, αλλιώς waterfall auto-layout
+- **Migration**: 3 νέες στήλες (edges, layout, groups) σε automation_flows + versions
+  — nullable, backward compatible, undo: DROP COLUMN
 
 ## 2026-11-25 (n8n 100% parity: 51 nodes + 1000 boxes + full UX) 🚀
 

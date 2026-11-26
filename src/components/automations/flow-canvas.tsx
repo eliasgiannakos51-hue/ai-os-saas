@@ -37,9 +37,10 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useTranslations } from "next-intl";
 import { AlertTriangle, ArrowUpDown, BarChart3, Calendar, Check, Clock, Code2, FileOutput, Filter, GitBranch, GitCompare, GitMerge, Globe, Hash, Heart, FileText, Layers, List, ListFilter, PauseCircle, RefreshCw, Reply, Scissors, Send, Sparkles, Split, Table2, Terminal, Timer, Type, X as XIcon, Zap, Play, Mail, Database, Webhook, ChevronRight, Plus, Search } from "lucide-react";
-import type { Box, StartBox } from "@/lib/automations/boxes";
+import type { Box, StartBox, FlowEdge, FlowGroup, NodePosition } from "@/lib/automations/boxes";
 import type { Connected } from "@/components/automations/flow-boxes";
 import type { BoxState, RunProgress } from "@/lib/automations/run-progress";
+import type { ShownFlow } from "@/lib/automations/flow-view";
 
 /* ───────────────────── n8n COLOR SYSTEM ───────────────────── */
 
@@ -479,27 +480,44 @@ const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"])
 function boxesToNodes(
   boxes: Box[], kindNames: Record<string, string>,
   describe: (b: Box) => string, progress: RunProgress | null,
+  savedLayout: Record<string, NodePosition> | null,
 ): Node[] {
   if (boxes.length === 0) return [];
-  const positions: { x: number; y: number }[] = [];
-  let col = 0, row = 0;
 
-  for (let i = 0; i < boxes.length; i++) {
-    const prevIsBranch = i > 0 && BRANCH_KINDS.has(boxes[i - 1].kind);
-    if (i === 0) {
-      positions.push({ x: 0, y: 0 }); col = 0; row = 0;
-    } else if (prevIsBranch) {
-      col++;
-      if (col >= COLS) { col = 0; row++; }
-      positions.push({ x: col * X_STEP, y: row * Y_STEP + 35 });
-    } else {
-      col++;
-      if (col >= COLS) { col = 0; row++; }
-      positions.push({ x: col * X_STEP, y: row * Y_STEP });
+  // Use saved positions if available; otherwise auto-layout
+  const positions: { x: number; y: number }[] = [];
+  if (savedLayout && Object.keys(savedLayout).length >= boxes.length * 0.5) {
+    // Saved layout: use stored positions, fallback to auto for missing
+    let autoCol = 0, autoRow = 0;
+    for (const box of boxes) {
+      const saved = savedLayout[box.id];
+      if (saved) {
+        positions.push(saved);
+      } else {
+        positions.push({ x: autoCol * X_STEP, y: autoRow * Y_STEP });
+        autoCol++;
+        if (autoCol >= COLS) { autoCol = 0; autoRow++; }
+      }
+    }
+  } else {
+    // Auto waterfall layout
+    let col = 0, row = 0;
+    for (let i = 0; i < boxes.length; i++) {
+      const prevIsBranch = i > 0 && BRANCH_KINDS.has(boxes[i - 1].kind);
+      if (i === 0) {
+        positions.push({ x: 0, y: 0 }); col = 0; row = 0;
+      } else if (prevIsBranch) {
+        col++;
+        if (col >= COLS) { col = 0; row++; }
+        positions.push({ x: col * X_STEP, y: row * Y_STEP + 35 });
+      } else {
+        col++;
+        if (col >= COLS) { col = 0; row++; }
+        positions.push({ x: col * X_STEP, y: row * Y_STEP });
+      }
     }
   }
 
-  // Find step counts from progress
   const stepCounts: Record<string, number> = {};
   if (progress?.failed) stepCounts[progress.failed.box] = 0;
 
@@ -516,7 +534,32 @@ function boxesToNodes(
   }));
 }
 
-function boxesToEdges(boxes: Box[], positions: { x: number; y: number }[]): Edge[] {
+function graphToEdges(graphEdges: FlowEdge[] | null, boxes: Box[], positions: { x: number; y: number }[]): Edge[] {
+  if (graphEdges && graphEdges.length > 0) {
+    // Use real graph edges
+    return graphEdges.map((ge) => {
+      const si = boxes.findIndex((b) => b.id === ge.from);
+      const ti = boxes.findIndex((b) => b.id === ge.to);
+      const sp = positions[si], tp = positions[ti];
+      const goesLeft = tp && sp && tp.x < sp.x;
+      // Color edge by port type
+      let strokeColor = "#9ca3af";
+      if (ge.fromPort === "true") strokeColor = "#16a34a";
+      if (ge.fromPort === "false") strokeColor = "#dc2626";
+      if (ge.fromPort === "error") strokeColor = "#dc2626";
+      return {
+        id: ge.id,
+        source: ge.from, sourceHandle: "right",
+        target: ge.to, targetHandle: "left",
+        type: goesLeft ? "smoothstep" : "default",
+        animated: false,
+        label: ge.fromPort !== "main" ? ge.fromPort : undefined,
+        labelStyle: { fontSize: 8, fontWeight: 600, fill: strokeColor },
+        style: { stroke: strokeColor, strokeWidth: 2, opacity: 0.55 },
+      };
+    });
+  }
+  // Fallback: linear edges from boxes order
   return boxes.slice(0, -1).map((box, i) => {
     const sp = positions[i], tp = positions[i + 1];
     const goesLeft = tp && sp && tp.x < sp.x;
@@ -535,17 +578,21 @@ function boxesToEdges(boxes: Box[], positions: { x: number; y: number }[]): Edge
 
 function FlowCanvasInner({
   boxes, chosen, onChoose, connected, onAdd, onDelete, onUndo, progress,
+  graphEdges, savedLayout, groups,
 }: {
   boxes: Box[]; chosen: string | null; onChoose: (id: string) => void;
   connected: Connected; onAdd?: (kind: Box["kind"]) => void;
   onDelete?: (boxId: string) => void; onUndo?: () => void;
   progress?: RunProgress | null;
+  graphEdges?: FlowEdge[] | null;
+  savedLayout?: Record<string, NodePosition> | null;
+  groups?: FlowGroup[] | null;
 }) {
   const kindNames = useKindNames();
   const describe = useDescribe();
 
   const { initialNodes, initialEdges } = useMemo(() => {
-    const nodes = boxesToNodes(boxes, kindNames, describe, progress ?? null);
+    const nodes = boxesToNodes(boxes, kindNames, describe, progress ?? null, savedLayout ?? null);
     const posArr = nodes.map((n) => n.position);
     if (onAdd) {
       const lastPos = nodes.length > 0 ? nodes[nodes.length - 1].position : { x: 0, y: 0 };
@@ -556,7 +603,7 @@ function FlowCanvasInner({
         draggable: false, selectable: false,
       });
     }
-    const edges = boxesToEdges(boxes, posArr);
+    const edges = graphToEdges(graphEdges ?? null, boxes, posArr);
     if (onAdd && boxes.length > 0) {
       edges.push({
         id: `e-${boxes[boxes.length - 1].id}-__add__`,
@@ -647,6 +694,9 @@ export function FlowCanvasView(props: {
   connected: Connected; onAdd?: (kind: Box["kind"]) => void;
   onDelete?: (boxId: string) => void; onUndo?: () => void;
   progress?: RunProgress | null;
+  graphEdges?: FlowEdge[] | null;
+  savedLayout?: Record<string, NodePosition> | null;
+  groups?: FlowGroup[] | null;
 }) {
   return (
     <ReactFlowProvider>

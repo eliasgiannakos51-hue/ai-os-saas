@@ -3,7 +3,7 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
-## 2026-11-26 (Phase 1+2 — n8n canvas cards + graph model)
+## 2026-11-26 (Phase 1-6 — full n8n spec implementation)
 
 ### n8n Phase 1: Κάρτες κόμβων (spec §4, flag: automation-canvas-cards)
 - **80×80 κάρτες** με στρογγυλό εικονίδιο (36px) στο κέντρο
@@ -34,6 +34,37 @@
 - **Canvas**: χρησιμοποιεί savedLayout αν υπάρχει, αλλιώς waterfall auto-layout
 - **Migration**: 3 νέες στήλες (edges, layout, groups) σε automation_flows + versions
   — nullable, backward compatible, undo: DROP COLUMN
+
+### n8n Phase 3: Λογική (spec §13, flag: automation-real-logic)
+- **pickNextBoxes()**: graph-aware routing — IF routes true/false, Switch routes
+  to route_N, Loop follows loop/done ports, error_handler follows error
+- **Runner graph traversal**: when graphEdges exist, jumps to target box via
+  `boxes.findIndex()` after IF/Switch/Loop instead of linear i++
+- **Loop counter**: Map<boxId, count> tracks iterations, respects maxIterations
+- **Skipped boxes**: non-taken branch paths get "skipped" status
+- **StepNote**: +skipped, +loop_done, +switch_route_0..3, +switch_fallback
+- **Linear fallback**: no graphEdges = exact same for-loop as before (zero regression)
+- **MAX_STEPS safety**: boxes.length * 3 to prevent infinite loops
+
+### n8n Phase 4: Εκτέλεση (spec §8, flag: automation-run-outputs)
+- **storeStepOutput()**: stores output per step in automation_run_step_outputs
+- **Sensitive data stripped**: regex removes password/token/secret before storing
+- **Called after**: read, ai, transform, ai_agent, execute_workflow steps
+- **14-day expiry**: rows auto-expire, cleaned by cron
+- **Migration**: 20261126100000_automation_run_step_outputs.sql — new table
+
+### n8n Phase 5: AI Agent (spec §11)
+- **ai_agent, llm_chain, retrieval_qa, summarization_chain**: now execute through
+  runAi() instead of placeholder "transform_done"
+- **Instruction extraction**: reads instruction/prompt/question from box
+- **Output stored**: via storeStepOutput() after execution
+
+### n8n Phase 6: Κλίμακα (spec §10, flag: automation-groups-subflows)
+- **execute_workflow**: actually loads and runs another automation as sub-flow
+- **Depth limit**: max 3 levels deep (prevents recursive loops)
+- **Sub-flow credits**: accumulated into parent run's total
+- **Sub-flow output**: becomes the text for the next box in parent
+- **FlowGroup**: visual groups (collapse) stored in groups column (canvas Phase 2)
 
 ## 2026-11-25 (n8n 100% parity: 51 nodes + 1000 boxes + full UX) 🚀
 

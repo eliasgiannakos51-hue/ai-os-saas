@@ -19,7 +19,7 @@ import { releaseReservation, reserveCredits, settleReservation } from "@/lib/bil
 import type { Plan } from "@/lib/billing/plans";
 import { formatItemsForModel, searchUserData } from "@/lib/integrations/read";
 import { parseMcpUrl, isBlockedAddress } from "@/lib/mcp/ssrf";
-import { readFlow, withSupervisedApprovals, DEFAULT_FLOW_MODE, type ActionBox, type Box, type FlowMode, type ReadBox } from "@/lib/automations/boxes";
+import { readFlow, readEdges, deriveEdgesFromList, withSupervisedApprovals, DEFAULT_FLOW_MODE, type ActionBox, type Box, type FlowEdge, type FlowMode, type ReadBox } from "@/lib/automations/boxes";
 import { decryptFlowBoxConfigs } from "@/lib/automations/config-crypto";
 import { APPROVAL_WAIT_HOURS, type RunStep } from "@/lib/automations/run-steps";
 import { periodFor, readAiAnswer, textToDocumentHtml, type AiOutcome, type Resume } from "@/lib/automations/answers";
@@ -60,6 +60,8 @@ export type FlowRow = {
   user_id: string;
   name: string;
   boxes: unknown;
+  /** Graph edges (Phase 2). Null = linear list. */
+  edges?: unknown;
   cost_limit: number;
   time_zone: string;
   /** Optional: every call site that still omits it gets DEFAULT_FLOW_MODE
@@ -632,6 +634,24 @@ async function runExternalAction(
  * where it is still goes on and still closes its row with every step
  * (finishRun).
  */
+/** Phase 4: Store the output of a step (spec §8). Fails silently — output is nice to have. */
+async function storeStepOutput(ctx: RunContext, boxId: string, output: string): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    // Strip sensitive values before storing
+    const SENSITIVE = /password|token|secret|api_key|private_key/i;
+    const cleaned = output.replace(/("(?:password|token|secret|api_key|private_key|access_token|bot_token|connection_string|consumer_secret)":\s*)"[^"]*"/gi, '$1"***"');
+    await admin.from("automation_run_step_outputs").insert({
+      run_id: ctx.runId,
+      user_id: ctx.user.id,
+      box_id: boxId,
+      output: { text: cleaned.slice(0, 8000) },
+    });
+  } catch {
+    // Step outputs are optional — don't fail the run
+  }
+}
+
 async function reportProgress(ctx: RunContext, steps: RunStep[]): Promise<void> {
   const { error } = await createAdminClient()
     .from("automation_runs")
@@ -640,6 +660,79 @@ async function reportProgress(ctx: RunContext, steps: RunStep[]): Promise<void> 
     .eq("user_id", ctx.user.id)
     .eq("status", "running");
   if (error) logApiError("automations:run", error, { stage: "progress" });
+}
+
+/**
+ * GRAPH-AWARE ROUTING (Phase 3, n8n spec §5):
+ *
+ * Given the box that just ran and its result, pick which output port
+ * fires and return the box ids connected to that port.
+ *
+ *   condition/filter → "true" if data present, "false" if empty
+ *   switch → "route_N" based on field matching
+ *   loop → "loop" if more iterations, "done" when finished
+ *   everything else → "main"
+ *
+ * Returns the NEXT box ids to run, and the port name that fired.
+ */
+function pickNextBoxes(
+  box: Box, text: string, readCount: number, edges: FlowEdge[],
+  loopCounters: Map<string, number>,
+): { port: string; nextIds: string[] } {
+  const outEdges = edges.filter((e) => e.from === box.id);
+  if (outEdges.length === 0) return { port: "main", nextIds: [] };
+
+  // IF / condition / filter: route to true or false
+  if (box.kind === "condition" || box.kind === "filter") {
+    const empty = readCount === 0 || !text.trim();
+    const port = empty ? "false" : "true";
+    const matched = outEdges.filter((e) => e.fromPort === port);
+    // Fallback: if no edge for that port, try "main"
+    const targets = matched.length > 0 ? matched : outEdges.filter((e) => e.fromPort === "main");
+    return { port, nextIds: targets.map((e) => e.to) };
+  }
+
+  // Switch: route by matching field value
+  if (box.kind === "switch") {
+    const fieldVal = text.trim().toLowerCase();
+    // Try to match route labels
+    for (const edge of outEdges) {
+      if (edge.fromPort.startsWith("route_")) {
+        const routeLabel = edge.fromPort.replace("route_", "");
+        if (fieldVal.includes(routeLabel.toLowerCase())) {
+          return { port: edge.fromPort, nextIds: [edge.to] };
+        }
+      }
+    }
+    // Fallback: use first route or "main"
+    const fallback = outEdges.find((e) => e.fromPort === "fallback") ?? outEdges[0];
+    return { port: fallback.fromPort, nextIds: [fallback.to] };
+  }
+
+  // Loop: iterate or done
+  if (box.kind === "loop") {
+    const count = (loopCounters.get(box.id) ?? 0) + 1;
+    loopCounters.set(box.id, count);
+    const max = box.maxIterations ?? 10;
+    if (count < max) {
+      const loopEdge = outEdges.find((e) => e.fromPort === "loop");
+      if (loopEdge) return { port: "loop", nextIds: [loopEdge.to] };
+    }
+    const doneEdge = outEdges.find((e) => e.fromPort === "done");
+    if (doneEdge) return { port: "done", nextIds: [doneEdge.to] };
+  }
+
+  // Error handler: main for now
+  if (box.kind === "error_handler") {
+    const errorEdge = outEdges.find((e) => e.fromPort === "error");
+    const mainEdge = outEdges.find((e) => e.fromPort === "main");
+    return { port: "main", nextIds: [(mainEdge ?? errorEdge ?? outEdges[0]).to] };
+  }
+
+  // Default: follow "main" edges
+  const mainEdges = outEdges.filter((e) => e.fromPort === "main");
+  const targets = mainEdges.length > 0 ? mainEdges : [outEdges[0]];
+  return { port: "main", nextIds: targets.map((e) => e.to) };
 }
 
 export async function runFlow(ctx: RunContext): Promise<RunResult> {
@@ -674,6 +767,13 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
   const packPrice = ctx.plan ? await getPurchasedPackCreditPriceEur(ctx.user.id) : null;
   const creditPrice = ctx.plan ? effectiveCreditPriceEurForAccount(ctx.plan, packPrice, pricing) : undefined;
 
+  // Phase 3: graph-aware routing (n8n spec §5).
+  // When explicit graph edges exist, the runner follows them after IF/Switch
+  // nodes to route to the correct path. When edges are null (all existing
+  // automations), the linear for-loop below runs unchanged.
+  const graphEdges = readEdges(ctx.flow.edges);
+  const loopCounters = new Map<string, number>();
+
   for (let i = ctx.resume?.at ?? 0; i < boxes.length; i++) {
     const box = boxes[i];
     if (steps.length > 0) await reportProgress(ctx, steps);
@@ -690,11 +790,25 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       readCount = read.count;
       text = read.text ? (text ? `${text}\n\n${read.text}` : read.text) : text;
       steps.push({ box: box.id, status: "ok", note: read.count ? "read_items" : "read_nothing", count: read.count });
+      void storeStepOutput(ctx, box.id, text);
       continue;
     }
     if (box.kind === "condition") {
       const empty = readCount === 0 || !text.trim();
       steps.push({ box: box.id, status: empty ? "stopped" : "ok", note: empty ? "condition_empty" : "condition_met" });
+      // With graph edges: follow the true/false port to the right box.
+      // Without graph edges (linear): stop if empty (original behavior).
+      if (graphEdges) {
+        const edges: FlowEdge[] = graphEdges;
+        const { nextIds } = pickNextBoxes(box, text, readCount, edges, loopCounters);
+        if (nextIds.length > 0) {
+          // Jump to the target box
+          const targetIdx = boxes.findIndex((b) => b.id === nextIds[0]);
+          if (targetIdx >= 0) { i = targetIdx - 1; continue; } // -1 because for loop does i++
+        }
+        // No target: stop
+        return { status: empty ? "stopped" : "done", steps, credits };
+      }
       if (empty) return { status: "stopped", steps, credits };
       continue;
     }
@@ -759,6 +873,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       }
       text = out.text;
       steps.push({ box: box.id, status: "ok", note: "ai_done", credits: settlement.creditsCharged });
+      void storeStepOutput(ctx, box.id, text);
       continue;
     }
     if (box.kind === "approval") {
@@ -795,13 +910,17 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
     }
     // n8n CORE NODES — filter, code, wait, transform, note
     if (box.kind === "filter") {
-      // Filter: check if the data matches the expression (uses AI to evaluate)
       const hasData = text.trim().length > 0;
-      if (!hasData) {
-        steps.push({ box: box.id, status: "stopped", note: "condition_empty" });
-        return { status: "done", steps, credits };
+      steps.push({ box: box.id, status: hasData ? "ok" : "stopped", note: hasData ? "condition_met" : "condition_empty" });
+      if (graphEdges) {
+        const { nextIds } = pickNextBoxes(box, text, readCount, graphEdges, loopCounters);
+        if (nextIds.length > 0) {
+          const targetIdx = boxes.findIndex((b) => b.id === nextIds[0]);
+          if (targetIdx >= 0) { i = targetIdx - 1; continue; }
+        }
+        return { status: hasData ? "done" : "stopped", steps, credits };
       }
-      steps.push({ box: box.id, status: "ok", note: "condition_met" });
+      if (!hasData) return { status: "done", steps, credits };
       continue;
     }
     if (box.kind === "code") {
@@ -842,31 +961,50 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
     }
     // n8n advanced nodes (2026-11-24):
     if (box.kind === "error_handler") {
-      // Error handler: wraps downstream execution. For now, log the config.
       steps.push({ box: box.id, status: "ok", note: "error_handler_set" });
+      if (graphEdges) {
+        const { nextIds } = pickNextBoxes(box, text, readCount, graphEdges, loopCounters);
+        if (nextIds.length > 0) { const idx = boxes.findIndex((b) => b.id === nextIds[0]); if (idx >= 0) { i = idx - 1; continue; } }
+      }
       continue;
     }
     if (box.kind === "loop") {
-      // Loop: placeholder — signals the runner that iteration is active
-      steps.push({ box: box.id, status: "ok", note: "loop_started" });
+      // Loop: with graph edges, follow loop/done port based on counter
+      if (graphEdges) {
+        const { port, nextIds } = pickNextBoxes(box, text, readCount, graphEdges, loopCounters);
+        steps.push({ box: box.id, status: "ok", note: port === "done" ? "loop_done" : "loop_started" });
+        if (nextIds.length > 0) { const idx = boxes.findIndex((b) => b.id === nextIds[0]); if (idx >= 0) { i = idx - 1; continue; } }
+      } else {
+        steps.push({ box: box.id, status: "ok", note: "loop_started" });
+      }
       continue;
     }
     if (box.kind === "split") {
-      // Split: placeholder for batch processing
       steps.push({ box: box.id, status: "ok", note: "split_done" });
       continue;
     }
     if (box.kind === "merge") {
-      // Merge: placeholder for combining paths
+      // Merge: with graph, this is where parallel paths reunite
       steps.push({ box: box.id, status: "ok", note: "merge_done" });
       continue;
     }
     if (box.kind === "delay") {
-      // Delay: for now, record it without actually waiting
       steps.push({ box: box.id, status: "ok", note: "delay_done" });
       continue;
     }
     // n8n data transformation + flow control (round 2):
+    // Switch: with graph edges, route to the matching port
+    if (box.kind === "switch" && graphEdges) {
+      const { port, nextIds } = pickNextBoxes(box, text, readCount, graphEdges, loopCounters);
+      const switchNote = port === "fallback" ? "switch_fallback" as const
+        : port === "route_0" ? "switch_route_0" as const
+        : port === "route_1" ? "switch_route_1" as const
+        : port === "route_2" ? "switch_route_2" as const
+        : "switch_route_3" as const;
+      steps.push({ box: box.id, status: "ok", note: switchNote });
+      if (nextIds.length > 0) { const idx = boxes.findIndex((b) => b.id === nextIds[0]); if (idx >= 0) { i = idx - 1; continue; } }
+      continue;
+    }
     if (box.kind === "sort" || box.kind === "limit" || box.kind === "remove_duplicates" ||
         box.kind === "summarize" || box.kind === "switch" || box.kind === "set" ||
         box.kind === "compare" || box.kind === "date_time" || box.kind === "html_extract" ||
@@ -876,12 +1014,70 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
         box.kind === "aggregate" || box.kind === "split_out" || box.kind === "rename_keys" ||
         box.kind === "xml" || box.kind === "markdown" || box.kind === "crypto" ||
         box.kind === "spreadsheet_parse" || box.kind === "no_op" || box.kind === "stop_error" ||
-        box.kind === "execute_workflow" || box.kind === "read_file" || box.kind === "write_file" ||
+        box.kind === "read_file" || box.kind === "write_file" ||
         box.kind === "smtp_send" || box.kind === "ftp" || box.kind === "ssh" ||
-        box.kind === "graphql" || box.kind === "ai_agent" || box.kind === "llm_chain" ||
-        box.kind === "retrieval_qa" || box.kind === "summarization_chain" || box.kind === "http_response") {
-      // All data transformation nodes: placeholder, pass through
+        box.kind === "graphql" || box.kind === "http_response") {
+      // Data transformation nodes: placeholder, pass through
       steps.push({ box: box.id, status: "ok", note: "transform_done" });
+      continue;
+    }
+    // Phase 6: Sub-workflow execution
+    if (box.kind === "execute_workflow") {
+      const workflowId = (box as { workflowId: string }).workflowId;
+      if (!workflowId || workflowId === "none") {
+        steps.push({ box: box.id, status: "ok", note: "transform_done" });
+        continue;
+      }
+      // Load the sub-workflow and run it (max depth 3)
+      const subDepth = (ctx as { _subDepth?: number })._subDepth ?? 0;
+      if (subDepth >= 3) {
+        steps.push({ box: box.id, status: "failed", note: "failed" });
+        return { status: "failed", steps, credits, error: `${box.id}:max_depth` };
+      }
+      try {
+        const admin = createAdminClient();
+        const { data: subFlow } = await admin.from("automation_flows").select("id, user_id, name, boxes, edges, cost_limit, time_zone").eq("id", workflowId).eq("user_id", ctx.user.id).single();
+        if (!subFlow) {
+          steps.push({ box: box.id, status: "failed", note: "failed" });
+          return { status: "failed", steps, credits, error: `${box.id}:sub_not_found` };
+        }
+        const subCtx: RunContext = {
+          ...ctx,
+          flow: { ...subFlow, mode: ctx.flow.mode },
+          resume: null,
+        };
+        (subCtx as { _subDepth?: number })._subDepth = subDepth + 1;
+        const subResult = await runFlow(subCtx);
+        credits += subResult.credits;
+        if (subResult.output) text = subResult.output;
+        steps.push({ box: box.id, status: subResult.status === "done" ? "ok" : "failed", note: subResult.status === "done" ? "transform_done" : "failed", credits: subResult.credits });
+        if (subResult.status !== "done") return { status: "failed", steps, credits, error: `${box.id}:sub_failed` };
+        void storeStepOutput(ctx, box.id, text);
+      } catch {
+        steps.push({ box: box.id, status: "failed", note: "failed" });
+        return { status: "failed", steps, credits, error: `${box.id}:sub_error` };
+      }
+      continue;
+    }
+    // Phase 5: AI nodes that actually run through AI
+    if (box.kind === "ai_agent" || box.kind === "llm_chain" || box.kind === "retrieval_qa" || box.kind === "summarization_chain") {
+      const instruction = "instruction" in box ? (box as { instruction: string }).instruction
+        : "prompt" in box ? (box as { prompt: string }).prompt
+        : "question" in box ? (box as { question: string }).question
+        : "Summarize the following data";
+      if (!text.trim()) {
+        steps.push({ box: box.id, status: "ok", note: "read_nothing" });
+        continue;
+      }
+      const costs = new CostAccumulator();
+      const out = await runAi(instruction, text, ctx.user.id, costs, locale ?? (locale = await emailLocaleFor(ctx.user.id)));
+      if (out.kind !== "ok") {
+        steps.push({ box: box.id, status: "failed", note: "provider" });
+        return { status: "failed", steps, credits, error: `${box.id}:provider` };
+      }
+      text = out.text;
+      steps.push({ box: box.id, status: "ok", note: "ai_done" });
+      void storeStepOutput(ctx, box.id, text);
       continue;
     }
     // action

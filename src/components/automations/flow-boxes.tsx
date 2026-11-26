@@ -542,6 +542,14 @@ function useNoteWords(): (step: RunStep) => string {
       merge_done: "Merge completed",
       delay_done: "Delay completed",
       transform_done: "Completed",
+      // Phase 3 — graph routing:
+      skipped: "Skipped",
+      loop_done: "Loop finished",
+      switch_route_0: "Route 0",
+      switch_route_1: "Route 1",
+      switch_route_2: "Route 2",
+      switch_route_3: "Route 3",
+      switch_fallback: "Fallback",
     };
     return note[step.note];
   };

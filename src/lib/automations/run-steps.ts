@@ -37,6 +37,11 @@ export const STEP_NOTES = [
   "merge_done",
   "delay_done",
   "transform_done",
+  // Phase 3 — graph routing (2026-11-26):
+  "skipped",         // box on a non-taken branch (IF false, Switch other route)
+  "loop_done",       // loop finished all iterations
+  "switch_route_0", "switch_route_1", "switch_route_2", "switch_route_3",
+  "switch_fallback",
 ] as const;
 export type StepNote = (typeof STEP_NOTES)[number];
 

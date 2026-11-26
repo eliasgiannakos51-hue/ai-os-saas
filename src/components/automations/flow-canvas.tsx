@@ -704,10 +704,13 @@ function FlowCanvasInner({
         deleteKeyCode={null} defaultEdgeOptions={{ type: "default" }}>
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgb(var(--foreground) / 0.06)" />
         <Controls showInteractive={false} style={{ background: "rgb(var(--panel))", border: "1px solid rgb(var(--border) / 0.2)", borderRadius: 8, boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }} />
-        <MiniMap
-          nodeColor={(n) => THEME[(n.data as { box: Box })?.box?.kind]?.accent ?? "#6b7280"}
-          maskColor="rgb(var(--panel) / 0.85)"
-          style={{ background: "rgb(var(--panel) / 0.7)", border: "1px solid rgb(var(--border) / 0.2)", borderRadius: 8, height: 80, width: 130 }} />
+        {/* Minimap only when canvas is bigger than viewport (spec #15) */}
+        {boxes.length > 8 && (
+          <MiniMap
+            nodeColor={(n) => THEME[(n.data as { box: Box })?.box?.kind]?.accent ?? "#6b7280"}
+            maskColor="rgb(var(--panel) / 0.85)"
+            style={{ background: "rgb(var(--panel) / 0.7)", border: "1px solid rgb(var(--border) / 0.2)", borderRadius: 8, height: 100, width: 160 }} />
+        )}
       </ReactFlow>
 
       {contextMenu && (
@@ -729,7 +732,19 @@ function FlowCanvasInner({
 
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 12px", background: "rgb(var(--panel) / 0.95)", borderTop: "1px solid rgb(var(--border) / 0.15)", fontSize: 9, color: "rgb(var(--foreground) / 0.3)" }}>
         <span>{boxes.length} node{boxes.length !== 1 ? "s" : ""}</span>
-        <span>Del · Ctrl+D · 1: fit · 0: 100%</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Tidy up button — spec #13 */}
+          <button type="button" onClick={() => {
+            // Re-layout all nodes using auto-layout (remove saved positions)
+            const newNodes = boxesToNodes(boxes, kindNames, describe, progress ?? null, null);
+            // Note: this only updates the visual; saving layout requires the graph migration
+            reactFlowInstance.setNodes(newNodes.map((n) => ({ ...n, selected: n.id === chosen })));
+            setTimeout(() => reactFlowInstance.fitView({ padding: 0.08, duration: 300, minZoom: 0.5 }), 50);
+          }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 9, color: "rgb(var(--foreground) / 0.4)", textDecoration: "underline" }}>
+            Tidy up
+          </button>
+          <span>Del · Ctrl+D · 1: fit · 0: 100%</span>
+        </div>
       </div>
     </div>
   );

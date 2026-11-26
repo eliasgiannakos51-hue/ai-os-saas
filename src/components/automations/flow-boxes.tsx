@@ -1445,7 +1445,12 @@ export function RunHistory({
     flow_off: t("runErrors.off"),
   };
 
-  if (runs.length === 0) return <p className="text-xs text-muted">{t("historyEmpty")}</p>;
+  if (runs.length === 0) return (
+    <div className="flex flex-col items-center gap-2 py-4">
+      <p className="text-xs text-muted">{t("historyEmpty")}</p>
+      <p className="text-[10px] text-muted/60">Press &quot;Run now&quot; or &quot;Try without sending&quot; above</p>
+    </div>
+  );
   return (
     <ul data-testid="flow-history" className="space-y-2">
       {runs.map((run) => {

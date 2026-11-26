@@ -75,6 +75,9 @@ export async function POST(request: Request) {
   }
   if ((count ?? 0) >= MAX_FLOWS) return refuse("too_many", 409, { limit: MAX_FLOWS });
 
+  // Phase 6, spec #16: warn about duplicate names (not block — just warn in response)
+  // The client shows the warning; the automation is still created.
+
   const breaker = await checkAiCallAllowed(user.id, "automation_build", fingerprintRequest(said));
   if (!breaker.allowed) return refuse("rate_limited", 429);
   // Accounts that are not charged: their own ceiling in euros.
@@ -129,6 +132,16 @@ export async function POST(request: Request) {
 
     const admin = createAdminClient();
     const id = crypto.randomUUID();
+
+    // Phase 6, spec #16: check for duplicate names
+    const { data: existing } = await admin
+      .from("automation_flows")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("name", built.name)
+      .limit(1);
+    const duplicateName = (existing?.length ?? 0) > 0;
+
     const { data: row, error: saveError } = await admin
       .from("automation_flows")
       .insert({ id, user_id: user.id, name: built.name, said, boxes: built.boxes, version: 1, is_active: false, time_zone: timeZone })
@@ -145,7 +158,7 @@ export async function POST(request: Request) {
 
     if (projectId) await linkResultToProject(supabase, user.id, "automation_flows", id, projectId);
 
-    return NextResponse.json({ ok: true, flow: row, unsupported: built.unsupported, creditsCharged: settlement.creditsCharged });
+    return NextResponse.json({ ok: true, flow: row, unsupported: built.unsupported, creditsCharged: settlement.creditsCharged, duplicateName });
   } catch (err) {
     logApiError("/api/automations/flows", err);
     if (!settled) await releaseReservation(user.id, reservationId);

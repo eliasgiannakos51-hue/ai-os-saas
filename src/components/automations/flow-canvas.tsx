@@ -684,7 +684,7 @@ function FlowCanvasInner({
       e.preventDefault(); const box = boxes.find((b) => b.id === chosen);
       if (box && box.kind !== "start") onAdd(box.kind);
     }
-    if (e.key === "1" && !e.ctrlKey && !e.metaKey) reactFlowInstance.fitView({ padding: 0.12, duration: 300 });
+    if (e.key === "1" && !e.ctrlKey && !e.metaKey) reactFlowInstance.fitView({ padding: 0.08, duration: 300, minZoom: 0.5 });
     if (e.key === "0" && !e.ctrlKey && !e.metaKey) reactFlowInstance.zoomTo(1, { duration: 300 });
   }, [chosen, onDelete, onUndo, onAdd, boxes, reactFlowInstance]);
 
@@ -697,8 +697,9 @@ function FlowCanvasInner({
         onNodeClick={(e, n) => { closeContext(); onNodeClick(e, n); }}
         onNodeDoubleClick={(_, n) => { if (n.id !== "__add__") onChoose(n.id); }}
         onNodeContextMenu={onNodeContextMenu} onPaneClick={closeContext}
-        nodeTypes={nodeTypes} fitView fitViewOptions={{ padding: 0.05, maxZoom: 1 }}
-        minZoom={0.08} panOnDrag zoomOnScroll panOnScroll
+        nodeTypes={nodeTypes} fitView
+        fitViewOptions={{ padding: 0.08, maxZoom: 1, minZoom: 0.5 }}
+        minZoom={0.2} panOnDrag zoomOnScroll panOnScroll
         proOptions={{ hideAttribution: true }} style={{ background: "transparent" }}
         deleteKeyCode={null} defaultEdgeOptions={{ type: "default" }}>
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgb(var(--foreground) / 0.06)" />

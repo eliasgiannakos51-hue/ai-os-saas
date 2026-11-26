@@ -353,19 +353,34 @@ function AutomationNode({ data, selected }: NodeProps) {
           transition: "box-shadow 0.15s, border-color 0.15s",
         }}
       >
-        {/* Input handle (left) — not on start node */}
+        {/* Input handles — left and top (for wrapped rows) */}
         {!isStart && (
-          <Handle
-            type="target"
-            position={Position.Left}
-            style={{
-              background: "rgb(var(--panel))",
-              border: `2px solid ${theme.accent}`,
-              width: 10,
-              height: 10,
-              left: -5,
-            }}
-          />
+          <>
+            <Handle
+              type="target"
+              position={Position.Left}
+              id="left"
+              style={{
+                background: "rgb(var(--panel))",
+                border: `2px solid ${theme.accent}`,
+                width: 10,
+                height: 10,
+                left: -5,
+              }}
+            />
+            <Handle
+              type="target"
+              position={Position.Top}
+              id="top"
+              style={{
+                background: "rgb(var(--panel))",
+                border: `2px solid ${theme.accent}`,
+                width: 10,
+                height: 10,
+                top: -5,
+              }}
+            />
+          </>
         )}
 
         {/* n8n big CIRCULAR icon — centered in the square */}
@@ -384,16 +399,29 @@ function AutomationNode({ data, selected }: NodeProps) {
           <NodeIcon box={box} size={20} />
         </div>
 
-        {/* Output handle (right) */}
+        {/* Output handles — right and bottom */}
         <Handle
           type="source"
           position={Position.Right}
+          id="right"
           style={{
             background: "rgb(var(--panel))",
             border: `2px solid ${theme.accent}`,
             width: 10,
             height: 10,
             right: -5,
+          }}
+        />
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          id="bottom"
+          style={{
+            background: "rgb(var(--panel))",
+            border: `2px solid ${theme.accent}`,
+            width: 10,
+            height: 10,
+            bottom: -5,
           }}
         />
       </div>
@@ -605,47 +633,80 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
  */
 const NODE_W = 96;    // n8n: GRID_SIZE * 6 = 96
 const NODE_H = 120;   // 96px card + ~24px label below
-const X_GAP = 56;     // horizontal gap between nodes
-const Y_GAP = 20;     // vertical gap between stacked nodes
-const X_STEP = NODE_W + X_GAP;  // 152px per column
-const Y_STEP = NODE_H + Y_GAP;  // 140px per stack row
-const MAX_STACK = 4;
+const X_GAP = 48;     // horizontal gap
+const Y_GAP = 24;     // vertical gap
+const X_STEP = NODE_W + X_GAP;  // 144px per column
+const Y_STEP = NODE_H + Y_GAP;  // 144px per row
 
+/**
+ * COMPACT GRID LAYOUT with branching — like n8n.
+ *
+ * Instead of one infinite horizontal line, nodes wrap into rows.
+ * PER_ROW controls how many nodes fit before wrapping down.
+ *
+ * Branch nodes (condition/switch/filter) create a visual fork:
+ * the branch node sits alone, and the next 2-3 nodes fan out
+ * diagonally from it (one up-right, one right, one down-right).
+ *
+ * This creates n8n's signature branching visual while keeping
+ * things compact — 100+ nodes fit without scrolling miles.
+ */
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
+const PER_ROW = 8; // nodes per row before wrapping
 
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
   if (boxes.length === 0) return [];
 
   const positions: { x: number; y: number }[] = [];
+
   let col = 0;
-  let stackInCol = 0;
-  let lastKind = "";
+  let row = 0;
+  let branchFanOut = 0;   // how many nodes to fan after a branch
+  let branchBaseCol = 0;
+  let branchBaseRow = 0;
 
   for (let i = 0; i < boxes.length; i++) {
     const box = boxes[i];
     const isBranch = BRANCH_KINDS.has(box.kind);
     const prevIsBranch = i > 0 && BRANCH_KINDS.has(boxes[i - 1].kind);
-    const sameAsPrev = box.kind === lastKind && !isBranch;
 
     if (i === 0) {
+      // First node — top left
       positions.push({ x: 0, y: 0 });
-      stackInCol = 1;
-    } else if (sameAsPrev && stackInCol < MAX_STACK && !prevIsBranch) {
-      // Stack vertically — same kind, same column
-      positions.push({ x: col * X_STEP, y: stackInCol * Y_STEP });
-      stackInCol++;
-    } else if (prevIsBranch) {
-      // After branch: shift right AND down to show branching
-      col++;
-      positions.push({ x: col * X_STEP, y: Math.round(Y_STEP * 0.6) });
-      stackInCol = 1;
+      col = 0;
+      row = 0;
+    } else if (prevIsBranch && branchFanOut < 3) {
+      // Fan out from a branch: place up to 3 nodes diagonally
+      const fanCol = branchBaseCol + 1;
+      let fanRow: number;
+      if (branchFanOut === 0) fanRow = branchBaseRow - 1;      // upper path
+      else if (branchFanOut === 1) fanRow = branchBaseRow;      // middle path
+      else fanRow = branchBaseRow + 1;                          // lower path
+
+      // Keep y non-negative
+      if (fanRow < 0) fanRow = 0;
+
+      positions.push({ x: fanCol * X_STEP, y: fanRow * Y_STEP });
+      col = fanCol;
+      row = fanRow;
+      branchFanOut++;
     } else {
-      // New column
+      // Normal: advance right, wrap to next row when hitting PER_ROW
       col++;
-      positions.push({ x: col * X_STEP, y: 0 });
-      stackInCol = 1;
+      if (col >= PER_ROW) {
+        col = 0;
+        row += 2; // skip a row for spacing between wrapped rows
+      }
+      positions.push({ x: col * X_STEP, y: row * Y_STEP });
+      branchFanOut = 0;
     }
-    lastKind = box.kind;
+
+    // Remember branch position for fan-out
+    if (isBranch) {
+      branchBaseCol = col;
+      branchBaseRow = row;
+      branchFanOut = 0;
+    }
   }
 
   return boxes.map((box, i) => ({
@@ -662,20 +723,50 @@ function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe:
   }));
 }
 
-/** Convert linear boxes to React Flow edges (each box → next box). */
-function boxesToEdges(boxes: Box[]): Edge[] {
+/**
+ * Edges: each box connects to the next. Uses smart handle selection:
+ * - If target is to the right → right→left handles
+ * - If target is below → bottom→top handles
+ * - If target is above → right→top handles (branch fan)
+ * This creates n8n's visual branching from above and below.
+ */
+function boxesToEdges(boxes: Box[], positions: { x: number; y: number }[]): Edge[] {
   return boxes.slice(0, -1).map((box, i) => {
     const sourceTheme = THEME[box.kind];
+    const sp = positions[i];
+    const tp = positions[i + 1];
+
+    // Decide handle direction based on relative position
+    let sourceHandle = "right";
+    let targetHandle = "left";
+
+    if (tp && sp) {
+      const dx = tp.x - sp.x;
+      const dy = tp.y - sp.y;
+
+      if (dx <= 0 && dy > X_STEP / 2) {
+        // Target is below and to the left (row wrap) → bottom→top
+        sourceHandle = "bottom";
+        targetHandle = "top";
+      } else if (Math.abs(dy) > Y_STEP * 0.8 && dx > 0) {
+        // Target is diagonally away (branch fan) → right→left still works
+        sourceHandle = "right";
+        targetHandle = "left";
+      }
+    }
+
     return {
       id: `e-${box.id}-${boxes[i + 1].id}`,
       source: box.id,
+      sourceHandle,
       target: boxes[i + 1].id,
-      type: "default",  // bezier curves — like n8n
+      targetHandle,
+      type: "default",  // bezier curves
       animated: false,
       style: {
         stroke: sourceTheme?.accent ?? "#6b7280",
         strokeWidth: 2,
-        opacity: 0.45,
+        opacity: 0.4,
       },
     };
   });
@@ -703,8 +794,11 @@ function FlowCanvasInner({
   const kindNames = useKindNames();
   const describe = useDescribe();
 
-  const initialNodes = useMemo(() => {
+  const { initialNodes, initialEdges } = useMemo(() => {
     const nodes = boxesToNodes(boxes, kindNames, describe);
+    // Extract positions for edge routing
+    const posArr = nodes.map((n) => n.position);
+
     if (onAdd) {
       const lastPos = nodes.length > 0 ? nodes[nodes.length - 1].position : { x: 0, y: 0 };
       nodes.push({
@@ -716,23 +810,23 @@ function FlowCanvasInner({
         selectable: false,
       });
     }
-    return nodes;
-  }, [boxes, kindNames, describe, onAdd]);
 
-  const initialEdges = useMemo(() => {
-    const edges = boxesToEdges(boxes);
+    const edges = boxesToEdges(boxes, posArr);
     if (onAdd && boxes.length > 0) {
       edges.push({
         id: `e-${boxes[boxes.length - 1].id}-__add__`,
         source: boxes[boxes.length - 1].id,
+        sourceHandle: "right",
         target: "__add__",
+        targetHandle: "left",
         type: "default",
         animated: false,
         style: { stroke: "#6b7280", strokeWidth: 1.5, strokeDasharray: "6 4", opacity: 0.3 },
       });
     }
-    return edges;
-  }, [boxes, onAdd]);
+
+    return { initialNodes: nodes, initialEdges: edges };
+  }, [boxes, kindNames, describe, onAdd]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);

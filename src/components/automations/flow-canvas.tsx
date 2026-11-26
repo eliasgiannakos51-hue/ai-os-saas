@@ -5,8 +5,8 @@
  *
  * Renders the automation's boxes as draggable nodes on an interactive
  * canvas with zoom, pan, and bezier connections — matching n8n's exact
- * visual design: wide rectangular nodes with icon left, label right,
- * colored left accent stripe, and proper horizontal flow.
+ * visual design: 96×96 square nodes with centered circular icon,
+ * label below, compact grid layout with row wrapping and branching.
  *
  * Run: src/components/automations/automation-shell.tsx uses this via
  * FlowCanvasView (the exported wrapper).
@@ -293,12 +293,6 @@ function NodeIcon({ box, size = 18 }: { box: Box; size?: number }) {
 /* ───────────────────── n8n NODE COMPONENT ───────────────────── */
 
 /**
- * n8n-EXACT node design:
- *  ┌─────────────────────────────┐
- *  │ ▌  [icon]  Node Name        │
- *  │ ▌          operation desc   │
- *  └─────────────────────────────┘
- *
  * n8n EXACT node design (from n8n source: GRID_SIZE=16, node=6×6=96×96px):
  *
  *       ┌──────────┐
@@ -623,14 +617,7 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 
 /* ───────────────────── n8n LAYOUT ALGORITHM ───────────────────── */
 
-/**
- * n8n CANVAS LAYOUT — exact horizontal flow.
- *
- * Primary direction: LEFT → RIGHT with 250px column spacing.
- * Branching nodes (condition/switch/filter) create Y offsets for
- * the nodes that follow, simulating parallel paths.
- * Same-kind consecutive nodes stack vertically in a column.
- */
+/** n8n CANVAS LAYOUT — compact grid with branching. */
 const NODE_W = 96;    // n8n: GRID_SIZE * 6 = 96
 const NODE_H = 120;   // 96px card + ~24px label below
 const X_GAP = 48;     // horizontal gap

@@ -3,24 +3,23 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
-## 2026-11-26 (Canvas redesign — exact n8n visual match)
+## 2026-11-26 (Phase 1 — n8n canvas cards, spec §4)
 
-### Complete canvas visual overhaul to match n8n
-- **Node design**: Wide rectangles (164×56px) with icon LEFT, label RIGHT —
-  exactly like n8n (was 80×80 squares with tiny label below)
-- **Colored left accent stripe** — 4px per node, category-specific color
-- **n8n color system** — green triggers, blue data, purple AI, orange flow
-  control, teal transform, red errors — matching n8n's brand colors
-- **Icon in rounded square** with light tinted background (n8n style)
-- **Two-line text**: bold name + subtle description subtitle
-- **Wider spacing** (244px columns vs 120px) — proper breathing room
-- **Bezier curve connections** (was smoothstep/angular)
-- **Categorized node picker** — 11 categories (Triggers, Actions, Flow,
-  Transform, Convert, Timing, AI, Dev, Files, HTTP, Other) with search
-- **Cleaner handles** — white fill with colored border (n8n exact)
-- **No input handle on start node** — like n8n triggers
-- **Subtle shadows** matching n8n's elevation system
-- **MiniMap** colors now match node category accent colors
+### n8n Phase 1: Κάρτες κόμβων (spec §4, flag: automation-canvas-cards)
+- **80×80 κάρτες** με στρογγυλό εικονίδιο (36px) στο κέντρο
+- **Τίτλος + υπότιτλος** κάτω από κάθε κάρτα (kindName + description)
+- **Input port**: ορθογώνιο αριστερά (6×14px, n8n style) — δεν υπάρχει σε triggers
+- **Output port**: κύκλος δεξιά (10px, χρωματιστός)
+- **IF/Switch labels**: "true"/"false" δίπλα στο output (§5 visual only)
+- **Status badges**: ✓ count (πράσινο), ✕ (κόκκινο), pulse (πορτοκαλί), idle (κενό)
+- **Trigger badge**: ⚡ πράσινο πάνω-αριστερά σε start nodes
+- **Maturity "SOON"**: placeholder nodes (code, loop, split, merge κλπ) δείχνουν badge
+- **SOON στο picker**: placeholder nodes εμφανίζονται με opacity 0.5 + "SOON" label
+- **Progress data**: RunProgress περνά από automation-shell → canvas → κάρτες
+- **Waterfall layout**: 8 nodes/row, πέφτει κάτω, branch nodes κάνουν offset
+- **Bezier + smoothstep**: bezier σε κανονικές γραμμές, smoothstep σε row wraps
+- **n8n χρώματα ανά κατηγορία**: πράσινο triggers, μπλε data, μωβ AI, πορτοκαλί flow
+- **Categorized picker**: 11 κατηγορίες + search, icons σε στρογγυλά χρωματιστά
 
 ## 2026-11-25 (n8n 100% parity: 51 nodes + 1000 boxes + full UX) 🚀
 

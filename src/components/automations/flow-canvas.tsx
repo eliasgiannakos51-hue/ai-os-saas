@@ -693,23 +693,20 @@ function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe:
  * (horizontal flow). Bezier curves like n8n.
  */
 function boxesToEdges(boxes: Box[]): Edge[] {
-  return boxes.slice(0, -1).map((box, i) => {
-    const sourceTheme = THEME[box.kind];
-    return {
-      id: `e-${box.id}-${boxes[i + 1].id}`,
-      source: box.id,
-      sourceHandle: "right",
-      target: boxes[i + 1].id,
-      targetHandle: "left",
-      type: "default",  // bezier curves — n8n style
-      animated: false,
-      style: {
-        stroke: sourceTheme?.accent ?? "#6b7280",
-        strokeWidth: 2,
-        opacity: 0.4,
-      },
-    };
-  });
+  return boxes.slice(0, -1).map((box, i) => ({
+    id: `e-${box.id}-${boxes[i + 1].id}`,
+    source: box.id,
+    sourceHandle: "right",
+    target: boxes[i + 1].id,
+    targetHandle: "left",
+    type: "default",  // bezier curves — n8n style
+    animated: false,
+    style: {
+      stroke: "#6b7280",    // n8n: neutral gray lines, NOT colored
+      strokeWidth: 2.5,
+      opacity: 0.5,
+    },
+  }));
 }
 
 /* ───────────────────── CANVAS INNER ───────────────────── */
@@ -759,7 +756,7 @@ function FlowCanvasInner({
         targetHandle: "left",
         type: "default",
         animated: false,
-        style: { stroke: "#6b7280", strokeWidth: 1.5, strokeDasharray: "6 4", opacity: 0.3 },
+        style: { stroke: "#6b7280", strokeWidth: 2, strokeDasharray: "6 4", opacity: 0.35 },
       });
     }
 
@@ -810,7 +807,7 @@ function FlowCanvasInner({
   return (
     <div
       style={{
-        height: 520,
+        height: 560,
         borderRadius: 10,
         border: "1px solid rgb(var(--border) / 0.2)",
         overflow: "hidden",

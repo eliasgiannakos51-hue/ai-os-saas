@@ -347,34 +347,20 @@ function AutomationNode({ data, selected }: NodeProps) {
           transition: "box-shadow 0.15s, border-color 0.15s",
         }}
       >
-        {/* Input handles — left and top (for wrapped rows) */}
+        {/* Input handle — left side */}
         {!isStart && (
-          <>
-            <Handle
-              type="target"
-              position={Position.Left}
-              id="left"
-              style={{
-                background: "rgb(var(--panel))",
-                border: `2px solid ${theme.accent}`,
-                width: 10,
-                height: 10,
-                left: -5,
-              }}
-            />
-            <Handle
-              type="target"
-              position={Position.Top}
-              id="top"
-              style={{
-                background: "rgb(var(--panel))",
-                border: `2px solid ${theme.accent}`,
-                width: 10,
-                height: 10,
-                top: -5,
-              }}
-            />
-          </>
+          <Handle
+            type="target"
+            position={Position.Left}
+            id="left"
+            style={{
+              background: "rgb(var(--panel))",
+              border: `2px solid ${theme.accent}`,
+              width: 10,
+              height: 10,
+              left: -5,
+            }}
+          />
         )}
 
         {/* n8n big CIRCULAR icon — centered in the square */}
@@ -393,7 +379,7 @@ function AutomationNode({ data, selected }: NodeProps) {
           <NodeIcon box={box} size={20} />
         </div>
 
-        {/* Output handles — right and bottom */}
+        {/* Output handle — right side */}
         <Handle
           type="source"
           position={Position.Right}
@@ -404,18 +390,6 @@ function AutomationNode({ data, selected }: NodeProps) {
             width: 10,
             height: 10,
             right: -5,
-          }}
-        />
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          id="bottom"
-          style={{
-            background: "rgb(var(--panel))",
-            border: `2px solid ${theme.accent}`,
-            width: 10,
-            height: 10,
-            bottom: -5,
           }}
         />
       </div>
@@ -617,82 +591,86 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 
 /* ───────────────────── n8n LAYOUT ALGORITHM ───────────────────── */
 
-/** n8n CANVAS LAYOUT — compact grid with branching. */
-const NODE_W = 96;    // n8n: GRID_SIZE * 6 = 96
-const NODE_H = 120;   // 96px card + ~24px label below
-const X_GAP = 48;     // horizontal gap
-const Y_GAP = 24;     // vertical gap
-const X_STEP = NODE_W + X_GAP;  // 144px per column
-const Y_STEP = NODE_H + Y_GAP;  // 144px per row
-
 /**
- * COMPACT GRID LAYOUT with branching — like n8n.
+ * n8n CANVAS LAYOUT — ALWAYS horizontal, left → right. NEVER wraps.
  *
- * Instead of one infinite horizontal line, nodes wrap into rows.
- * PER_ROW controls how many nodes fit before wrapping down.
+ * This is exactly how n8n works:
+ * - Every node goes to the RIGHT of the previous one
+ * - Branch nodes (condition/switch/filter) create vertical fan-out:
+ *   the NEXT 2-3 nodes after a branch spread vertically at the
+ *   same X position, then each continues to the right
+ * - The whole workflow scrolls horizontally (zoom to fit)
+ * - Merge nodes bring paths back to the center Y
  *
- * Branch nodes (condition/switch/filter) create a visual fork:
- * the branch node sits alone, and the next 2-3 nodes fan out
- * diagonally from it (one up-right, one right, one down-right).
- *
- * This creates n8n's signature branching visual while keeping
- * things compact — 100+ nodes fit without scrolling miles.
+ * With a linear array, we simulate branching visually:
+ * groups of same-kind nodes after a branch stack vertically
+ * in one column, creating the "parallel paths" look.
  */
+const NODE_SIZE = 96;   // n8n: GRID_SIZE * 6 = 96px square
+const LABEL_H = 24;     // label below the card
+const X_STEP = 144;     // horizontal distance between columns
+const Y_STEP = 130;     // vertical distance for branching paths
+const CENTER_Y = 300;   // center line Y position
+
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
-const PER_ROW = 8; // nodes per row before wrapping
+const MERGE_KINDS = new Set(["merge", "aggregate"]);
 
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
   if (boxes.length === 0) return [];
 
   const positions: { x: number; y: number }[] = [];
 
-  let col = 0;
-  let row = 0;
-  let branchFanOut = 0;   // how many nodes to fan after a branch
-  let branchBaseCol = 0;
-  let branchBaseRow = 0;
+  let x = 0;
+  let currentY = CENTER_Y;
+  let inFanOut = false;
+  let fanOutCount = 0;
+  let fanOutX = 0;
+  let fanOutBaseY = CENTER_Y;
 
   for (let i = 0; i < boxes.length; i++) {
     const box = boxes[i];
     const isBranch = BRANCH_KINDS.has(box.kind);
+    const isMerge = MERGE_KINDS.has(box.kind);
     const prevIsBranch = i > 0 && BRANCH_KINDS.has(boxes[i - 1].kind);
 
     if (i === 0) {
-      // First node — top left
-      positions.push({ x: 0, y: 0 });
-      col = 0;
-      row = 0;
-    } else if (prevIsBranch && branchFanOut < 3) {
-      // Fan out from a branch: place up to 3 nodes diagonally
-      const fanCol = branchBaseCol + 1;
-      let fanRow: number;
-      if (branchFanOut === 0) fanRow = branchBaseRow - 1;      // upper path
-      else if (branchFanOut === 1) fanRow = branchBaseRow;      // middle path
-      else fanRow = branchBaseRow + 1;                          // lower path
+      // First node — left side, centered
+      positions.push({ x: 0, y: CENTER_Y });
+      x = 0;
+    } else if (prevIsBranch) {
+      // Start fan-out: first node after a branch
+      inFanOut = true;
+      fanOutCount = 0;
+      fanOutX = x + X_STEP;
+      fanOutBaseY = currentY;
 
-      // Keep y non-negative
-      if (fanRow < 0) fanRow = 0;
+      // Place first fan node ABOVE center
+      const fanY = fanOutBaseY - Y_STEP;
+      positions.push({ x: fanOutX, y: fanY });
+      currentY = fanY;
+      x = fanOutX;
+      fanOutCount = 1;
+    } else if (inFanOut && fanOutCount < 3 && !isBranch && !isMerge) {
+      // Continue fan-out: stack vertically at same X
+      let fanY: number;
+      if (fanOutCount === 1) fanY = fanOutBaseY;         // center
+      else fanY = fanOutBaseY + Y_STEP;                  // below
 
-      positions.push({ x: fanCol * X_STEP, y: fanRow * Y_STEP });
-      col = fanCol;
-      row = fanRow;
-      branchFanOut++;
+      positions.push({ x: fanOutX, y: fanY });
+      currentY = fanY;
+      fanOutCount++;
     } else {
-      // Normal: advance right, wrap to next row when hitting PER_ROW
-      col++;
-      if (col >= PER_ROW) {
-        col = 0;
-        row += 2; // skip a row for spacing between wrapped rows
-      }
-      positions.push({ x: col * X_STEP, y: row * Y_STEP });
-      branchFanOut = 0;
-    }
+      // Normal: move RIGHT
+      inFanOut = false;
+      fanOutCount = 0;
+      x += X_STEP;
 
-    // Remember branch position for fan-out
-    if (isBranch) {
-      branchBaseCol = col;
-      branchBaseRow = row;
-      branchFanOut = 0;
+      // Merge node: come back to center
+      if (isMerge) {
+        currentY = CENTER_Y;
+      }
+
+      positions.push({ x, y: currentY });
     }
   }
 
@@ -711,44 +689,19 @@ function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe:
 }
 
 /**
- * Edges: each box connects to the next. Uses smart handle selection:
- * - If target is to the right → right→left handles
- * - If target is below → bottom→top handles
- * - If target is above → right→top handles (branch fan)
- * This creates n8n's visual branching from above and below.
+ * Edges connect each box to the next. Always right→left handles
+ * (horizontal flow). Bezier curves like n8n.
  */
-function boxesToEdges(boxes: Box[], positions: { x: number; y: number }[]): Edge[] {
+function boxesToEdges(boxes: Box[]): Edge[] {
   return boxes.slice(0, -1).map((box, i) => {
     const sourceTheme = THEME[box.kind];
-    const sp = positions[i];
-    const tp = positions[i + 1];
-
-    // Decide handle direction based on relative position
-    let sourceHandle = "right";
-    let targetHandle = "left";
-
-    if (tp && sp) {
-      const dx = tp.x - sp.x;
-      const dy = tp.y - sp.y;
-
-      if (dx <= 0 && dy > X_STEP / 2) {
-        // Target is below and to the left (row wrap) → bottom→top
-        sourceHandle = "bottom";
-        targetHandle = "top";
-      } else if (Math.abs(dy) > Y_STEP * 0.8 && dx > 0) {
-        // Target is diagonally away (branch fan) → right→left still works
-        sourceHandle = "right";
-        targetHandle = "left";
-      }
-    }
-
     return {
       id: `e-${box.id}-${boxes[i + 1].id}`,
       source: box.id,
-      sourceHandle,
+      sourceHandle: "right",
       target: boxes[i + 1].id,
-      targetHandle,
-      type: "default",  // bezier curves
+      targetHandle: "left",
+      type: "default",  // bezier curves — n8n style
       animated: false,
       style: {
         stroke: sourceTheme?.accent ?? "#6b7280",
@@ -783,22 +736,20 @@ function FlowCanvasInner({
 
   const { initialNodes, initialEdges } = useMemo(() => {
     const nodes = boxesToNodes(boxes, kindNames, describe);
-    // Extract positions for edge routing
-    const posArr = nodes.map((n) => n.position);
 
     if (onAdd) {
-      const lastPos = nodes.length > 0 ? nodes[nodes.length - 1].position : { x: 0, y: 0 };
+      const lastPos = nodes.length > 0 ? nodes[nodes.length - 1].position : { x: 0, y: CENTER_Y };
       nodes.push({
         id: "__add__",
         type: "addNode",
-        position: { x: lastPos.x + X_STEP + 10, y: lastPos.y + 6 },
+        position: { x: lastPos.x + X_STEP, y: lastPos.y + 30 },
         data: { onAdd, kindNames, themes: THEME },
         draggable: false,
         selectable: false,
       });
     }
 
-    const edges = boxesToEdges(boxes, posArr);
+    const edges = boxesToEdges(boxes);
     if (onAdd && boxes.length > 0) {
       edges.push({
         id: `e-${boxes[boxes.length - 1].id}-__add__`,

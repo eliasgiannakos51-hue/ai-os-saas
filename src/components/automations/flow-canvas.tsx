@@ -277,8 +277,8 @@ function NodeIcon({ box }: { box: Box }) {
 }
 
 /**
- * Custom node component — n8n style: colored left bar, icon, name, description.
- * Each node is a card with the kind color as a left accent stripe.
+ * n8n EXACT node design: square card, big centered icon, label below.
+ * Compact — many nodes fit on screen. No description inside the node.
  */
 function AutomationNode({ data, selected }: NodeProps) {
   const { box, kindName, description, theme } = data as {
@@ -289,36 +289,32 @@ function AutomationNode({ data, selected }: NodeProps) {
   };
   return (
     <div
-      className="relative flex overflow-hidden rounded-lg transition-shadow"
+      className="relative flex flex-col items-center rounded-xl transition-shadow"
       style={{
-        border: selected ? `2px solid ${theme.border}` : "1px solid rgb(var(--border) / 0.4)",
-        boxShadow: selected ? `0 0 0 2px ${theme.border}40, 0 4px 12px rgba(0,0,0,0.25)` : "0 2px 6px rgba(0,0,0,0.15)",
-        width: 160,
+        border: selected ? `2.5px solid ${theme.border}` : "1.5px solid rgb(var(--border) / 0.3)",
+        boxShadow: selected ? `0 0 0 3px ${theme.border}30, 0 4px 16px rgba(0,0,0,0.3)` : "0 2px 8px rgba(0,0,0,0.2)",
+        width: 80,
+        height: 80,
         cursor: "grab",
         background: "rgb(var(--panel))",
       }}
+      title={`${kindName}: ${description}`}
     >
       {/* Input handle (left) */}
-      <Handle type="target" position={Position.Left} style={{ background: theme.border, border: "2px solid rgb(var(--panel))", width: 10, height: 10 }} />
-      {/* Color accent bar — left side, like n8n */}
-      <div style={{ width: 4, background: theme.border, flexShrink: 0 }} />
-      {/* Content */}
-      <div className="flex flex-col px-3 py-2.5" style={{ minWidth: 0, flex: 1 }}>
-        {/* Kind label + icon row */}
-        <div className="flex items-center gap-1.5">
-          <div
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded"
-            style={{ background: theme.icon, color: theme.iconText }}
-          >
-            <NodeIcon box={box} />
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: theme.border }}>{kindName}</span>
-        </div>
-        {/* Description */}
-        <div className="mt-1 truncate text-[11px] leading-snug text-foreground" title={description}>{description}</div>
+      <Handle type="target" position={Position.Left} style={{ background: theme.border, border: "2px solid rgb(var(--panel))", width: 9, height: 9 }} />
+      {/* Big centered icon */}
+      <div
+        className="mt-2.5 flex h-9 w-9 items-center justify-center rounded-lg"
+        style={{ background: theme.icon, color: theme.iconText }}
+      >
+        <NodeIcon box={box} />
       </div>
+      {/* Label below icon */}
+      <span className="mt-1 w-full truncate px-1 text-center text-[8px] font-semibold uppercase tracking-wide" style={{ color: theme.border }}>
+        {kindName}
+      </span>
       {/* Output handle (right) */}
-      <Handle type="source" position={Position.Right} style={{ background: theme.border, border: "2px solid rgb(var(--panel))", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: theme.border, border: "2px solid rgb(var(--panel))", width: 9, height: 9 }} />
     </div>
   );
 }
@@ -416,8 +412,8 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
 
 function boxesToNodes(boxes: Box[], kindNames: Record<string, string>, describe: (b: Box) => string): Node[] {
-  const X_STEP = 200;
-  const Y_STEP = 70;
+  const X_STEP = 120;
+  const Y_STEP = 95;
   const MAX_STACK = 3;    // max vertical stack per column
 
   // Group consecutive same-kind boxes into vertical stacks

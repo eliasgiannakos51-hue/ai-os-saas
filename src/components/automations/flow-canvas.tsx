@@ -684,7 +684,7 @@ function FlowCanvasInner({
       e.preventDefault(); const box = boxes.find((b) => b.id === chosen);
       if (box && box.kind !== "start") onAdd(box.kind);
     }
-    if (e.key === "1" && !e.ctrlKey && !e.metaKey) reactFlowInstance.fitView({ padding: 0.08, duration: 300, minZoom: 0.5 });
+    if (e.key === "1" && !e.ctrlKey && !e.metaKey) reactFlowInstance.fitView({ padding: 0.08, duration: 300, minZoom: 0.7 });
     if (e.key === "0" && !e.ctrlKey && !e.metaKey) reactFlowInstance.zoomTo(1, { duration: 300 });
   }, [chosen, onDelete, onUndo, onAdd, boxes, reactFlowInstance]);
 
@@ -698,8 +698,8 @@ function FlowCanvasInner({
         onNodeDoubleClick={(_, n) => { if (n.id !== "__add__") onChoose(n.id); }}
         onNodeContextMenu={onNodeContextMenu} onPaneClick={closeContext}
         nodeTypes={nodeTypes} fitView
-        fitViewOptions={{ padding: 0.08, maxZoom: 1, minZoom: 0.5 }}
-        minZoom={0.2} panOnDrag zoomOnScroll panOnScroll
+        fitViewOptions={{ padding: 0.08, maxZoom: 1, minZoom: 0.7 }}
+        minZoom={0.3} panOnDrag zoomOnScroll panOnScroll
         proOptions={{ hideAttribution: true }} style={{ background: "transparent" }}
         deleteKeyCode={null} defaultEdgeOptions={{ type: "default" }}>
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgb(var(--foreground) / 0.06)" />
@@ -739,7 +739,7 @@ function FlowCanvasInner({
             const newNodes = boxesToNodes(boxes, kindNames, describe, progress ?? null, null);
             // Note: this only updates the visual; saving layout requires the graph migration
             reactFlowInstance.setNodes(newNodes.map((n) => ({ ...n, selected: n.id === chosen })));
-            setTimeout(() => reactFlowInstance.fitView({ padding: 0.08, duration: 300, minZoom: 0.5 }), 50);
+            setTimeout(() => reactFlowInstance.fitView({ padding: 0.08, duration: 300, minZoom: 0.7 }), 50);
           }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 9, color: "rgb(var(--foreground) / 0.4)", textDecoration: "underline" }}>
             Tidy up
           </button>

@@ -299,9 +299,13 @@ function NodeIcon({ box, size = 18 }: { box: Box; size?: number }) {
  *  │ ▌          operation desc   │
  *  └─────────────────────────────┘
  *
- * Compact rectangle (110×38px) — matching n8n's actual node size.
- * Colored left accent stripe (3px), small icon, label only (no subtitle
- * inside the node — tooltip shows full detail on hover).
+ * n8n EXACT node — studied from screenshots:
+ *  ┌────────────────────────┐
+ *  │  (●)  Node Name        │   ← circular colored icon, bold name
+ *  │       operation info   │   ← subtle subtitle
+ *  └────────────────────────┘
+ *
+ * 142×52px, 10px radius, circular icon (n8n signature), two text lines.
  */
 function AutomationNode({ data, selected }: NodeProps) {
   const { box, kindName, description, theme } = data as {
@@ -317,38 +321,24 @@ function AutomationNode({ data, selected }: NodeProps) {
   return (
     <div
       style={{
-        width: 110,
-        height: 38,
-        borderRadius: 6,
-        overflow: "hidden",
+        width: 142,
+        height: 52,
+        borderRadius: 10,
         cursor: "grab",
         display: "flex",
         alignItems: "center",
         background: "rgb(var(--panel))",
         border: selected
-          ? `1.5px solid ${theme.accent}`
-          : "1px solid rgb(var(--border) / 0.2)",
+          ? `2px solid ${theme.accent}`
+          : "1px solid rgb(var(--border) / 0.18)",
         boxShadow: selected
-          ? `0 0 0 2px ${theme.accent}20, 0 2px 8px rgba(0,0,0,0.12)`
-          : "0 1px 2px rgba(0,0,0,0.06)",
+          ? `0 0 0 2px ${theme.accent}22, 0 3px 10px rgba(0,0,0,0.15)`
+          : "0 1px 3px rgba(0,0,0,0.08)",
         position: "relative",
         transition: "box-shadow 0.15s, border-color 0.15s",
       }}
       title={`${kindName}: ${description}`}
     >
-      {/* Colored LEFT ACCENT STRIPE */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 3,
-          background: theme.accent,
-          borderRadius: "6px 0 0 6px",
-        }}
-      />
-
       {/* Input handle (left) — not on start node */}
       {!isStart && (
         <Handle
@@ -356,48 +346,62 @@ function AutomationNode({ data, selected }: NodeProps) {
           position={Position.Left}
           style={{
             background: "rgb(var(--panel))",
-            border: `1.5px solid ${theme.accent}`,
-            width: 8,
-            height: 8,
-            left: -4,
+            border: `2px solid ${theme.accent}`,
+            width: 9,
+            height: 9,
+            left: -5,
           }}
         />
       )}
 
-      {/* Icon */}
+      {/* n8n CIRCULAR icon — the signature look */}
       <div
         style={{
           marginLeft: 10,
-          width: 22,
-          height: 22,
-          borderRadius: 4,
+          width: 30,
+          height: 30,
+          borderRadius: "50%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: theme.iconBg,
-          color: theme.iconColor,
+          background: theme.accent,
+          color: "#fff",
           flexShrink: 0,
         }}
       >
-        <NodeIcon box={box} size={12} />
+        <NodeIcon box={box} size={14} />
       </div>
 
-      {/* Label only — compact like n8n */}
-      <div
-        style={{
-          marginLeft: 6,
-          overflow: "hidden",
-          flex: 1,
-          paddingRight: 6,
-          fontSize: 11,
-          fontWeight: 500,
-          color: "rgb(var(--foreground))",
-          lineHeight: "14px",
-          whiteSpace: "nowrap",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {kindName}
+      {/* Two lines: name + subtitle */}
+      <div style={{ marginLeft: 8, overflow: "hidden", flex: 1, paddingRight: 8 }}>
+        <div
+          style={{
+            fontSize: 11.5,
+            fontWeight: 600,
+            color: "rgb(var(--foreground))",
+            lineHeight: "15px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {kindName}
+        </div>
+        {description && (
+          <div
+            style={{
+              fontSize: 9.5,
+              color: "rgb(var(--foreground) / 0.4)",
+              lineHeight: "12px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              marginTop: 1,
+            }}
+          >
+            {description}
+          </div>
+        )}
       </div>
 
       {/* Output handle (right) */}
@@ -406,10 +410,10 @@ function AutomationNode({ data, selected }: NodeProps) {
         position={Position.Right}
         style={{
           background: "rgb(var(--panel))",
-          border: `1.5px solid ${theme.accent}`,
-          width: 8,
-          height: 8,
-          right: -4,
+          border: `2px solid ${theme.accent}`,
+          width: 9,
+          height: 9,
+          right: -5,
         }}
       />
     </div>
@@ -464,13 +468,13 @@ function AddNode({ data }: NodeProps) {
         type="button"
         onClick={() => { setOpen(!open); setSearch(""); }}
         style={{
-          width: 28,
-          height: 28,
+          width: 32,
+          height: 32,
           borderRadius: "50%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          border: "1.5px dashed rgb(var(--border) / 0.35)",
+          border: "2px dashed rgb(var(--border) / 0.3)",
           background: "rgb(var(--panel))",
           color: "rgb(var(--foreground) / 0.35)",
           cursor: "pointer",
@@ -600,13 +604,13 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
  * the nodes that follow, simulating parallel paths.
  * Same-kind consecutive nodes stack vertically in a column.
  */
-const NODE_W = 110;
-const NODE_H = 38;
-const X_GAP = 40;      // gap between nodes horizontally (compact like n8n)
-const Y_GAP = 14;      // gap between stacked nodes vertically
-const X_STEP = NODE_W + X_GAP;  // 150px per column
-const Y_STEP = NODE_H + Y_GAP;  // 52px per stack row
-const MAX_STACK = 5;   // more stacking allowed since nodes are smaller
+const NODE_W = 142;
+const NODE_H = 52;
+const X_GAP = 50;      // horizontal gap — balanced like n8n
+const Y_GAP = 16;      // vertical gap between stacked nodes
+const X_STEP = NODE_W + X_GAP;  // 192px per column
+const Y_STEP = NODE_H + Y_GAP;  // 68px per stack row
+const MAX_STACK = 5;
 
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
 

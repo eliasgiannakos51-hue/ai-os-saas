@@ -3,7 +3,7 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
-## 2026-11-26 (Phase 1-6 — full n8n spec implementation)
+## 2026-11-26 (n8n spec — full implementation, updated per 21:36 screenshot)
 
 ### n8n Phase 1: Κάρτες κόμβων (spec §4, flag: automation-canvas-cards)
 - **80×80 κάρτες** με στρογγυλό εικονίδιο (36px) στο κέντρο
@@ -20,6 +20,16 @@
 - **Bezier + smoothstep**: bezier σε κανονικές γραμμές, smoothstep σε row wraps
 - **n8n χρώματα ανά κατηγορία**: πράσινο triggers, μπλε data, μωβ AI, πορτοκαλί flow
 - **Categorized picker**: 11 κατηγορίες + search, icons σε στρογγυλά χρωματιστά
+
+### Updated per 21:36 spec — visual fixes
+- **ΑΦΑΙΡΕΣΗ waterfall** (8 ανά σειρά) — ΟΡΙΖΟΝΤΙΑ ροη μόνο (spec Γ3)
+- **96×96 κάρτες** (ήταν 80px) με 42px icon, 12px τίτλο, 10px υπότιτλο
+- **Notes = sticky notes** — κίτρινα αυτοκόλλητα χωρίς θύρες, κάτω από τη ροή
+- **StickyNoteNode** component — 160×60px, κίτρινο (#fef9c3), no handles
+- **Edges skip notes** — notes δεν συνδέονται με τη ροή
+- **Fit-view fills width** — padding 0.05 (ήταν 0.12), minZoom 0.08
+- **Canvas 600px** (ήταν 560)
+- **Branch visual**: μετά IF/Switch offset +70px Y, Merge επαναφέρει
 
 ### n8n Phase 2: Γράφος (spec §5, migration: 20261126000000_automation_graph.sql)
 - **FlowEdge type**: `{id, from, fromPort, to, toPort}` — ports: main, true, false,

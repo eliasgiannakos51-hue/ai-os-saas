@@ -290,12 +290,12 @@ function AutomationNode({ data, selected }: NodeProps) {
   if (isSoon) { borderStyle = "dashed"; }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "grab", width: 80 }}
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "grab", width: 96 }}
       title={`${kindName}: ${description}`}>
 
-      {/* The square card */}
+      {/* The square card — 96×96 per spec Γ1 */}
       <div style={{
-        width: 80, height: 80, borderRadius: 12,
+        width: 96, height: 96, borderRadius: 14,
         display: "flex", alignItems: "center", justifyContent: "center",
         background: "rgb(var(--panel))",
         border: `${borderWidth}px ${borderStyle} ${borderColor}`,
@@ -329,13 +329,13 @@ function AutomationNode({ data, selected }: NodeProps) {
             style={{ background: "#6b7280", border: "none", width: 6, height: 14, borderRadius: 2, left: -3 }} />
         )}
 
-        {/* Circular icon — centered */}
+        {/* Circular icon — centered, 42px for 96px card */}
         <div style={{
-          width: 36, height: 36, borderRadius: "50%",
+          width: 42, height: 42, borderRadius: "50%",
           display: "flex", alignItems: "center", justifyContent: "center",
           background: accent, color: "#fff",
         }}>
-          <NodeIcon kind={box.kind} size={18} />
+          <NodeIcon kind={box.kind} size={20} />
         </div>
 
         {/* Output port — circle on right */}
@@ -356,21 +356,21 @@ function AutomationNode({ data, selected }: NodeProps) {
         )}
       </div>
 
-      {/* Title below */}
+      {/* Title below — 12px per spec Γ1 */}
       <div style={{
-        marginTop: 5, maxWidth: 95, textAlign: "center",
-        fontSize: 10, fontWeight: 600, color: "rgb(var(--foreground) / 0.85)",
-        lineHeight: "13px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        marginTop: 6, maxWidth: 110, textAlign: "center",
+        fontSize: 12, fontWeight: 600, color: "rgb(var(--foreground) / 0.9)",
+        lineHeight: "15px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
       }}>
         {kindName}
       </div>
 
-      {/* Subtitle below title */}
+      {/* Subtitle — 10px */}
       {description && (
         <div style={{
-          maxWidth: 95, textAlign: "center",
-          fontSize: 8, fontWeight: 400, color: "rgb(var(--foreground) / 0.4)",
-          lineHeight: "11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          maxWidth: 110, textAlign: "center",
+          fontSize: 10, fontWeight: 400, color: "rgb(var(--foreground) / 0.45)",
+          lineHeight: "13px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>
           {description}
         </div>
@@ -464,17 +464,43 @@ function AddNode({ data }: NodeProps) {
   );
 }
 
-const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
+/** Sticky note — spec Γ1: Notes are NOT workflow nodes. Yellow, no ports, free-floating. */
+function StickyNoteNode({ data, selected }: NodeProps) {
+  const { box } = data as { box: Box };
+  const text = "text" in box ? (box as { text: string }).text : "";
+  return (
+    <div style={{
+      width: 160, minHeight: 60, padding: "10px 12px",
+      background: "#fef9c3", borderRadius: 8, cursor: "grab",
+      border: selected ? "2px solid #ca8a04" : "1px solid #fbbf2480",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+      fontSize: 11, lineHeight: "15px", color: "#78350f",
+      whiteSpace: "pre-wrap", wordBreak: "break-word",
+    }}>
+      {text || "Note"}
+    </div>
+  );
+}
+
+const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode, stickyNote: StickyNoteNode };
 
 /* ───────────────────── LAYOUT ───────────────────── */
 
 /**
- * Waterfall layout: 8 nodes per row, then drops down.
- * Branching nodes (condition/switch) offset the next node down slightly.
+ * HORIZONTAL FLOW — spec Γ3: NO waterfall.
+ *
+ * Every node goes to the RIGHT. Branch nodes (IF/Switch) spread the
+ * next nodes vertically to show parallel paths. Merge brings back to
+ * center. This is how n8n works.
+ *
+ * Notes are placed BELOW the main flow as sticky notes (separate y).
+ * Saved layout positions override auto-layout.
  */
-const X_STEP = 120;
-const Y_STEP = 130;
-const COLS = 8;
+const X_STEP = 160;     // horizontal spacing — 96px card + 64px gap
+const Y_STEP = 140;     // vertical offset for branching
+const CENTER_Y = 0;     // main flow Y
+const NOTE_OFFSET_Y = 250; // sticky notes go below the main flow
+
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
 
 function boxesToNodes(
@@ -484,37 +510,56 @@ function boxesToNodes(
 ): Node[] {
   if (boxes.length === 0) return [];
 
-  // Use saved positions if available; otherwise auto-layout
-  const positions: { x: number; y: number }[] = [];
-  if (savedLayout && Object.keys(savedLayout).length >= boxes.length * 0.5) {
-    // Saved layout: use stored positions, fallback to auto for missing
-    let autoCol = 0, autoRow = 0;
+  // Separate notes from workflow boxes
+  const workflowBoxes = boxes.filter((b) => b.kind !== "note");
+  const noteBoxes = boxes.filter((b) => b.kind === "note");
+
+  const positions: Map<string, { x: number; y: number }> = new Map();
+
+  // Use saved positions if available
+  if (savedLayout && Object.keys(savedLayout).length >= workflowBoxes.length * 0.5) {
     for (const box of boxes) {
       const saved = savedLayout[box.id];
-      if (saved) {
-        positions.push(saved);
-      } else {
-        positions.push({ x: autoCol * X_STEP, y: autoRow * Y_STEP });
-        autoCol++;
-        if (autoCol >= COLS) { autoCol = 0; autoRow++; }
-      }
+      if (saved) positions.set(box.id, saved);
     }
-  } else {
-    // Auto waterfall layout
-    let col = 0, row = 0;
-    for (let i = 0; i < boxes.length; i++) {
-      const prevIsBranch = i > 0 && BRANCH_KINDS.has(boxes[i - 1].kind);
-      if (i === 0) {
-        positions.push({ x: 0, y: 0 }); col = 0; row = 0;
-      } else if (prevIsBranch) {
-        col++;
-        if (col >= COLS) { col = 0; row++; }
-        positions.push({ x: col * X_STEP, y: row * Y_STEP + 35 });
-      } else {
-        col++;
-        if (col >= COLS) { col = 0; row++; }
-        positions.push({ x: col * X_STEP, y: row * Y_STEP });
-      }
+  }
+
+  // Auto-layout for workflow boxes without saved positions
+  let x = 0;
+  let y = CENTER_Y;
+  let noteX = 0;
+
+  for (let i = 0; i < workflowBoxes.length; i++) {
+    const box = workflowBoxes[i];
+    if (positions.has(box.id)) { x = positions.get(box.id)!.x; continue; }
+
+    const prevIsBranch = i > 0 && BRANCH_KINDS.has(workflowBoxes[i - 1].kind);
+    const isMerge = box.kind === "merge" || box.kind === "aggregate";
+
+    if (i === 0) {
+      positions.set(box.id, { x: 0, y: CENTER_Y });
+      x = 0;
+    } else if (prevIsBranch) {
+      // After branch: shift down to show branching visual
+      x += X_STEP;
+      y += Math.round(Y_STEP * 0.5);
+      positions.set(box.id, { x, y });
+    } else if (isMerge) {
+      // Merge: come back to center
+      x += X_STEP;
+      y = CENTER_Y;
+      positions.set(box.id, { x, y });
+    } else {
+      x += X_STEP;
+      positions.set(box.id, { x, y });
+    }
+  }
+
+  // Place note sticky notes below the flow
+  for (const note of noteBoxes) {
+    if (!positions.has(note.id)) {
+      positions.set(note.id, { x: noteX, y: NOTE_OFFSET_Y });
+      noteX += 180;
     }
   }
 
@@ -523,8 +568,8 @@ function boxesToNodes(
 
   return boxes.map((box, i) => ({
     id: box.id,
-    type: "automation",
-    position: positions[i],
+    type: box.kind === "note" ? "stickyNote" : "automation",
+    position: positions.get(box.id) ?? { x: i * X_STEP, y: CENTER_Y },
     data: {
       box, kindName: kindNames[box.kind] ?? box.kind,
       description: describe(box), theme: THEME[box.kind], index: i,
@@ -559,14 +604,16 @@ function graphToEdges(graphEdges: FlowEdge[] | null, boxes: Box[], positions: { 
       };
     });
   }
-  // Fallback: linear edges from boxes order
-  return boxes.slice(0, -1).map((box, i) => {
-    const sp = positions[i], tp = positions[i + 1];
+  // Fallback: linear edges from boxes order (skip notes — they're sticky notes, not connected)
+  const connected = boxes.filter((b) => b.kind !== "note");
+  return connected.slice(0, -1).map((box, i) => {
+    const si = boxes.indexOf(box), ti = boxes.indexOf(connected[i + 1]);
+    const sp = positions[si], tp = positions[ti];
     const goesLeft = tp && sp && tp.x < sp.x;
     return {
-      id: `e-${box.id}-${boxes[i + 1].id}`,
+      id: `e-${box.id}-${connected[i + 1].id}`,
       source: box.id, sourceHandle: "right",
-      target: boxes[i + 1].id, targetHandle: "left",
+      target: connected[i + 1].id, targetHandle: "left",
       type: goesLeft ? "smoothstep" : "default",
       animated: false,
       style: { stroke: "#9ca3af", strokeWidth: 2, opacity: 0.5 },
@@ -642,7 +689,7 @@ function FlowCanvasInner({
   }, [chosen, onDelete, onUndo, onAdd, boxes, reactFlowInstance]);
 
   return (
-    <div style={{ height: 560, borderRadius: 10, border: "1px solid rgb(var(--border) / 0.2)", overflow: "hidden", position: "relative" }}
+    <div style={{ height: 600, borderRadius: 10, border: "1px solid rgb(var(--border) / 0.2)", overflow: "hidden", position: "relative" }}
       onKeyDown={onKeyDown} tabIndex={0}>
       <ReactFlow
         nodes={nodes.map((n) => ({ ...n, selected: n.id === chosen }))}
@@ -650,8 +697,8 @@ function FlowCanvasInner({
         onNodeClick={(e, n) => { closeContext(); onNodeClick(e, n); }}
         onNodeDoubleClick={(_, n) => { if (n.id !== "__add__") onChoose(n.id); }}
         onNodeContextMenu={onNodeContextMenu} onPaneClick={closeContext}
-        nodeTypes={nodeTypes} fitView fitViewOptions={{ padding: 0.12, maxZoom: 1.2 }}
-        minZoom={0.15} panOnDrag zoomOnScroll panOnScroll
+        nodeTypes={nodeTypes} fitView fitViewOptions={{ padding: 0.05, maxZoom: 1 }}
+        minZoom={0.08} panOnDrag zoomOnScroll panOnScroll
         proOptions={{ hideAttribution: true }} style={{ background: "transparent" }}
         deleteKeyCode={null} defaultEdgeOptions={{ type: "default" }}>
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgb(var(--foreground) / 0.06)" />

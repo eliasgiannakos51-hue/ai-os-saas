@@ -299,11 +299,12 @@ function NodeIcon({ box, size = 18 }: { box: Box; size?: number }) {
  *  │ ▌          operation desc   │
  *  └─────────────────────────────┘
  *
- * Wide rectangle (160×56px), colored left accent stripe (4px),
- * icon in a rounded square, name + subtitle, clean shadow.
+ * Compact rectangle (110×38px) — matching n8n's actual node size.
+ * Colored left accent stripe (3px), small icon, label only (no subtitle
+ * inside the node — tooltip shows full detail on hover).
  */
 function AutomationNode({ data, selected }: NodeProps) {
-  const { box, kindName, description, theme, index } = data as {
+  const { box, kindName, description, theme } = data as {
     box: Box;
     kindName: string;
     description: string;
@@ -316,35 +317,35 @@ function AutomationNode({ data, selected }: NodeProps) {
   return (
     <div
       style={{
-        width: 164,
-        height: 56,
-        borderRadius: 8,
+        width: 110,
+        height: 38,
+        borderRadius: 6,
         overflow: "hidden",
         cursor: "grab",
         display: "flex",
         alignItems: "center",
         background: "rgb(var(--panel))",
         border: selected
-          ? `2px solid ${theme.accent}`
-          : "1px solid rgb(var(--border) / 0.25)",
+          ? `1.5px solid ${theme.accent}`
+          : "1px solid rgb(var(--border) / 0.2)",
         boxShadow: selected
-          ? `0 0 0 3px ${theme.accent}25, 0 4px 12px rgba(0,0,0,0.15)`
-          : "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06)",
+          ? `0 0 0 2px ${theme.accent}20, 0 2px 8px rgba(0,0,0,0.12)`
+          : "0 1px 2px rgba(0,0,0,0.06)",
         position: "relative",
         transition: "box-shadow 0.15s, border-color 0.15s",
       }}
       title={`${kindName}: ${description}`}
     >
-      {/* n8n colored LEFT ACCENT STRIPE */}
+      {/* Colored LEFT ACCENT STRIPE */}
       <div
         style={{
           position: "absolute",
           left: 0,
           top: 0,
           bottom: 0,
-          width: 4,
+          width: 3,
           background: theme.accent,
-          borderRadius: "8px 0 0 8px",
+          borderRadius: "6px 0 0 6px",
         }}
       />
 
@@ -355,21 +356,21 @@ function AutomationNode({ data, selected }: NodeProps) {
           position={Position.Left}
           style={{
             background: "rgb(var(--panel))",
-            border: `2px solid ${theme.accent}`,
-            width: 10,
-            height: 10,
-            left: -5,
+            border: `1.5px solid ${theme.accent}`,
+            width: 8,
+            height: 8,
+            left: -4,
           }}
         />
       )}
 
-      {/* Icon container */}
+      {/* Icon */}
       <div
         style={{
-          marginLeft: 14,
-          width: 32,
-          height: 32,
-          borderRadius: 6,
+          marginLeft: 10,
+          width: 22,
+          height: 22,
+          borderRadius: 4,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -378,39 +379,25 @@ function AutomationNode({ data, selected }: NodeProps) {
           flexShrink: 0,
         }}
       >
-        <NodeIcon box={box} size={16} />
+        <NodeIcon box={box} size={12} />
       </div>
 
-      {/* Text: name + description */}
-      <div style={{ marginLeft: 10, overflow: "hidden", flex: 1, paddingRight: 10 }}>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 600,
-            color: "rgb(var(--foreground))",
-            lineHeight: "16px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {kindName}
-        </div>
-        {description && (
-          <div
-            style={{
-              fontSize: 10,
-              color: "rgb(var(--foreground) / 0.5)",
-              lineHeight: "14px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              marginTop: 1,
-            }}
-          >
-            {description}
-          </div>
-        )}
+      {/* Label only — compact like n8n */}
+      <div
+        style={{
+          marginLeft: 6,
+          overflow: "hidden",
+          flex: 1,
+          paddingRight: 6,
+          fontSize: 11,
+          fontWeight: 500,
+          color: "rgb(var(--foreground))",
+          lineHeight: "14px",
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {kindName}
       </div>
 
       {/* Output handle (right) */}
@@ -419,10 +406,10 @@ function AutomationNode({ data, selected }: NodeProps) {
         position={Position.Right}
         style={{
           background: "rgb(var(--panel))",
-          border: `2px solid ${theme.accent}`,
-          width: 10,
-          height: 10,
-          right: -5,
+          border: `1.5px solid ${theme.accent}`,
+          width: 8,
+          height: 8,
+          right: -4,
         }}
       />
     </div>
@@ -477,21 +464,21 @@ function AddNode({ data }: NodeProps) {
         type="button"
         onClick={() => { setOpen(!open); setSearch(""); }}
         style={{
-          width: 36,
-          height: 36,
+          width: 28,
+          height: 28,
           borderRadius: "50%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          border: "2px dashed rgb(var(--border) / 0.4)",
+          border: "1.5px dashed rgb(var(--border) / 0.35)",
           background: "rgb(var(--panel))",
-          color: "rgb(var(--foreground) / 0.4)",
+          color: "rgb(var(--foreground) / 0.35)",
           cursor: "pointer",
-          fontSize: 20,
+          fontSize: 16,
           transition: "all 0.15s",
         }}
       >
-        <Plus style={{ width: 18, height: 18 }} />
+        <Plus style={{ width: 14, height: 14 }} />
       </button>
 
       {open && (
@@ -613,13 +600,13 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode };
  * the nodes that follow, simulating parallel paths.
  * Same-kind consecutive nodes stack vertically in a column.
  */
-const NODE_W = 164;
-const NODE_H = 56;
-const X_GAP = 80;      // gap between nodes horizontally
-const Y_GAP = 24;      // gap between stacked nodes vertically
-const X_STEP = NODE_W + X_GAP;  // 244px per column
-const Y_STEP = NODE_H + Y_GAP;  // 80px per stack row
-const MAX_STACK = 4;
+const NODE_W = 110;
+const NODE_H = 38;
+const X_GAP = 40;      // gap between nodes horizontally (compact like n8n)
+const Y_GAP = 14;      // gap between stacked nodes vertically
+const X_STEP = NODE_W + X_GAP;  // 150px per column
+const Y_STEP = NODE_H + Y_GAP;  // 52px per stack row
+const MAX_STACK = 5;   // more stacking allowed since nodes are smaller
 
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
 
@@ -720,7 +707,7 @@ function FlowCanvasInner({
       nodes.push({
         id: "__add__",
         type: "addNode",
-        position: { x: lastPos.x + X_STEP + 20, y: lastPos.y + 10 },
+        position: { x: lastPos.x + X_STEP + 10, y: lastPos.y + 6 },
         data: { onAdd, kindNames, themes: THEME },
         draggable: false,
         selectable: false,

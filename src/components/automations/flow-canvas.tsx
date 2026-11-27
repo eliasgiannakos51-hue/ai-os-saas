@@ -21,6 +21,7 @@ import {
   ReactFlow,
   Background,
   BackgroundVariant,
+  MarkerType,
   Controls,
   MiniMap,
   type Node,
@@ -99,12 +100,15 @@ const THEME: Record<Box["kind"], { accent: string }> = {
   no_op:             { accent: "#78909c" },
 };
 
-/** Nodes that are placeholder only — show "soon" badge. */
+/** Nodes that are placeholder only — show "soon" badge. Checked against
+ *  lib/automations/runner.ts on 2026-11-27: "switch" (routes by its rules
+ *  when the graph switch is on) and the four AI nodes (ai_agent, llm_chain,
+ *  retrieval_qa, summarization_chain → runAi) do real work, so they carry no
+ *  badge; everything left here only passes its data through. */
 const SOON_KINDS = new Set<Box["kind"]>([
   "code", "execute_command", "ssh", "loop", "split", "merge", "delay",
-  "sort", "limit", "remove_duplicates", "switch", "set", "compare",
-  "aggregate", "split_out", "rename_keys", "ai_agent", "llm_chain",
-  "retrieval_qa", "summarization_chain",
+  "sort", "limit", "remove_duplicates", "set", "compare",
+  "aggregate", "split_out", "rename_keys",
 ]);
 
 /** Branching nodes that get extra output handles. */
@@ -292,7 +296,7 @@ function AutomationNode({ data, selected }: NodeProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "grab", width: 96 }}
-      title={`${kindName}: ${description}`}>
+      title={description && description !== kindName ? `${kindName}: ${description}` : kindName}>
 
       {/* The square card — 96×96 per spec Γ1 */}
       <div style={{
@@ -601,7 +605,8 @@ function graphToEdges(graphEdges: FlowEdge[] | null, boxes: Box[], positions: { 
         animated: false,
         label: ge.fromPort !== "main" ? ge.fromPort : undefined,
         labelStyle: { fontSize: 8, fontWeight: 600, fill: strokeColor },
-        style: { stroke: strokeColor, strokeWidth: 2, opacity: 0.55 },
+        style: { stroke: strokeColor, strokeWidth: 2, opacity: 0.85 },
+        markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14, color: strokeColor },
       };
     });
   }
@@ -617,7 +622,8 @@ function graphToEdges(graphEdges: FlowEdge[] | null, boxes: Box[], positions: { 
       target: connected[i + 1].id, targetHandle: "left",
       type: goesLeft ? "smoothstep" : "default",
       animated: false,
-      style: { stroke: "#9ca3af", strokeWidth: 2, opacity: 0.5 },
+      style: { stroke: "#9ca3af", strokeWidth: 2, opacity: 0.85 },
+      markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14, color: "#9ca3af" },
     };
   });
 }
@@ -703,7 +709,7 @@ function FlowCanvasInner({
         minZoom={0.3} panOnDrag zoomOnScroll panOnScroll
         proOptions={{ hideAttribution: true }} style={{ background: "transparent" }}
         deleteKeyCode={null} defaultEdgeOptions={{ type: "default" }}>
-        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgb(var(--foreground) / 0.06)" />
+        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgb(var(--foreground) / 0.16)" />
         <Controls showInteractive={false} style={{ background: "rgb(var(--panel))", border: "1px solid rgb(var(--border) / 0.2)", borderRadius: 8, boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }} />
         {/* Minimap only when canvas is bigger than viewport (spec #15) */}
         {boxes.length > 8 && (

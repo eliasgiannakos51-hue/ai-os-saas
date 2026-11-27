@@ -14,7 +14,7 @@
 
 - **2026-11-27, τέλος: `npm run gates` βγαίνει με 0** (μετρήθηκε 2026-11-27 — ξανατρέξτε το). Στην πορεία: τα 10 νέα templates (data_pipeline … alert_system) δεν είχαν ΚΑΝΕΝΑ κείμενο στα messages (όνομα, περιγραφή, οδηγία) — τώρα έχουν σε 10 γλώσσες· το `readFlow` ξαναδίνει `bad_box` αντί να πετά σιωπηλά ένα κουτί που δεν διαβάζεται· `automations.test.mjs` περιγράφει τον καμβά όπως είναι (και στα δύο επίπεδα, χωρίς ρήτρα «Όταν/Αν/Κάνε»)· `message-slices` 76 → 78 με λόγο (flow-canvas, automation-shell).
 
-**Ακόμα κόκκινα: κανένα gate. Δεν έγινε:** `npm run build:ci`/`test:env`, έλεγχος σε browser, και οι κόμβοι Delay/Compare/Merge/Code παραμένουν «SOON». Η παρακάτω παλιά λίστα (2026-11-26) έχει εν μέρει κλείσει:**
+**Ακόμα κόκκινα: κανένα gate· το `npm run build:ci` πέρασε (2026-11-27). Δεν έγινε:** `npm run build:ci`/`test:env`, έλεγχος σε browser, και οι κόμβοι Delay/Compare/Merge/Code παραμένουν «SOON». Η παρακάτω παλιά λίστα (2026-11-26) έχει εν μέρει κλείσει:**
 **Παλιά λίστα, μετρήθηκε 2026-11-26:** automations (113 checks — η οθόνη Simple/Pro, `BoxEditor`, `FlowSteps` και το «μέρος της πρότασης» δεν υπάρχουν πια στο shell μετά το «Clean UI»), mutation-anchors / mutation-suite-shape (το ίδιο), design-tokens, rtl, i18n-coverage, message-slices, baselines / comment-claims, first-run-strings, glossary, pricing-promises, untrusted-boundaries, write-guards. Χρειάζεται απόφαση του owner αν το Simple/Pro επιστρέφει ή οι έλεγχοι ξαναγράφονται.
 
 **Διόρθωση προηγούμενου κειμένου:** η καταχώρηση «n8n spec — full implementation» παρακάτω υπερέβαινε την πραγματικότητα. Merge και Code είναι ακόμα placeholders, το Loop δεν περνά στοιχεία, και δεν έγινε έλεγχος σε browser.

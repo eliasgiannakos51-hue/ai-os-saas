@@ -10,7 +10,9 @@
 
 - 2026-11-27 ακόμα: κλείστηκαν first-run-strings (`npm run i18n:first-run`), glossary, untrusted-boundaries (`BOUNDARY-FORMAT: html` στο boxes.ts), write-guards (το gate διάλεγε λάθος αλυσίδα update — ο κώδικας είχε το compare-and-swap), pricing-promises (το αγγλικό `teamBannerBody` είχε κοπεί· επανήλθε όπως το ελληνικό), baselines/comment-claims (τρία σχόλια runner χωρίς λόγο).
 
-**Ακόμα κόκκινα (μετρήθηκε 2026-11-27 με `node scripts/tests/<όνομα>.test.mjs`): automations, mutation-anchors, mutation-suite-shape, design-tokens, rtl, i18n-coverage, message-slices. Η παρακάτω παλιά λίστα (2026-11-26) έχει εν μέρει κλείσει:**
+- 2026-11-27 (μεταγενέστερα): design-tokens και rtl πράσινα (ακτίνες/χρώματα του editor στα tokens· τα χρώματα κατηγορίας κόμβων δηλώθηκαν ως εξαίρεση με λόγο)· 41 αγγλικά κείμενα του editor και του καμβά μεταφράστηκαν σε 10 γλώσσες (`dashboard.automations.nodeEdit.*`).
+
+**Ακόμα κόκκινα (μετρήθηκε 2026-11-27 με `node scripts/tests/<όνομα>.test.mjs`): automations, mutation-anchors, mutation-suite-shape, i18n-coverage (4 αγγλικά μηνύματα στο `src/lib/agents`), message-slices (78 αντί 76 — δεν είναι στο automation). Η παρακάτω παλιά λίστα (2026-11-26) έχει εν μέρει κλείσει:**
 **Παλιά λίστα, μετρήθηκε 2026-11-26:** automations (113 checks — η οθόνη Simple/Pro, `BoxEditor`, `FlowSteps` και το «μέρος της πρότασης» δεν υπάρχουν πια στο shell μετά το «Clean UI»), mutation-anchors / mutation-suite-shape (το ίδιο), design-tokens, rtl, i18n-coverage, message-slices, baselines / comment-claims, first-run-strings, glossary, pricing-promises, untrusted-boundaries, write-guards. Χρειάζεται απόφαση του owner αν το Simple/Pro επιστρέφει ή οι έλεγχοι ξαναγράφονται.
 
 **Διόρθωση προηγούμενου κειμένου:** η καταχώρηση «n8n spec — full implementation» παρακάτω υπερέβαινε την πραγματικότητα. Merge και Code είναι ακόμα placeholders, το Loop δεν περνά στοιχεία, και δεν έγινε έλεγχος σε browser.

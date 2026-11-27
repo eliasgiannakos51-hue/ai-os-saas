@@ -309,7 +309,7 @@ function AutomationNode({ data, selected }: NodeProps) {
           ? `0 0 0 3px ${accent}25, 0 4px 14px rgba(0,0,0,0.18)`
           : "0 1px 4px rgba(0,0,0,0.08)",
         position: "relative",
-        transition: "box-shadow 0.15s, border-color 0.15s",
+        transition: "box-shadow 0.15s, border 0.15s",
       }}>
 
         {/* Trigger badge ⚡ — top left */}
@@ -388,6 +388,7 @@ function AutomationNode({ data, selected }: NodeProps) {
 /* ───────────────────── "+" ADD NODE ───────────────────── */
 
 function AddNode({ data }: NodeProps) {
+  const t = useTranslations("dashboard.automations");
   const { onAdd, kindNames, themes } = data as {
     onAdd: (kind: Box["kind"]) => void;
     kindNames: Record<string, string>;
@@ -431,7 +432,7 @@ function AddNode({ data }: NodeProps) {
           <div style={{ padding: "8px 8px 4px", borderBottom: "1px solid rgb(var(--border) / 0.15)" }}>
             <div style={{ position: "relative" }}>
               <Search style={{ position: "absolute", left: 7, top: 6, width: 13, height: 13, color: "rgb(var(--foreground) / 0.3)" }} />
-              <input ref={inputRef} type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search nodes..."
+              <input ref={inputRef} type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("nodeEdit.canvasSearch")}
                 style={{ width: "100%", padding: "5px 8px 5px 26px", borderRadius: 6, border: "1px solid rgb(var(--border) / 0.3)", background: "rgb(var(--background))", color: "rgb(var(--foreground))", fontSize: 11, outline: "none" }} />
             </div>
           </div>
@@ -461,7 +462,7 @@ function AddNode({ data }: NodeProps) {
               );
             })}
             {q && cats[0]?.kinds.length === 0 && (
-              <div style={{ padding: "14px 10px", textAlign: "center", fontSize: 11, color: "rgb(var(--foreground) / 0.4)" }}>No nodes found</div>
+              <div style={{ padding: "14px 10px", textAlign: "center", fontSize: 11, color: "rgb(var(--foreground) / 0.4)" }}>{t("nodeEdit.canvasNone")}</div>
             )}
           </div>
         </div>
@@ -643,6 +644,7 @@ function FlowCanvasInner({
   savedLayout?: Record<string, NodePosition> | null;
   groups?: FlowGroup[] | null;
 }) {
+  const t = useTranslations("dashboard.automations");
   const kindNames = useKindNames();
   const describe = useDescribe();
 
@@ -749,9 +751,9 @@ function FlowCanvasInner({
             reactFlowInstance.setNodes(newNodes.map((n) => ({ ...n, selected: n.id === chosen })));
             setTimeout(() => reactFlowInstance.fitView({ padding: 0.08, duration: 300, minZoom: 0.7 }), 50);
           }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 9, color: "rgb(var(--foreground) / 0.4)", textDecoration: "underline" }}>
-            Tidy up
+            {t("nodeEdit.canvasTidy")}
           </button>
-          <span>Del · Ctrl+D · 1: fit · 0: 100%</span>
+          <span>{t("nodeEdit.canvasKeys")}</span>
         </div>
       </div>
     </div>

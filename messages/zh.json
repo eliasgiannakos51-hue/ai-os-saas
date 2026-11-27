@@ -4065,7 +4065,10 @@
           "ecommerce": "电子商务",
           "support": "客户支持",
           "marketing": "内容营销",
-          "sales": "销售管道"
+          "sales": "销售管道",
+          "data": "数据",
+          "operations": "运营",
+          "monitoring": "监控"
         },
         "finance_daily": {
           "name": "每天早上的财务摘要",
@@ -4106,6 +4109,56 @@
           "name": "每周线索评分",
           "description": "每周一：为您的HubSpot联系人评分并更新。",
           "instruction": "根据互动数据为每个联系人评分。分配1-100的分数和类别（热门/温和/冷淡）。列出本周需要跟进的前5个线索。"
+        },
+        "data_pipeline": {
+          "name": "每日数据流程",
+          "description": "每天 06:00：读取网页，整理并排序条目，生成摘要，并发送到表格和 Slack。",
+          "instruction": "请用五行以内总结以下条目：有什么新内容、有什么变化、哪些需要注意。只使用数据中的内容。"
+        },
+        "customer_onboarding": {
+          "name": "新客户引导",
+          "description": "有新客户时：提取其信息，撰写欢迎消息并通过邮件发送，创建任务并更新 CRM。",
+          "instruction": "仅根据以下信息，为这位新客户写一条简短而热情的欢迎消息，并说明下一步。"
+        },
+        "social_monitor": {
+          "name": "社交提及监测",
+          "description": "每天 09:00：读取最近的提及，判断情感，分类整理，并把重要的发送到 Slack。",
+          "instruction": "请总结今天的提及：大家称赞什么、抱怨什么、哪些需要回复。只使用下面的提及内容。"
+        },
+        "invoice_processor": {
+          "name": "发票处理",
+          "description": "收到发票邮件时：提取供应商、金额和日期，核对后加入表格和账务系统，并通知团队。",
+          "instruction": "请检查下面的发票信息，用两行简短说明是否有缺失或错误（金额、日期、供应商）。"
+        },
+        "competitor_tracker": {
+          "name": "竞争对手跟踪",
+          "description": "每天 07:30：读取竞争对手的页面，找出变化，并通过邮件发给你一条简短说明。",
+          "instruction": "请用三行简短说明此页面与之前相比有哪些变化，以及为什么可能重要。只使用下面的文本。"
+        },
+        "report_generator": {
+          "name": "每周报告",
+          "description": "每周一 08:00：读取你的表格，汇总数字，撰写分析，并以 PDF 发送到邮箱、Drive 和 Slack。",
+          "instruction": "请根据下面的数字写一份简短的每周报告：总计、变化最大的部分，以及一件需要关注的事。只使用给出的数字。"
+        },
+        "webhook_processor": {
+          "name": "Webhook 处理",
+          "description": "当其他系统发来事件时：提取字段，写一条简短说明，保存到你的数据库，回复发送方并通知 Slack。",
+          "instruction": "请用一句清晰的话说明这个事件是什么，以及（如有）需要做什么。只使用下面的数据。"
+        },
+        "crm_sync": {
+          "name": "CRM 同步",
+          "description": "每天 06:30：找出新联系人，去除重复，为每人写一条简短备注，并更新你的 CRM。",
+          "instruction": "请为下面每位新联系人写一行：他们是谁，下一步应该做什么。只使用给出的数据。"
+        },
+        "content_pipeline": {
+          "name": "内容发布流程",
+          "description": "每天 10:00：读取订阅源，挑出重点内容，为 LinkedIn、X 和 Facebook 撰写帖子，并在发布前等待你的批准。",
+          "instruction": "请就下面最有趣的一条内容写一则简短清晰、语气友好的帖子。不要编造事实。"
+        },
+        "alert_system": {
+          "name": "可用性告警",
+          "description": "每晚检查一个网址，如有异常，评估严重程度，通过 Slack 和邮件提醒你并创建任务。",
+          "instruction": "请用两行简短说明下面检查结果中哪里有问题，以及紧急程度。只使用给出的数据。"
         }
       },
       "timeSaved": {

@@ -309,7 +309,7 @@ function AutomationNode({ data, selected }: NodeProps) {
           ? `0 0 0 3px ${accent}25, 0 4px 14px rgba(0,0,0,0.18)`
           : "0 1px 4px rgba(0,0,0,0.08)",
         position: "relative",
-        transition: "box-shadow 0.15s, border 0.15s",
+        transition: "all 0.15s",
       }}>
 
         {/* Trigger badge ⚡ — top left */}

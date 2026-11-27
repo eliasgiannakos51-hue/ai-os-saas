@@ -206,8 +206,8 @@ const MUTANTS = [
   {
     name: "the two levels stop reading the same boxes",
     file: AUTO_SHELL,
-    from: "<FlowSteps boxes={shown.boxes} connected={connected} />",
-    to: "<FlowSteps boxes={shown.boxes.slice(1)} connected={connected} />",
+    from: "                  boxes={shown.boxes}\n                  chosen={chosen}",
+    to: "                  boxes={shown.boxes.slice(1)}\n                  chosen={chosen}",
     expect: "Simple and Pro are drawn from the same boxes, not two stores",
   },
   {
@@ -248,10 +248,10 @@ const MUTANTS = [
     expect: "the start is «Όταν»; the condition and the approval are «Αν»",
   },
   {
-    name: "Simple stops saying which part each step is",
+    name: "Simple stops saying what kind of step each one is",
     file: FLOW_BOXES,
-    from: "                {part[partOf(box)]}\n",
-    to: "                {i + 1}\n",
+    from: '>{kind[box.kind]}</span>\n                  <span title={sentence(box)}',
+    to: '>{i + 1}</span>\n                  <span title={sentence(box)}',
     expect: "Simple draws each step's part, from the box's own kind, before its sentence",
   },
   // The live canvas: a position invented, a run brought back, a moving
@@ -330,9 +330,9 @@ const MUTANTS = [
   {
     name: "a «Σύντομα» template becomes something to press",
     file: TEMPLATES,
-    from: '  "ecommerce_daily", "support_triage", "content_repurpose", "lead_enrich",\n] as const;',
-    to: '  "ecommerce_daily", "support_triage", "content_repurpose", "lead_enrich", "instagram_to_telegram",\n] as const;',
-    expect: "six ready: finance, e-commerce, support, marketing, sales templates",
+    from: '"webhook_processor", "crm_sync", "content_pipeline", "alert_system",\n] as const;',
+    to: '"webhook_processor", "crm_sync", "content_pipeline", "alert_system", "instagram_to_telegram",\n] as const;',
+    expect: "the ready templates are exactly these sixteen",
   },
   {
     name: "a «Σύντομα» card grows a button",

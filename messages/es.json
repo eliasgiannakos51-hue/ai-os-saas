@@ -4065,7 +4065,10 @@
           "ecommerce": "Comercio electrónico",
           "support": "Soporte al cliente",
           "marketing": "Marketing de contenidos",
-          "sales": "Pipeline de ventas"
+          "sales": "Pipeline de ventas",
+          "data": "Datos",
+          "operations": "Operaciones",
+          "monitoring": "Supervisión"
         },
         "finance_daily": {
           "name": "Resumen financiero cada mañana",
@@ -4106,6 +4109,56 @@
           "name": "Puntuación semanal de leads",
           "description": "Cada lunes: puntúa tus contactos de HubSpot y actualízalos.",
           "instruction": "Puntúa cada contacto según sus datos de interacción. Asigna una puntuación 1-100 y una categoría (caliente/tibio/frío). Lista los 5 mejores leads para seguimiento esta semana."
+        },
+        "data_pipeline": {
+          "name": "Flujo diario de datos",
+          "description": "Cada día a las 06:00: lee una página web, limpia y ordena los elementos, los resume y envía el resultado a una hoja y a Slack.",
+          "instruction": "Resume los elementos de abajo en cinco líneas cortas: qué es nuevo, qué ha cambiado y qué requiere atención. Usa solo lo que hay en los datos."
+        },
+        "customer_onboarding": {
+          "name": "Bienvenida de clientes",
+          "description": "Cuando llega un cliente nuevo: extrae sus datos, escribe un mensaje de bienvenida, lo envía por correo, crea una tarea y actualiza el CRM.",
+          "instruction": "Escribe un mensaje de bienvenida corto y cálido para este cliente nuevo, usando solo los datos de abajo. Menciona el siguiente paso."
+        },
+        "social_monitor": {
+          "name": "Monitor de menciones",
+          "description": "Cada día a las 09:00: lee las menciones recientes, valora el sentimiento, las clasifica y envía las importantes a Slack.",
+          "instruction": "Resume las menciones de hoy: qué elogian, de qué se quejan y cuáles necesitan respuesta. Usa solo las menciones de abajo."
+        },
+        "invoice_processor": {
+          "name": "Procesado de facturas",
+          "description": "Cuando llega un correo con factura: extrae proveedor, importe y fecha, lo comprueba, lo añade a tu hoja y a la contabilidad, y avisa al equipo.",
+          "instruction": "Revisa los datos de la factura de abajo: indica en dos líneas cortas si falta algo o parece incorrecto (importe, fecha, proveedor)."
+        },
+        "competitor_tracker": {
+          "name": "Seguimiento de competidores",
+          "description": "Cada día a las 07:30: lee la página de un competidor, encuentra qué cambió y te envía una nota breve por correo.",
+          "instruction": "Describe en tres líneas cortas qué ha cambiado en esta página respecto a antes y por qué puede importar. Usa solo el texto de abajo."
+        },
+        "report_generator": {
+          "name": "Informe semanal",
+          "description": "Cada lunes a las 08:00: lee tu hoja, suma las cifras, escribe el análisis y lo envía como PDF a tu correo, a Drive y a Slack.",
+          "instruction": "Escribe un informe semanal corto con las cifras de abajo: los totales, qué se movió más y una cosa a vigilar. Usa solo los números dados."
+        },
+        "webhook_processor": {
+          "name": "Procesador de webhooks",
+          "description": "Cuando otro sistema envía un evento: extrae los campos, escribe una nota breve, la guarda en tu base de datos, responde al remitente y avisa a Slack.",
+          "instruction": "Escribe una frase clara que diga qué es este evento y qué, si hace falta, hay que hacer. Usa solo los datos de abajo."
+        },
+        "crm_sync": {
+          "name": "Sincronización de CRM",
+          "description": "Cada día a las 06:30: encuentra contactos nuevos, quita duplicados, escribe una nota breve para cada uno y actualiza tu CRM.",
+          "instruction": "Para cada contacto nuevo de abajo, escribe una línea que diga quién es y cuál debería ser el siguiente paso. Usa solo los datos dados."
+        },
+        "content_pipeline": {
+          "name": "Flujo de contenido",
+          "description": "Cada día a las 10:00: lee un feed, elige lo más destacado, escribe publicaciones para LinkedIn, X y Facebook y espera tu aprobación antes de publicar.",
+          "instruction": "Escribe una publicación corta y clara sobre el elemento más interesante de abajo, en tono cercano. No inventes datos."
+        },
+        "alert_system": {
+          "name": "Alertas de disponibilidad",
+          "description": "Cada noche: comprueba una dirección web y, si algo falla, valora su gravedad, te avisa por Slack y correo y crea una tarea.",
+          "instruction": "Indica en dos líneas cortas qué parece ir mal en la comprobación de abajo y cuán urgente es. Usa solo los datos dados."
         }
       },
       "timeSaved": {

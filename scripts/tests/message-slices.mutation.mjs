@@ -128,7 +128,7 @@ const MUTANTS = [
     // 74 -> 75 on 2026-11-11: achievement-unlock-bridge.tsx's
     // useTranslations() with no namespace.
     // 75 -> 76 on 2026-11-11: payments-dashboard.tsx template-literal key.
-    from: "    unbounded: 76,",
+    from: "    unbounded: 78,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

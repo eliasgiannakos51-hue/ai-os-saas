@@ -8,7 +8,10 @@
 - **`alive`** στο `automation-shell.tsx` ξανά `simplePro && level === "pro"`: ο καμβάς ρωτούσε για run κάθε δευτερόλεπτο και για όσους ΔΕΝ έχουν τον διακόπτη.
 - Κλείστηκαν gates που ήταν ήδη κόκκινα από πριν: i18n (405 κλειδιά, 9 γλώσσες), `gdpr-coverage` (πίνακας `automation_run_step_outputs`), `schema-canaries` (2 canaries + 1 εξαίρεση), `function-limits`, `accent-search`, `sql-spellings`, `automation-modes`.
 
-**Ακόμα κόκκινα (ήταν κόκκινα και πριν από αυτό το PR, μετρήθηκε 2026-11-26):** automations (113 checks — η οθόνη Simple/Pro, `BoxEditor`, `FlowSteps` και το «μέρος της πρότασης» δεν υπάρχουν πια στο shell μετά το «Clean UI»), mutation-anchors / mutation-suite-shape (το ίδιο), design-tokens, rtl, i18n-coverage, message-slices, baselines / comment-claims, first-run-strings, glossary, pricing-promises, untrusted-boundaries, write-guards. Χρειάζεται απόφαση του owner αν το Simple/Pro επιστρέφει ή οι έλεγχοι ξαναγράφονται.
+- 2026-11-27 ακόμα: κλείστηκαν first-run-strings (`npm run i18n:first-run`), glossary, untrusted-boundaries (`BOUNDARY-FORMAT: html` στο boxes.ts), write-guards (το gate διάλεγε λάθος αλυσίδα update — ο κώδικας είχε το compare-and-swap), pricing-promises (το αγγλικό `teamBannerBody` είχε κοπεί· επανήλθε όπως το ελληνικό), baselines/comment-claims (τρία σχόλια runner χωρίς λόγο).
+
+**Ακόμα κόκκινα (μετρήθηκε 2026-11-27 με `node scripts/tests/<όνομα>.test.mjs`): automations, mutation-anchors, mutation-suite-shape, design-tokens, rtl, i18n-coverage, message-slices. Η παρακάτω παλιά λίστα (2026-11-26) έχει εν μέρει κλείσει:**
+**Παλιά λίστα, μετρήθηκε 2026-11-26:** automations (113 checks — η οθόνη Simple/Pro, `BoxEditor`, `FlowSteps` και το «μέρος της πρότασης» δεν υπάρχουν πια στο shell μετά το «Clean UI»), mutation-anchors / mutation-suite-shape (το ίδιο), design-tokens, rtl, i18n-coverage, message-slices, baselines / comment-claims, first-run-strings, glossary, pricing-promises, untrusted-boundaries, write-guards. Χρειάζεται απόφαση του owner αν το Simple/Pro επιστρέφει ή οι έλεγχοι ξαναγράφονται.
 
 **Διόρθωση προηγούμενου κειμένου:** η καταχώρηση «n8n spec — full implementation» παρακάτω υπερέβαινε την πραγματικότητα. Merge και Code είναι ακόμα placeholders, το Loop δεν περνά στοιχεία, και δεν έγινε έλεγχος σε browser.
 

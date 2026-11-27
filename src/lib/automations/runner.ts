@@ -732,7 +732,8 @@ function pickNextBoxes(
     if (doneEdge) return { port: "done", nextIds: [doneEdge.to] };
   }
 
-  // Error handler: main for now
+  // Error handler: follows its main port. Nothing sends a run down the
+  // error port, because a failed box ends the run before a handler is read.
   if (box.kind === "error_handler") {
     const errorEdge = outEdges.find((e) => e.fromPort === "error");
     const mainEdge = outEdges.find((e) => e.fromPort === "main");
@@ -943,7 +944,8 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       continue;
     }
     if (box.kind === "code") {
-      // Code: skip for now — the AI step can do what code does
+      // Code: not executed — running a person's code needs a sandbox this
+      // runner does not have; the canvas marks the box SOON.
       steps.push({ box: box.id, status: "ok", note: "ai_done" });
       continue;
     }
@@ -953,7 +955,8 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
         steps.push({ box: box.id, status: "would", note: "would_wait" });
         continue;
       }
-      // For now, waits are treated as instant — real wait needs a scheduler
+      // A wait is recorded as instant: a real pause needs a scheduler, and a
+      // serverless run cannot sleep for minutes.
       steps.push({ box: box.id, status: "ok", note: "started" });
       continue;
     }

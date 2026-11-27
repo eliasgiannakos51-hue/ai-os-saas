@@ -358,7 +358,7 @@
     "contactSales": "Contact Sales",
     "getPlan": "Get {plan}",
     "teamBannerTitle": "Building with a team?",
-    "teamBannerBody": "Each member gets your plan. Professional: +{price}/member/month. Ultimate and Enterprise: unlimited seats included.",
+    "teamBannerBody": "Give your team your plan: each member signs in on their own account and gets your plan's level. Work is not shared between accounts yet. Professional: +{price}/member/month. Ultimate and Enterprise: unlimited seats included.",
     "comparePlans": "Compare plans",
     "feature": "Feature",
     "backToHome": "← Back to Ionexa AI",

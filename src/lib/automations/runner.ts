@@ -20,6 +20,7 @@ import type { Plan } from "@/lib/billing/plans";
 import { formatItemsForModel, searchUserData } from "@/lib/integrations/read";
 import { parseMcpUrl, isBlockedAddress } from "@/lib/mcp/ssrf";
 import { isFeatureOn } from "@/lib/flags/flags";
+import { applyTransform, REAL_TRANSFORM_KINDS } from "@/lib/automations/transforms";
 import { matchesSearch } from "@/lib/text/search-match";
 import { readFlow, readEdges, deriveEdgesFromList, withSupervisedApprovals, DEFAULT_FLOW_MODE, type ActionBox, type Box, type FlowEdge, type FlowMode, type ReadBox } from "@/lib/automations/boxes";
 import { decryptFlowBoxConfigs } from "@/lib/automations/config-crypto";
@@ -1021,6 +1022,15 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
         : "switch_route_3" as const;
       steps.push({ box: box.id, status: "ok", note: switchNote });
       if (nextIds.length > 0) { const idx = boxes.findIndex((b) => b.id === nextIds[0]); if (idx >= 0) { i = idx - 1; continue; } }
+      continue;
+    }
+    // limit / sort / remove_duplicates / set really change the text while
+    // the switch is open (lib/automations/transforms.ts); closed, they pass
+    // it through as they always did.
+    if (realLogicOn && REAL_TRANSFORM_KINDS.has(box.kind)) {
+      text = applyTransform(box, text);
+      steps.push({ box: box.id, status: "ok", note: "transform_done" });
+      await storeOutput(box.id, text);
       continue;
     }
     if (box.kind === "sort" || box.kind === "limit" || box.kind === "remove_duplicates" ||

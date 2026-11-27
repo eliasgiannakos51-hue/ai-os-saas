@@ -104,10 +104,11 @@ const THEME: Record<Box["kind"], { accent: string }> = {
  *  lib/automations/runner.ts on 2026-11-27: "switch" (routes by its rules
  *  when the graph switch is on) and the four AI nodes (ai_agent, llm_chain,
  *  retrieval_qa, summarization_chain → runAi) do real work, so they carry no
- *  badge; everything left here only passes its data through. */
+ *  badge, and so do limit / sort / remove_duplicates / set while the switch
+ *  "automation-real-logic" is open (lib/automations/transforms.ts); everything left here only passes its data through. */
 const SOON_KINDS = new Set<Box["kind"]>([
   "code", "execute_command", "ssh", "loop", "split", "merge", "delay",
-  "sort", "limit", "remove_duplicates", "set", "compare",
+  "compare",
   "aggregate", "split_out", "rename_keys",
 ]);
 

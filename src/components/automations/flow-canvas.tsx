@@ -297,87 +297,85 @@ function AutomationNode({ data, selected }: NodeProps) {
   if (isSoon) { borderStyle = "dashed"; }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "grab", width: 96 }}
+    <div style={{ cursor: "grab", position: "relative" }}
       title={description && description !== kindName ? `${kindName}: ${description}` : kindName}>
 
-      {/* The square card — 96×96 per spec Γ1 */}
+      {/* Wide card: icon LEFT, title+subtitle RIGHT — always readable */}
       <div style={{
-        width: 96, height: 96, borderRadius: 14,
-        display: "flex", alignItems: "center", justifyContent: "center",
+        width: 180, height: 56, borderRadius: 10,
+        display: "flex", alignItems: "center",
         background: "rgb(var(--panel))",
         border: `${borderWidth}px ${borderStyle} ${borderColor}`,
         boxShadow: selected
           ? `0 0 0 3px ${accent}25, 0 4px 14px rgba(0,0,0,0.18)`
           : "0 1px 4px rgba(0,0,0,0.08)",
-        position: "relative",
+        position: "relative", overflow: "hidden",
         transition: "all 0.15s",
       }}>
 
-        {/* Trigger badge ⚡ — top left */}
+        {/* Colored left accent stripe */}
+        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: accent, borderRadius: "10px 0 0 10px" }} />
+
+        {/* Trigger badge ⚡ */}
         {isStart && (
           <div style={{ position: "absolute", top: -4, left: -4, width: 16, height: 16, borderRadius: "50%", background: "#00b050", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}>
             <Zap style={{ width: 9, height: 9, color: "#fff" }} />
           </div>
         )}
 
-        {/* "Soon" badge — top left for non-triggers */}
+        {/* SOON badge */}
         {isSoon && !isStart && (
-          <div style={{ position: "absolute", top: -5, left: -2, background: "#78909c", color: "#fff", borderRadius: 6, padding: "0 4px", fontSize: 7, fontWeight: 700, letterSpacing: "0.03em", zIndex: 2 }}>
+          <div style={{ position: "absolute", top: -5, right: 8, background: "#78909c", color: "#fff", borderRadius: 6, padding: "0 4px", fontSize: 7, fontWeight: 700, zIndex: 2 }}>
             SOON
           </div>
         )}
 
-        {/* Status badge — top right */}
         <StatusBadge state={boxState} count={stepCount} />
 
-        {/* Input port — rectangle on left (n8n style) */}
+        {/* Input port */}
         {!isStart && (
           <Handle type="target" position={Position.Left} id="left"
             style={{ background: "rgb(var(--foreground) / 0.4)", border: "2px solid rgb(var(--panel))", width: 10, height: 10, borderRadius: "50%", left: -5 }} />
         )}
 
-        {/* Circular icon — centered, 42px for 96px card */}
+        {/* Circular icon */}
         <div style={{
-          width: 42, height: 42, borderRadius: "50%",
+          marginLeft: 14, width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
           background: accent, color: "#fff",
         }}>
-          <NodeIcon kind={box.kind} size={20} />
+          <NodeIcon kind={box.kind} size={16} />
         </div>
 
-        {/* Output port — circle on right */}
+        {/* Title + subtitle INSIDE card */}
+        <div style={{ marginLeft: 10, overflow: "hidden", flex: 1, paddingRight: 10 }}>
+          <div style={{
+            fontSize: 12, fontWeight: 600, color: "rgb(var(--foreground) / 0.9)",
+            lineHeight: "16px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>
+            {kindName}
+          </div>
+          {description && (
+            <div style={{
+              fontSize: 10, color: "rgb(var(--foreground) / 0.45)",
+              lineHeight: "13px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
+            }}>
+              {description}
+            </div>
+          )}
+        </div>
+
+        {/* Output port */}
         <Handle type="source" position={Position.Right} id="right"
           style={{ background: accent, border: "2px solid rgb(var(--panel))", width: 10, height: 10, borderRadius: "50%", right: -5 }} />
-
-        {/* IF: second output with label */}
-        {IF_KINDS.has(box.kind) && (
-          <>
-            <div style={{ position: "absolute", right: -28, top: 18, fontSize: 7, fontWeight: 600, color: "#16a34a" }}>true</div>
-            <div style={{ position: "absolute", right: -30, bottom: 14, fontSize: 7, fontWeight: 600, color: "#dc2626" }}>false</div>
-          </>
-        )}
-
-        {/* Switch: route labels */}
       </div>
 
-      {/* Title below — 12px per spec Γ1 */}
-      <div style={{
-        marginTop: 6, maxWidth: 110, textAlign: "center",
-        fontSize: 12, fontWeight: 600, color: "rgb(var(--foreground) / 0.9)",
-        lineHeight: "15px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-      }}>
-        {kindName}
-      </div>
-
-      {/* Subtitle — 10px */}
-      {description && (
-        <div style={{
-          maxWidth: 110, textAlign: "center",
-          fontSize: 10, fontWeight: 400, color: "rgb(var(--foreground) / 0.45)",
-          lineHeight: "13px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-        }}>
-          {description}
-        </div>
+      {/* IF true/false labels */}
+      {IF_KINDS.has(box.kind) && (
+        <>
+          <div style={{ position: "absolute", right: -30, top: 10, fontSize: 8, fontWeight: 600, color: "#16a34a" }}>true</div>
+          <div style={{ position: "absolute", right: -30, bottom: 8, fontSize: 8, fontWeight: 600, color: "#dc2626" }}>false</div>
+        </>
       )}
     </div>
   );
@@ -501,8 +499,8 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode, sti
  * Notes are placed BELOW the main flow as sticky notes (separate y).
  * Saved layout positions override auto-layout.
  */
-const X_STEP = 160;     // horizontal spacing — 96px card + 64px gap
-const Y_STEP = 140;     // vertical offset for branching
+const X_STEP = 230;     // horizontal spacing — 180px card + 50px gap
+const Y_STEP = 80;      // vertical offset for branching
 const WRAP_COLS = 1000; // cards per row; one line like n8n — a long flow is panned, not wrapped
 const OPEN_NODES = 9;   // how many cards the first view fits (about a screen at a readable size)
 const ROW_STEP = 210;    // vertical distance between wrapped rows

@@ -33,6 +33,7 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  useNodesInitialized,
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -682,6 +683,16 @@ function FlowCanvasInner({
   }, []);
   const closeContext = useCallback(() => setContextMenu(null), []);
   const reactFlowInstance = useReactFlow();
+  // Open on the first row once React Flow has MEASURED the cards. Fitting in
+  // onInit ran before that, saw no sizes, and left the view on the middle of
+  // the flow (owner's screenshot, 2026-11-28).
+  const measured = useNodesInitialized();
+  const fittedOnce = useRef(false);
+  useEffect(() => {
+    if (!measured || fittedOnce.current) return;
+    fittedOnce.current = true;
+    reactFlowInstance.fitView({ nodes: nodes.slice(0, WRAP_COLS + 1).map((n) => ({ id: n.id })), padding: 0.12, maxZoom: 1, minZoom: 0.5 });
+  }, [measured, nodes, reactFlowInstance]);
 
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {
     if ((e.key === "Delete" || e.key === "Backspace") && chosen && onDelete) { e.preventDefault(); onDelete(chosen); }
@@ -704,7 +715,6 @@ function FlowCanvasInner({
         onNodeDoubleClick={(_, n) => { if (n.id !== "__add__") onChoose(n.id); }}
         onNodeContextMenu={onNodeContextMenu} onPaneClick={closeContext}
         nodeTypes={nodeTypes}
-        onInit={(inst) => inst.fitView({ nodes: nodes.slice(0, WRAP_COLS + 1).map((n) => ({ id: n.id })), padding: 0.12, maxZoom: 1, minZoom: 0.5 })}
         minZoom={0.3} panOnDrag zoomOnScroll panOnScroll
         proOptions={{ hideAttribution: true }} style={{ background: "transparent" }}
         deleteKeyCode={null} defaultEdgeOptions={{ type: "default" }}>

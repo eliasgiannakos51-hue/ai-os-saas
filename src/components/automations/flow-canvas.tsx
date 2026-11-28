@@ -26,6 +26,7 @@ import {
   MiniMap,
   type Node,
   type Edge,
+  type Connection,
   type NodeTypes,
   type NodeProps,
   Handle,
@@ -39,7 +40,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useTranslations } from "next-intl";
 import { AlertTriangle, ArrowUpDown, BarChart3, Calendar, Check, Clock, Code2, FileOutput, Filter, GitBranch, GitCompare, GitMerge, Globe, Hash, Heart, FileText, Layers, List, ListFilter, PauseCircle, RefreshCw, Reply, Scissors, Send, Sparkles, Split, Table2, Terminal, Timer, Type, X as XIcon, Zap, Play, Mail, Database, Webhook, ChevronRight, Plus, Search } from "lucide-react";
-import type { Box, StartBox, FlowEdge, FlowGroup, NodePosition } from "@/lib/automations/boxes";
+import { deriveEdgesFromList, type Box, type StartBox, type FlowEdge, type FlowGroup, type NodePosition } from "@/lib/automations/boxes";
 import type { Connected } from "@/components/automations/flow-boxes";
 import { matchesSearch } from "@/lib/text/search-match";
 import type { BoxState, RunProgress } from "@/lib/automations/run-progress";
@@ -108,7 +109,7 @@ const THEME: Record<Box["kind"], { accent: string }> = {
  *  badge, and so do limit / sort / remove_duplicates / set while the switch
  *  "automation-real-logic" is open (lib/automations/transforms.ts); everything left here only passes its data through. */
 const SOON_KINDS = new Set<Box["kind"]>([
-  "code", "execute_command", "ssh", "loop", "split", "merge", "delay",
+  "code", "execute_command", "ssh", "loop", "split", "delay",
   "compare",
   "aggregate", "split_out", "rename_keys",
 ]);
@@ -309,7 +310,10 @@ function AutomationNode({ data, selected }: NodeProps) {
         boxShadow: selected
           ? `0 0 0 3px ${accent}25, 0 4px 14px rgba(0,0,0,0.18)`
           : "0 1px 4px rgba(0,0,0,0.08)",
-        position: "relative", overflow: "hidden",
+        // No overflow:hidden here: it clipped the round input/output dots in half
+        // and made them impossible to grab, so no line could be drawn from them
+        // (seen in the browser harness, 2026-11-28). The text boxes below clip themselves.
+        position: "relative",
         transition: "all 0.15s",
       }}>
 
@@ -418,7 +422,7 @@ function AddNode({ data }: NodeProps) {
   return (
     <div style={{ position: "relative" }}>
       <Handle type="target" position={Position.Left}
-        style={{ background: "#6b7280", border: "none", width: 6, height: 14, borderRadius: 2, left: -3 }} />
+        style={{ background: "rgb(var(--foreground) / 0.4)", border: "2px solid rgb(var(--panel))", width: 10, height: 10, borderRadius: "50%", left: -5 }} />
       <button type="button" onClick={() => { setOpen(!open); setSearch(""); }}
         style={{ width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", border: "2px dashed rgb(var(--border) / 0.3)", background: "rgb(var(--panel))", color: "rgb(var(--foreground) / 0.35)", cursor: "pointer", transition: "all 0.15s" }}>
         <Plus style={{ width: 16, height: 16 }} />
@@ -681,7 +685,7 @@ function graphToEdges(graphEdges: FlowEdge[] | null, boxes: Box[], positions: { 
 
 function FlowCanvasInner({
   boxes, chosen, onChoose, connected, onAdd, onDelete, onUndo, progress,
-  graphEdges, savedLayout, groups,
+  graphEdges, savedLayout, groups, onGraphChange,
 }: {
   boxes: Box[]; chosen: string | null; onChoose: (id: string) => void;
   connected: Connected; onAdd?: (kind: Box["kind"]) => void;
@@ -690,6 +694,7 @@ function FlowCanvasInner({
   graphEdges?: FlowEdge[] | null;
   savedLayout?: Record<string, NodePosition> | null;
   groups?: FlowGroup[] | null;
+  onGraphChange?: (patch: { edges?: FlowEdge[]; layout?: Record<string, NodePosition> }) => void;
 }) {
   const t = useTranslations("dashboard.automations");
   const kindNames = useKindNames();
@@ -719,8 +724,38 @@ function FlowCanvasInner({
     return { initialNodes: nodes, initialEdges: edges };
   }, [boxes, kindNames, describe, onAdd, progress, graphEdges, savedLayout]);
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  const reactFlowInstance = useReactFlow();
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  // The state above only reads its first value: when the boxes, the
+  // connections or the positions change (a card added, a line drawn) it must
+  // be given the new ones.
+  // Keyed on the PROPS, not on initialNodes: that memo is rebuilt whenever
+  // the label hooks hand back a new object, and setting state from it loops
+  // ("Maximum update depth", seen in the browser harness, 2026-11-28).
+  useEffect(() => { setNodes(initialNodes); setEdges(initialEdges); }, [boxes, graphEdges, savedLayout, progress]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // THE CONNECTIONS A PERSON DRAWS. The whole new set goes to the server
+  // (PATCH edges), which refuses a cycle, a duplicate or an unknown box; the
+  // canvas redraws from what it keeps. A flow with no saved connections is a
+  // chain, so the chain is what a first new line is added to.
+  const currentEdges = graphEdges && graphEdges.length > 0 ? graphEdges : deriveEdgesFromList(boxes);
+  const onConnect = useCallback((c: Connection) => {
+    if (!onGraphChange || !c.source || !c.target || c.source === c.target || c.source === "__add__" || c.target === "__add__") return;
+    if (currentEdges.some((e) => e.from === c.source && e.to === c.target)) return;
+    onGraphChange({ edges: [...currentEdges, { id: `e-${c.source}-${c.target}-${Date.now().toString(36)}`, from: c.source, fromPort: "main", to: c.target, toPort: "main" }] });
+  }, [onGraphChange, currentEdges]);
+  const onEdgesDelete = useCallback((gone: Edge[]) => {
+    if (!onGraphChange) return;
+    const ids = new Set(gone.map((e) => e.id));
+    onGraphChange({ edges: currentEdges.filter((e) => !ids.has(e.id)) });
+  }, [onGraphChange, currentEdges]);
+  const onNodeDragStop = useCallback(() => {
+    if (!onGraphChange) return;
+    const layout: Record<string, NodePosition> = {};
+    for (const n of reactFlowInstance.getNodes()) if (n.id !== "__add__") layout[n.id] = { x: n.position.x, y: n.position.y };
+    onGraphChange({ layout });
+  }, [onGraphChange, reactFlowInstance]);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     if (node.id !== "__add__") onChoose(node.id);
@@ -732,7 +767,6 @@ function FlowCanvasInner({
     setContextMenu({ x: e.clientX, y: e.clientY, nodeId: node.id });
   }, []);
   const closeContext = useCallback(() => setContextMenu(null), []);
-  const reactFlowInstance = useReactFlow();
   // Open on the first row once React Flow has MEASURED the cards. Fitting in
   // onInit ran before that, saw no sizes, and left the view on the middle of
   // the flow (owner's screenshot, 2026-11-28).
@@ -759,15 +793,17 @@ function FlowCanvasInner({
     <div style={{ height: 600, borderRadius: 10, border: "1px solid rgb(var(--border) / 0.2)", overflow: "hidden", position: "relative" }}
       onKeyDown={onKeyDown} tabIndex={0}>
       <ReactFlow
-        nodes={nodes.map((n) => ({ ...n, selected: n.id === chosen }))}
+        nodes={nodes.map((n) => ({ ...n, selected: n.id === chosen, deletable: false }))}
         edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
         onNodeClick={(e, n) => { closeContext(); onNodeClick(e, n); }}
         onNodeDoubleClick={(_, n) => { if (n.id !== "__add__") onChoose(n.id); }}
         onNodeContextMenu={onNodeContextMenu} onPaneClick={closeContext}
         nodeTypes={nodeTypes}
+        nodesConnectable={Boolean(onGraphChange)}
+        onConnect={onConnect} onEdgesDelete={onEdgesDelete} onNodeDragStop={onNodeDragStop}
         minZoom={0.3} panOnDrag zoomOnScroll panOnScroll
         proOptions={{ hideAttribution: true }} style={{ background: "transparent" }}
-        deleteKeyCode={null} defaultEdgeOptions={{ type: "default" }}>
+        deleteKeyCode={onGraphChange ? ["Delete", "Backspace"] : null} defaultEdgeOptions={{ type: "default" }}>
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgb(var(--foreground) / 0.16)" />
         <Controls showInteractive={false} style={{ background: "rgb(var(--panel))", border: "1px solid rgb(var(--border) / 0.2)", borderRadius: 8, boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }} />
         {/* Minimap only when canvas is bigger than viewport (spec #15) */}
@@ -826,6 +862,8 @@ export function FlowCanvasView(props: {
   graphEdges?: FlowEdge[] | null;
   savedLayout?: Record<string, NodePosition> | null;
   groups?: FlowGroup[] | null;
+  /** The person drew or removed a connection, or moved cards: the whole new set to keep. Absent = the canvas is read-only. */
+  onGraphChange?: (patch: { edges?: FlowEdge[]; layout?: Record<string, NodePosition> }) => void;
 }) {
   return (
     <ReactFlowProvider>

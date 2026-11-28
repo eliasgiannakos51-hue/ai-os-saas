@@ -342,7 +342,14 @@ export function AutomationShell({
 
   function placeFlow(row: unknown): ShownFlow | null {
     if (!row || typeof row !== "object") return null;
-    const flow = readShownFlow(row as Record<string, unknown>);
+    const incoming = row as Record<string, unknown>;
+    let flow = readShownFlow(incoming);
+    // A reply that does not carry the connections (run, switch on, a box
+    // edited in words) leaves the ones already on the screen as they were.
+    if (!("edges" in incoming)) {
+      const before = flows.find((f) => f.id === flow.id);
+      if (before) flow = { ...flow, edges: before.edges, layout: before.layout, groups: before.groups };
+    }
     setFlows((prev) => [flow, ...prev.filter((f) => f.id !== flow.id)]);
     return flow;
   }
@@ -628,6 +635,12 @@ export function AutomationShell({
                   graphEdges={canvasCards ? shown.edges : null}
                   savedLayout={canvasCards ? shown.layout : null}
                   groups={groupsSubflows ? shown.groups : null}
+                  onGraphChange={canvasCards ? (patch) => {
+                    void (async () => {
+                      const data = await call(`/api/automations/flows/${shown.id}`, "PATCH", patch, "save");
+                      if (data) placeFlow(data.flow);
+                    })();
+                  } : undefined}
                   onDelete={(boxId) => {
                     const boxes = shown.boxes.filter((b) => b.id !== boxId && b.kind !== "start" ? true : b.kind === "start");
                     if (boxes.length < 2) return;

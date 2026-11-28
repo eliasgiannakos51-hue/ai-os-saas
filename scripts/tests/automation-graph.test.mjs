@@ -74,5 +74,20 @@ check("the old jumps are off in graph mode", (runner.match(/graphEdges && !graph
 check("a condition does not stop the whole run in graph mode", /if \(graphMode\) continue;\s*\n\s*if \(empty\) return \{ status: "stopped"/.test(runner));
 check("the connections are read in a query of their own, not FLOW_COLUMNS", /loadEdges\(ctx\.flow\.id, ctx\.flow\.user_id\)/.test(runner) && !/FLOW_COLUMNS = "[^"]*edges/.test(readFileSync("src/lib/automations/flow-access.ts", "utf8")));
 
+console.log("\n== 8. the canvas draws, deletes and moves — and says so to the server ==");
+const canvas = readFileSync("src/components/automations/flow-canvas.tsx", "utf8").replace(/\/\/.*$/gm, "");
+const shell = readFileSync("src/components/automations/automation-shell.tsx", "utf8").replace(/\/\/.*$/gm, "");
+check("a drawn line is added to the WHOLE current set (the chain, when nothing is saved)", /const currentEdges = graphEdges && graphEdges\.length > 0 \? graphEdges : deriveEdgesFromList\(boxes\);/.test(canvas) && /onGraphChange\(\{ edges: \[\.\.\.currentEdges, \{ id:/.test(canvas));
+check("a deleted line is taken out of that set", /onGraphChange\(\{ edges: currentEdges\.filter\(\(e\) => !ids\.has\(e\.id\)\) \}\)/.test(canvas));
+check("moving a card keeps every position", /layout\[n\.id\] = \{ x: n\.position\.x, y: n\.position\.y \}/.test(canvas) && /onNodeDragStop=\{onNodeDragStop\}/.test(canvas));
+check("the canvas can connect only when it was given a way to save", /nodesConnectable=\{Boolean\(onGraphChange\)\}/.test(canvas));
+check("the card does not clip its own round ports (overflow hidden made them ungrabbable)", !/position: "relative", overflow: "hidden",\s*transition/.test(canvas));
+check("the screen gives the canvas a way to save ONLY behind automation-canvas-cards", /onGraphChange=\{canvasCards \? \(patch\) =>/.test(shell));
+check("a reply without connections keeps the ones on the screen", /if \(!\("edges" in incoming\)\)/.test(shell));
+const patchRoute = readFileSync("src/app/api/automations/flows/[id]/route.ts", "utf8").replace(/\/\/.*$/gm, "");
+check("PATCH takes connections and positions only behind automation-canvas-cards", /body\.edges !== undefined \|\| body\.layout !== undefined\) \{\s*if \(!\(await isFeatureOn\("automation-canvas-cards", user\)\)\) return refuse\("not_enabled", 403\)/.test(patchRoute));
+check("PATCH checks them against the boxes the flow will have", /validateEdges\(body\.edges, boxIds\)/.test(patchRoute) && /validateLayout\(body\.layout, boxIds\)/.test(patchRoute));
+check("connections follow a box edit", /reconcileStoredEdges\(id, user\.id, before\.boxes, verdict\.boxes\)/.test(patchRoute));
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

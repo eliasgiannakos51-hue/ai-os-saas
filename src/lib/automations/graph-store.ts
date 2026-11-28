@@ -13,13 +13,25 @@ import { reconcileEdges } from "@/lib/automations/graph-edit";
  * missing column, or any read problem, answers null, and null means "a plain
  * chain": the flow runs and draws as it always did.
  */
-export async function loadEdges(flowId: string, userId: string): Promise<unknown> {
-  const { data, error } = await createAdminClient().from("automation_flows").select("edges").eq("id", flowId).eq("user_id", userId).maybeSingle();
+export async function loadGraphColumns(flowId: string, userId: string): Promise<{ edges: unknown; layout: unknown } | null> {
+  const { data, error } = await createAdminClient().from("automation_flows").select("edges, layout").eq("id", flowId).eq("user_id", userId).maybeSingle();
   if (error) {
-    if (!isColumnMissing(error)) logApiError("automations:graph", error, { stage: "edges", flowId });
+    if (!isColumnMissing(error)) logApiError("automations:graph", error, { stage: "columns", flowId });
     return null;
   }
-  return (data as { edges?: unknown } | null)?.edges ?? null;
+  const row = data as { edges?: unknown; layout?: unknown } | null;
+  return row ? { edges: row.edges ?? null, layout: row.layout ?? null } : null;
+}
+
+export async function loadEdges(flowId: string, userId: string): Promise<unknown> {
+  return (await loadGraphColumns(flowId, userId))?.edges ?? null;
+}
+
+/** A flow row for the screen with its connections and positions added, so the canvas that just saved them keeps them. */
+export async function withGraph<T extends object>(row: T | null, flowId: string, userId: string): Promise<T | null> {
+  if (!row) return row;
+  const graph = await loadGraphColumns(flowId, userId);
+  return graph ? { ...row, ...graph } : row;
 }
 
 /**

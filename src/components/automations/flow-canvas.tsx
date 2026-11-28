@@ -509,11 +509,55 @@ const NOTE_OFFSET_Y = 250; // sticky notes go below the main flow
 
 const BRANCH_KINDS = new Set(["condition", "switch", "filter", "error_handler"]);
 
+/**
+ * Tree layout from the edges, or null when the flow is a straight line.
+ * The column of a box is the longest path to it from a box nothing points
+ * at; boxes in one column are stacked, centred on the main line.
+ */
+function treeLayout(ids: string[], edges: FlowEdge[] | null): Map<string, { x: number; y: number }> | null {
+  if (!edges || edges.length === 0) return null;
+  const known = new Set(ids);
+  const use = edges.filter((e) => known.has(e.from) && known.has(e.to) && e.from !== e.to);
+  const outCount = new Map<string, number>();
+  const inCount = new Map<string, number>();
+  for (const e of use) {
+    outCount.set(e.from, (outCount.get(e.from) ?? 0) + 1);
+    inCount.set(e.to, (inCount.get(e.to) ?? 0) + 1);
+  }
+  const branches = [...outCount.values(), ...inCount.values()].some((n) => n > 1);
+  if (!branches) return null;
+  const depth = new Map<string, number>(ids.map((id) => [id, 0]));
+  // Relax at most ids.length times: a loop back-edge cannot spin forever.
+  for (let pass = 0; pass < ids.length; pass++) {
+    let moved = false;
+    for (const e of use) {
+      const d = (depth.get(e.from) ?? 0) + 1;
+      if (d > (depth.get(e.to) ?? 0) && d < ids.length) { depth.set(e.to, d); moved = true; }
+    }
+    if (!moved) break;
+  }
+  const columns = new Map<number, string[]>();
+  for (const id of ids) {
+    const d = depth.get(id) ?? 0;
+    columns.set(d, [...(columns.get(d) ?? []), id]);
+  }
+  const out = new Map<string, { x: number; y: number }>();
+  for (const [d, members] of columns) {
+    members.forEach((id, i) => out.set(id, { x: d * X_STEP, y: CENTER_Y + Math.round((i - (members.length - 1) / 2) * Y_STEP) }));
+  }
+  return out;
+}
+
 function boxesToNodes(
   boxes: Box[], kindNames: Record<string, string>,
   describe: (b: Box) => string, progress: RunProgress | null,
   savedLayout: Record<string, NodePosition> | null,
+  graphEdges: FlowEdge[] | null = null,
 ): Node[] {
+  // An empty sticky note says nothing; it is not drawn (owner, 2026-11-28:
+  // ten blank yellow squares under «Daily Mega Pipeline»). A note with
+  // words stays.
+  boxes = boxes.filter((b) => !(b.kind === "note" && !b.text.trim()));
   if (boxes.length === 0) return [];
 
   // Separate notes from workflow boxes
@@ -553,6 +597,16 @@ function boxesToNodes(
     if (prevIsBranch) branchY = Math.round(Y_STEP * 0.5);
     else if (isMerge) branchY = 0;
     positions.set(box.id, { x: col * X_STEP, y: CENTER_Y + row * ROW_STEP + branchY });
+  }
+
+  // A flow whose edges really branch or join is laid out as a tree: one
+  // column per step from the start, the parallel branches stacked in that
+  // column — the n8n picture. A straight line keeps the line above.
+  const tree = treeLayout(workflowBoxes.map((b) => b.id), graphEdges);
+  if (tree) for (const box of workflowBoxes) {
+    if (savedLayout?.[box.id]) continue;
+    const at = tree.get(box.id);
+    if (at) positions.set(box.id, at);
   }
 
   // Place note sticky notes below the flow
@@ -642,7 +696,7 @@ function FlowCanvasInner({
   const describe = useDescribe();
 
   const { initialNodes, initialEdges } = useMemo(() => {
-    const nodes = boxesToNodes(boxes, kindNames, describe, progress ?? null, savedLayout ?? null);
+    const nodes = boxesToNodes(boxes, kindNames, describe, progress ?? null, savedLayout ?? null, graphEdges ?? null);
     const posArr = nodes.map((n) => n.position);
     if (onAdd) {
       const lastPos = nodes.length > 0 ? nodes[nodes.length - 1].position : { x: 0, y: 0 };

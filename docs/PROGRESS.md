@@ -13202,3 +13202,8 @@ After #532 the owner's screenshot showed the wrapped rows but the view still ope
 ### 2026-11-28 (fix/canvas-one-line-n8n) — back to one line, looked at in a browser this time
 
 The wrapped rows of #532 were a mistake: the return edge ran under the labels and the canvas no longer looked like n8n. `WRAP_COLS` is 1000 again (one line, panned), the first view fits `OPEN_NODES` (9) cards, the input handle is a round dot like the output, and the stray orange «→» beside Switch is gone. Seen, for once: a throwaway esbuild bundle of `FlowCanvasView` with a stubbed `next-intl`, 113 and 12 mock boxes, Chromium screenshots (not committed; the real page behind sign-in was not seen). `npm run gates` exit 0, 2026-11-28.
+
+### 2026-11-28 (feat/canvas-tree-layout) — branches are drawn as a tree; empty notes are not drawn
+
+`flow-canvas.tsx`: `treeLayout()` places a flow whose edges really branch or join one column per step with the parallel branches stacked; a straight line is unchanged; saved positions still win; blank sticky notes are not drawn. Seen in a throwaway esbuild bundle (Chromium screenshot, start → 3 → join → 2 → join → 1), not on the real page.
+**What is still NOT there, measured 2026-11-28 by grep:** nothing in `src/` writes `automation_flows.edges` — no route saves it, no template carries it, and the canvas has no `onConnect`. So no person can make a branch yet; the runner (`pickNextBoxes`) already follows several outgoing edges, Merge is still «SOON». Next: save edges (route + undo), `onConnect`/delete on the canvas, a branching template.

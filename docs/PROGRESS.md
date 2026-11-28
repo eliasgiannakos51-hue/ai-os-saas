@@ -13190,3 +13190,7 @@ deny-all RLS), 4 lib (`connect.ts`, `products.ts`, `checkout.ts`,
 Measured 2026-11-28 from the run logs of run 46028196840 and by running the same mutation suites on a checkout of origin/main:
 - `schema-canaries.mutation.mjs` was ours: two new migrations pushed `20261108000000_pending_deletions.sql` out of the newest-12 window, so two mutants named a file outside it. Re-anchored to `20261126100000_automation_run_step_outputs.sql`. It still prints a different one-mutant miss on some runs (red with an empty message); not explained.
 - Red on origin/main too, not touched here: `gate-independence`, `integrations-copy`, `tool-shell`, `ionexa-payments` (6 mutants missed), and the `routes-smoke` browser step (the `site-design` button is not visible). `chat-opens-tools` has a red itest baseline (needs a database) and `voice-conversation` was not reproduced locally (9 of 10).
+
+### 2026-11-28 (fix/canvas-wrap-rows) — a long flow is rows, not one line
+
+The owner's screenshot of «Daily Mega Pipeline» (113 nodes) showed the canvas opening in the middle of one ~18 000 px line at a zoom where nothing could be read. `flow-canvas.tsx` now wraps the auto-layout every `WRAP_COLS` (8) cards, and opens on the first row (`onInit` → `fitView` on the first nine nodes) instead of fitting all of them. Flows with a saved layout keep their positions. Not looked at in a browser: this is checked by `npm run gates` only (exit 0, 2026-11-28).

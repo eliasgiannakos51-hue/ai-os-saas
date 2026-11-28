@@ -3810,7 +3810,27 @@
         "clickup_tasks": "Tâches ClickUp",
         "stripe_payments": "Paiements Stripe",
         "typeform_responses": "Réponses Typeform",
-        "google_forms": "Réponses Google Forms"
+        "google_forms": "Réponses Google Forms",
+        "salesforce_records": "Enregistrements Salesforce",
+        "pipedrive_deals": "Affaires Pipedrive",
+        "zoho_records": "Enregistrements Zoho CRM",
+        "monday_items": "Éléments Monday.com",
+        "linear_issues": "Tickets d'incident Linear",
+        "baserow_rows": "Lignes Baserow",
+        "mysql_query": "Requête MySQL",
+        "postgres_query": "Requête PostgreSQL",
+        "mongodb_query": "Requête MongoDB",
+        "elasticsearch_query": "Requête Elasticsearch",
+        "bigquery_query": "Requête BigQuery",
+        "dropbox_files": "Fichiers Dropbox",
+        "onedrive_files": "Fichiers OneDrive",
+        "box_files": "Fichiers Box",
+        "zendesk_tickets": "Tickets Zendesk",
+        "intercom_conversations": "Conversations Intercom",
+        "freshdesk_tickets": "Tickets Freshdesk",
+        "google_analytics": "Données Google Analytics",
+        "mixpanel_events": "Événements Mixpanel",
+        "woocommerce_orders": "Commandes WooCommerce"
       },
       "condition": "Si quelque chose a été trouvé, continuer",
       "conditionElse": "sinon : s’arrête ici, sans frais",
@@ -3862,7 +3882,32 @@
         "supabase_insert": "Insère dans Supabase",
         "redis_set": "Définit clé Redis",
         "mqtt_publish": "Publie message MQTT",
-        "s3_upload": "Téléverse sur S3"
+        "s3_upload": "Téléverse sur S3",
+        "salesforce_create": "Crée dans Salesforce",
+        "pipedrive_create": "Crée dans Pipedrive",
+        "zoho_create": "Crée dans Zoho CRM",
+        "monday_create": "Crée un élément dans Monday.com",
+        "linear_create": "Crée un incident dans Linear",
+        "baserow_create": "Crée une ligne dans Baserow",
+        "mysql_insert": "Insère dans MySQL",
+        "postgres_insert": "Insère dans PostgreSQL",
+        "mongodb_insert": "Insère dans MongoDB",
+        "elasticsearch_index": "Indexe dans Elasticsearch",
+        "bigquery_insert": "Insère dans BigQuery",
+        "dropbox_upload": "Téléverse vers Dropbox",
+        "onedrive_upload": "Téléverse vers OneDrive",
+        "box_upload": "Téléverse vers Box",
+        "zendesk_create": "Crée un ticket dans Zendesk",
+        "intercom_send": "Envoie via Intercom",
+        "freshdesk_create": "Crée un ticket dans Freshdesk",
+        "teams_send": "Envoie à Microsoft Teams",
+        "google_chat_send": "Envoie à Google Chat",
+        "woocommerce_update": "Met à jour WooCommerce",
+        "paypal_send": "Envoie via PayPal",
+        "quickbooks_create": "Crée dans QuickBooks",
+        "xero_create": "Crée dans Xero",
+        "deepl_translate": "Traduit avec DeepL",
+        "openai_generate": "Génère avec OpenAI"
       },
       "needsConnection": "Besoin d’une connexion : {name}",
       "connect": "Connecter",
@@ -4020,7 +4065,10 @@
           "ecommerce": "E-commerce",
           "support": "Support client",
           "marketing": "Marketing de contenu",
-          "sales": "Pipeline commercial"
+          "sales": "Pipeline commercial",
+          "data": "Données",
+          "operations": "Opérations",
+          "monitoring": "Surveillance"
         },
         "finance_daily": {
           "name": "Résumé financier chaque matin",
@@ -4061,6 +4109,56 @@
           "name": "Scoring hebdomadaire des leads",
           "description": "Chaque lundi : évalue tes contacts HubSpot et mets-les à jour.",
           "instruction": "Évalue chaque contact selon ses données d'engagement. Attribue un score 1-100 et une catégorie (chaud/tiède/froid). Liste les 5 meilleurs leads à suivre cette semaine."
+        },
+        "data_pipeline": {
+          "name": "Flux de données quotidien",
+          "description": "Chaque jour à 06 h 00 : lit une page web, nettoie et trie les éléments, les résume et envoie le résultat dans une feuille et sur Slack.",
+          "instruction": "Résume les éléments ci-dessous en cinq lignes courtes : ce qui est nouveau, ce qui a changé et ce qui demande de l'attention. Utilise uniquement les données."
+        },
+        "customer_onboarding": {
+          "name": "Accueil d'un nouveau client",
+          "description": "Quand un nouveau client arrive : extrait ses informations, rédige un message de bienvenue, l'envoie par e-mail, crée une tâche et met à jour le CRM.",
+          "instruction": "Rédige un court message de bienvenue chaleureux pour ce nouveau client, avec uniquement les informations ci-dessous. Mentionne la prochaine étape."
+        },
+        "social_monitor": {
+          "name": "Veille des mentions",
+          "description": "Chaque jour à 09 h 00 : lit les mentions récentes, évalue le sentiment, les classe par catégorie et envoie les importantes sur Slack.",
+          "instruction": "Résume les mentions du jour : ce qu'on apprécie, ce dont on se plaint et celles qui demandent une réponse. Utilise uniquement les mentions ci-dessous."
+        },
+        "invoice_processor": {
+          "name": "Traitement des factures",
+          "description": "Quand un e-mail de facture arrive : extrait fournisseur, montant et date, la vérifie, l'ajoute à votre feuille et à la comptabilité, et prévient l'équipe.",
+          "instruction": "Vérifie les données de facture ci-dessous : indique en deux lignes courtes si quelque chose manque ou semble faux (montant, date, fournisseur)."
+        },
+        "competitor_tracker": {
+          "name": "Veille concurrentielle",
+          "description": "Chaque jour à 07 h 30 : lit la page d'un concurrent, repère ce qui a changé et vous envoie une courte note par e-mail.",
+          "instruction": "Décris en trois lignes courtes ce qui a changé sur cette page par rapport à avant et pourquoi cela peut compter. Utilise uniquement le texte ci-dessous."
+        },
+        "report_generator": {
+          "name": "Rapport hebdomadaire",
+          "description": "Chaque lundi à 08 h 00 : lit votre feuille, additionne les chiffres, rédige l'analyse et l'envoie en PDF par e-mail, sur Drive et sur Slack.",
+          "instruction": "Rédige un court rapport hebdomadaire à partir des chiffres ci-dessous : les totaux, ce qui a le plus bougé et un point à surveiller. Utilise uniquement les chiffres fournis."
+        },
+        "webhook_processor": {
+          "name": "Traitement de webhooks",
+          "description": "Quand un autre système envoie un événement : extrait les champs, rédige une courte note, l'enregistre dans votre base, répond à l'expéditeur et prévient Slack.",
+          "instruction": "Rédige une phrase claire disant ce qu'est cet événement et ce qu'il faut éventuellement faire. Utilise uniquement les données ci-dessous."
+        },
+        "crm_sync": {
+          "name": "Synchronisation CRM",
+          "description": "Chaque jour à 06 h 30 : trouve les nouveaux contacts, retire les doublons, rédige une courte note pour chacun et met à jour votre CRM.",
+          "instruction": "Pour chaque nouveau contact ci-dessous, écris une ligne disant qui il est et quelle devrait être la prochaine étape. Utilise uniquement les données fournies."
+        },
+        "content_pipeline": {
+          "name": "Flux de contenu",
+          "description": "Chaque jour à 10 h 00 : lit un flux, choisit les meilleurs éléments, rédige des publications pour LinkedIn, X et Facebook et attend votre accord avant de publier.",
+          "instruction": "Rédige une publication courte et claire sur l'élément le plus intéressant ci-dessous, sur un ton amical. N'invente aucun fait."
+        },
+        "alert_system": {
+          "name": "Alertes de disponibilité",
+          "description": "Chaque nuit : vérifie une adresse web et, si quelque chose cloche, évalue sa gravité, vous alerte sur Slack et par e-mail et crée une tâche.",
+          "instruction": "Dis en deux lignes courtes ce qui semble anormal dans la vérification ci-dessous et son degré d'urgence. Utilise uniquement les données fournies."
         }
       },
       "timeSaved": {
@@ -4100,6 +4198,43 @@
           "socialPost": "Chaque jour à 12h, lis les dernières actualités RSS et crée un post pour les réseaux sociaux"
         },
         "paste": "Collez n'importe quoi"
+      },
+      "nodeEdit": {
+        "settings": "Réglages",
+        "transformInstruction": "Instruction de transformation",
+        "noteText": "Texte de la note",
+        "onError": "En cas d'erreur",
+        "errContinue": "Continuer",
+        "errStop": "Arrêter le flux",
+        "errRetry": "Réessayer",
+        "retryCount": "Nombre de tentatives",
+        "retryDelay": "Délai entre tentatives (secondes)",
+        "maxIterations": "Itérations maximales",
+        "batchSize": "Taille du lot",
+        "mergeMode": "Mode de fusion",
+        "chooseBranch": "Choisir une branche",
+        "maxItems": "Éléments maximum",
+        "dedupeField": "Dédoublonner par champ",
+        "routeField": "Router par champ",
+        "findNew": "Trouver les nouveaux éléments",
+        "findRemoved": "Trouver les éléments supprimés",
+        "findChanged": "Trouver les éléments modifiés",
+        "add": "Ajouter",
+        "attrOptional": "Attribut (facultatif)",
+        "categories": "Catégories (une par ligne)",
+        "sentimentInfo": "Analyse le sentiment du texte. Renvoie positif, négatif ou neutre.",
+        "fieldsToExtract": "Champs à extraire (un par ligne)",
+        "statusCode": "Code d'état",
+        "responseBody": "Corps de la réponse",
+        "duplicate": "Dupliquer",
+        "runHint": "Appuyez sur « Exécuter maintenant » ou « Essayer sans envoyer » ci-dessus",
+        "notePlaceholder": "Ajoutez une note sur cette partie du flux",
+        "transformPlaceholder": "Extraire le nom, l'e-mail et le téléphone de chaque élément",
+        "canvasSearch": "Rechercher des nœuds...",
+        "canvasNone": "Aucun nœud trouvé",
+        "canvasTidy": "Ranger",
+        "canvasKeys": "Suppr · Ctrl+D · 1 : ajuster · 0 : 100 %",
+        "conditionHint": "p. ex. les données contiennent « urgent »"
       }
     },
     "flows": {

@@ -145,6 +145,15 @@ export const CONNECT_AT: Record<string, string> = {
  * `iconText` its foreground, `label` the kind label text colour.
  * The card itself is always the same neutral bg-panel.
  */
+/** Syntax examples shown in input fields: code and selectors, the same in every language. */
+const SYNTAX_HINT = {
+  code: "return items.map(i => i.name);",
+  selector: "h1, .title, #main",
+  attribute: "href, src",
+  json: "{\"ok\": true}",
+  curl: "curl https://...",
+} as const;
+
 const NODE_THEME: Record<Box["kind"], { icon: string; iconText: string; label: string; bg: string; bgHover: string; text: string; border: string }> = {
   start:     { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
   read:      { icon: "#1e3a5f", iconText: "#60a5fa", label: "#60a5fa", bg: "#1e3a5f", bgHover: "#1e3a5f", text: "#fff", border: "#3b82f6" },
@@ -744,11 +753,9 @@ function zigzagRows(boxes: Box[]): Box[][] {
 function FlowCanvas({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative overflow-hidden rounded-xl px-4 py-6"
+      className="relative overflow-hidden rounded-card px-4 py-6"
       style={{
         background: "rgb(var(--panel) / 0.4)",
-        backgroundImage: "radial-gradient(circle, rgb(var(--foreground) / 0.06) 1px, transparent 1px)",
-        backgroundSize: "16px 16px",
         border: "1px solid rgb(var(--border) / 0.3)",
         minHeight: 200,
       }}
@@ -810,19 +817,19 @@ export function BoxRow({
               data-testid="flow-box"
               data-kind={box.kind}
               data-state={progress ? state : undefined}
-              className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2 text-start transition-all"
+              className="flex w-full items-center gap-2.5 rounded-item bg-panel px-3 py-2 text-start transition-all"
               style={{
                 border: isChosen ? `2px solid ${theme.border}` : stateBorder ? `2px solid ${stateBorder}` : "1px solid rgb(var(--border) / 0.5)",
                 boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
               }}
             >
               <div className="relative shrink-0">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: theme.icon }}>
+                <div className="flex h-9 w-9 items-center justify-center rounded-item" style={{ background: theme.icon }}>
                   <span style={{ color: theme.iconText }}><BoxIconInner box={box} /></span>
                 </div>
-                {state === "done" && <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full" style={{ background: "#dcfce7", border: "1.5px solid #10b981" }}><Check className="h-2.5 w-2.5" style={{ color: "#10b981" }} aria-hidden="true" /></span>}
-                {state === "failed" && <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[7px] font-bold" style={{ background: "#fee2e2", border: "1.5px solid #ef4444", color: "#ef4444" }}>✕</span>}
-                {state === "active" && <span className="absolute -right-1 -top-1"><ThinkingIndicator size="sm" /><span className="sr-only">{t("runStatus.running")}</span></span>}
+                {state === "done" && <span className="absolute -end-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full" style={{ background: "#dcfce7", border: "1.5px solid #10b981" }}><Check className="h-2.5 w-2.5" style={{ color: "#10b981" }} aria-hidden="true" /></span>}
+                {state === "failed" && <span className="absolute -end-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[7px] font-bold" style={{ background: "#fee2e2", border: "1.5px solid #ef4444", color: "#ef4444" }}>✕</span>}
+                {state === "active" && <span className="absolute -end-1 -top-1"><ThinkingIndicator size="sm" /><span className="sr-only">{t("runStatus.running")}</span></span>}
               </div>
               <span className="min-w-0 flex-1">
                 <span className="block text-[9px] font-semibold uppercase tracking-wider" style={{ color: theme.label }}>{kind[box.kind]}</span>
@@ -856,7 +863,7 @@ export function BoxRow({
             <Plus className="h-4 w-4" aria-hidden="true" />
           </button>
           {addAt === -1 && (
-            <div className="absolute top-10 z-10 flex gap-1 rounded-lg bg-panel p-1.5 shadow-lg" style={{ border: "1px solid rgb(var(--border))" }}>
+            <div className="absolute top-10 z-10 flex gap-1 rounded-item bg-panel p-1.5" style={{ border: "1px solid rgb(var(--border))" }}>
               {ADD_KINDS.map((k) => {
                 const th = NODE_THEME[k];
                 return (
@@ -864,7 +871,7 @@ export function BoxRow({
                     key={k}
                     type="button"
                     onClick={() => { setAddAt(null); onAdd(boxes.length - 1, k); }}
-                    className="flex flex-col items-center gap-0.5 rounded-lg px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-panel-hover"
+                    className="flex flex-col items-center gap-0.5 rounded-item px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-panel-hover"
                     style={{ color: th.border }}
                   >
                     <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: th.icon, color: th.iconText }}>
@@ -939,10 +946,10 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
               <div
                 data-testid="flow-box"
                 data-kind={box.kind}
-                className="flex w-full items-center gap-2.5 rounded-lg bg-panel px-3 py-2"
+                className="flex w-full items-center gap-2.5 rounded-item bg-panel px-3 py-2"
                 style={{ border: "1px solid rgb(var(--border) / 0.5)", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: theme.icon }}>
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-item" style={{ background: theme.icon }}>
                   <span style={{ color: theme.iconText }}><BoxIconInner box={box} /></span>
                 </div>
                 <span className="min-w-0 flex-1">
@@ -974,11 +981,12 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
  */
 /** Render config fields for a box — n8n-style per-node settings. */
 function ConfigFields({ fields, config, onChange }: { fields: ConfigField[]; config: Record<string, string>; onChange: (cfg: Record<string, string>) => void }) {
+  const t = useTranslations("dashboard.automations");
   const fieldCls = "mt-1 block min-h-[44px] w-full rounded-item bg-panel px-3 text-sm text-foreground";
   const labelCls = "block text-xs text-muted";
   return (
     <div className="mt-3 space-y-2 border-t pt-3" style={{ borderColor: "rgb(var(--border) / 0.3)" }}>
-      <p className="text-[10px] font-bold uppercase tracking-wider text-muted">⚙ Settings</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted">⚙ {t("nodeEdit.settings")}</p>
       {fields.map((f) => (
         <label key={f.key} className={labelCls}>
           {f.label}{f.required && <span className="text-danger"> *</span>}
@@ -1126,7 +1134,7 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
     body = (
       <label className={label}>
         Expression
-        <textarea className={`${field} min-h-[66px] py-2`} maxLength={MAX_INSTRUCTION_CHARS} value={draft.expression} onChange={(e) => setDraft({ ...draft, expression: e.target.value })} placeholder="e.g. data contains 'urgent'" />
+        <textarea className={`${field} min-h-[66px] py-2`} maxLength={MAX_INSTRUCTION_CHARS} value={draft.expression} onChange={(e) => setDraft({ ...draft, expression: e.target.value })} placeholder={t("nodeEdit.conditionHint")} />
       </label>
     );
   } else if (draft.kind === "code") {
@@ -1141,7 +1149,7 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
         </label>
         <label className={label}>
           Code
-          <textarea className={`${field} min-h-[120px] py-2 font-mono text-xs`} maxLength={5000} value={draft.code} onChange={(e) => setDraft({ ...draft, code: e.target.value })} placeholder="return items.map(i => i.name);" />
+          <textarea className={`${field} min-h-[120px] py-2 font-mono text-xs`} maxLength={5000} value={draft.code} onChange={(e) => setDraft({ ...draft, code: e.target.value })} placeholder={SYNTAX_HINT.code} />
         </label>
       </>
     );
@@ -1166,36 +1174,36 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
   } else if (draft.kind === "transform") {
     body = (
       <label className={label}>
-        Transform instruction
-        <textarea className={`${field} min-h-[88px] py-2`} maxLength={MAX_INSTRUCTION_CHARS} value={draft.instruction} onChange={(e) => setDraft({ ...draft, instruction: e.target.value })} placeholder="Extract name, email, and phone from each item" />
+        {t("nodeEdit.transformInstruction")}
+        <textarea className={`${field} min-h-[88px] py-2`} maxLength={MAX_INSTRUCTION_CHARS} value={draft.instruction} onChange={(e) => setDraft({ ...draft, instruction: e.target.value })} placeholder={t("nodeEdit.transformPlaceholder")} />
       </label>
     );
   } else if (draft.kind === "note") {
     body = (
       <label className={label}>
-        Note text
-        <textarea className={`${field} min-h-[66px] py-2`} maxLength={500} value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} placeholder="Add a note about this part of the workflow" />
+        {t("nodeEdit.noteText")}
+        <textarea className={`${field} min-h-[66px] py-2`} maxLength={500} value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} placeholder={t("nodeEdit.notePlaceholder")} />
       </label>
     );
   } else if (draft.kind === "error_handler") {
     body = (
       <>
         <label className={label}>
-          On error
+          {t("nodeEdit.onError")}
           <select className={field} value={draft.fallbackAction} onChange={(e) => setDraft({ ...draft, fallbackAction: e.target.value as "continue" | "stop" | "retry" })}>
-            <option value="continue">Continue</option>
-            <option value="stop">Stop workflow</option>
-            <option value="retry">Retry</option>
+            <option value="continue">{t("nodeEdit.errContinue")}</option>
+            <option value="stop">{t("nodeEdit.errStop")}</option>
+            <option value="retry">{t("nodeEdit.errRetry")}</option>
           </select>
         </label>
         {draft.fallbackAction === "retry" && (
           <>
             <label className={label}>
-              Retry count
+              {t("nodeEdit.retryCount")}
               <input type="number" className={field} min={1} max={5} value={draft.retryCount ?? 3} onChange={(e) => setDraft({ ...draft, retryCount: Number(e.target.value) })} />
             </label>
             <label className={label}>
-              Retry delay (seconds)
+              {t("nodeEdit.retryDelay")}
               <input type="number" className={field} min={1} max={300} value={draft.retryDelay ?? 10} onChange={(e) => setDraft({ ...draft, retryDelay: Number(e.target.value) })} />
             </label>
           </>
@@ -1205,25 +1213,25 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
   } else if (draft.kind === "loop") {
     body = (
       <label className={label}>
-        Max iterations
+        {t("nodeEdit.maxIterations")}
         <input type="number" className={field} min={1} max={100} value={draft.maxIterations} onChange={(e) => setDraft({ ...draft, maxIterations: Number(e.target.value) })} />
       </label>
     );
   } else if (draft.kind === "split") {
     body = (
       <label className={label}>
-        Batch size
+        {t("nodeEdit.batchSize")}
         <input type="number" className={field} min={1} max={1000} value={draft.batchSize} onChange={(e) => setDraft({ ...draft, batchSize: Number(e.target.value) })} />
       </label>
     );
   } else if (draft.kind === "merge") {
     body = (
       <label className={label}>
-        Merge mode
+        {t("nodeEdit.mergeMode")}
         <select className={field} value={draft.mode} onChange={(e) => setDraft({ ...draft, mode: e.target.value as "append" | "combine" | "choose_branch" })}>
           <option value="append">Append</option>
           <option value="combine">Combine</option>
-          <option value="choose_branch">Choose branch</option>
+          <option value="choose_branch">{t("nodeEdit.chooseBranch")}</option>
         </select>
       </label>
     );
@@ -1252,9 +1260,9 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
       </>
     );
   } else if (draft.kind === "limit") {
-    body = <label className={label}>Max items<input type="number" className={field} min={1} max={10000} value={draft.maxItems} onChange={(e) => setDraft({ ...draft, maxItems: Number(e.target.value) })} /></label>;
+    body = <label className={label}>{t("nodeEdit.maxItems")}<input type="number" className={field} min={1} max={10000} value={draft.maxItems} onChange={(e) => setDraft({ ...draft, maxItems: Number(e.target.value) })} /></label>;
   } else if (draft.kind === "remove_duplicates") {
-    body = <label className={label}>Deduplicate by field<input type="text" className={field} value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="email" /></label>;
+    body = <label className={label}>{t("nodeEdit.dedupeField")}<input type="text" className={field} value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="email" /></label>;
   } else if (draft.kind === "summarize") {
     body = (
       <>
@@ -1263,15 +1271,15 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
       </>
     );
   } else if (draft.kind === "switch") {
-    body = <label className={label}>Route by field<input type="text" className={field} value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="status" /></label>;
+    body = <label className={label}>{t("nodeEdit.routeField")}<input type="text" className={field} value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="status" /></label>;
   } else if (draft.kind === "set") {
     body = <label className={label}>Assignments<textarea className={`${field} min-h-[66px] py-2`} value={draft.assignments.map(a => `${a.field}=${a.value}`).join("\n")} onChange={(e) => setDraft({ ...draft, assignments: e.target.value.split("\n").filter(Boolean).map(l => { const [f, ...v] = l.split("="); return { field: f?.trim() ?? "", value: v.join("=").trim() }; }).slice(0, 20) })} placeholder={"name=John\nemail=john@example.com"} /></label>;
   } else if (draft.kind === "compare") {
-    body = <label className={label}>Mode<select className={field} value={draft.mode} onChange={(e) => setDraft({ ...draft, mode: e.target.value as "find_new" | "find_removed" | "find_changed" })}><option value="find_new">Find new items</option><option value="find_removed">Find removed items</option><option value="find_changed">Find changed items</option></select></label>;
+    body = <label className={label}>Mode<select className={field} value={draft.mode} onChange={(e) => setDraft({ ...draft, mode: e.target.value as "find_new" | "find_removed" | "find_changed" })}><option value="find_new">{t("nodeEdit.findNew")}</option><option value="find_removed">{t("nodeEdit.findRemoved")}</option><option value="find_changed">{t("nodeEdit.findChanged")}</option></select></label>;
   } else if (draft.kind === "date_time") {
     body = (
       <>
-        <label className={label}>Operation<select className={field} value={draft.operation} onChange={(e) => setDraft({ ...draft, operation: e.target.value as "format" | "add" | "subtract" | "diff" })}><option value="format">Format</option><option value="add">Add</option><option value="subtract">Subtract</option><option value="diff">Difference</option></select></label>
+        <label className={label}>Operation<select className={field} value={draft.operation} onChange={(e) => setDraft({ ...draft, operation: e.target.value as "format" | "add" | "subtract" | "diff" })}><option value="format">Format</option><option value="add">{t("nodeEdit.add")}</option><option value="subtract">Subtract</option><option value="diff">Difference</option></select></label>
         {draft.operation === "format" && <label className={label}>Format<input type="text" className={field} value={draft.format ?? ""} onChange={(e) => setDraft({ ...draft, format: e.target.value })} placeholder="YYYY-MM-DD" /></label>}
         {(draft.operation === "add" || draft.operation === "subtract") && (
           <>
@@ -1284,25 +1292,25 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
   } else if (draft.kind === "html_extract") {
     body = (
       <>
-        <label className={label}>CSS Selector<input type="text" className={field} value={draft.selector} onChange={(e) => setDraft({ ...draft, selector: e.target.value })} placeholder="h1, .title, #main" /></label>
-        <label className={label}>Attribute (optional)<input type="text" className={field} value={draft.attribute ?? ""} onChange={(e) => setDraft({ ...draft, attribute: e.target.value || undefined })} placeholder="href, src" /></label>
+        <label className={label}>CSS Selector<input type="text" className={field} value={draft.selector} onChange={(e) => setDraft({ ...draft, selector: e.target.value })} placeholder={SYNTAX_HINT.selector} /></label>
+        <label className={label}>{t("nodeEdit.attrOptional")}<input type="text" className={field} value={draft.attribute ?? ""} onChange={(e) => setDraft({ ...draft, attribute: e.target.value || undefined })} placeholder={SYNTAX_HINT.attribute} /></label>
       </>
     );
   } else if (draft.kind === "text_classifier") {
-    body = <label className={label}>Categories (one per line)<textarea className={`${field} min-h-[66px] py-2`} value={draft.categories.join("\n")} onChange={(e) => setDraft({ ...draft, categories: e.target.value.split("\n").filter(Boolean).slice(0, 20) })} placeholder={"urgent\nnormal\nlow priority"} /></label>;
+    body = <label className={label}>{t("nodeEdit.categories")}<textarea className={`${field} min-h-[66px] py-2`} value={draft.categories.join("\n")} onChange={(e) => setDraft({ ...draft, categories: e.target.value.split("\n").filter(Boolean).slice(0, 20) })} placeholder={"urgent\nnormal\nlow priority"} /></label>;
   } else if (draft.kind === "sentiment") {
-    body = <p className="text-xs text-muted">Analyzes the sentiment of the input text. Returns positive, negative, or neutral.</p>;
+    body = <p className="text-xs text-muted">{t("nodeEdit.sentimentInfo")}</p>;
   } else if (draft.kind === "extract_info") {
-    body = <label className={label}>Fields to extract (one per line)<textarea className={`${field} min-h-[66px] py-2`} value={draft.fields.join("\n")} onChange={(e) => setDraft({ ...draft, fields: e.target.value.split("\n").filter(Boolean).slice(0, 20) })} placeholder={"name\nemail\nphone"} /></label>;
+    body = <label className={label}>{t("nodeEdit.fieldsToExtract")}<textarea className={`${field} min-h-[66px] py-2`} value={draft.fields.join("\n")} onChange={(e) => setDraft({ ...draft, fields: e.target.value.split("\n").filter(Boolean).slice(0, 20) })} placeholder={"name\nemail\nphone"} /></label>;
   } else if (draft.kind === "respond_webhook") {
     body = (
       <>
-        <label className={label}>Status code<input type="number" className={field} min={100} max={599} value={draft.statusCode} onChange={(e) => setDraft({ ...draft, statusCode: Number(e.target.value) })} /></label>
-        <label className={label}>Response body<textarea className={`${field} min-h-[44px] py-2`} value={draft.body ?? ""} onChange={(e) => setDraft({ ...draft, body: e.target.value })} placeholder='{"ok": true}' /></label>
+        <label className={label}>{t("nodeEdit.statusCode")}<input type="number" className={field} min={100} max={599} value={draft.statusCode} onChange={(e) => setDraft({ ...draft, statusCode: Number(e.target.value) })} /></label>
+        <label className={label}>{t("nodeEdit.responseBody")}<textarea className={`${field} min-h-[44px] py-2`} value={draft.body ?? ""} onChange={(e) => setDraft({ ...draft, body: e.target.value })} placeholder={SYNTAX_HINT.json} /></label>
       </>
     );
   } else if (draft.kind === "execute_command") {
-    body = <label className={label}>Command<input type="text" className={field} value={draft.command} onChange={(e) => setDraft({ ...draft, command: e.target.value })} placeholder="curl https://..." /></label>;
+    body = <label className={label}>Command<input type="text" className={field} value={draft.command} onChange={(e) => setDraft({ ...draft, command: e.target.value })} placeholder={SYNTAX_HINT.curl} /></label>;
   } else if (draft.kind === "action") {
     const act = draft;
     body = (
@@ -1329,10 +1337,10 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
   const editable = draft.kind !== "condition" && draft.kind !== "approval" && draft.kind !== "note";
   const theme = NODE_THEME[box.kind];
   return (
-    <div data-testid="flow-box-editor" className="space-y-3 rounded-xl p-4" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>
+    <div data-testid="flow-box-editor" className="space-y-3 rounded-card p-4" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>
       {/* Header with node colour accent */}
       <div className="flex items-center gap-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-md text-white" style={{ background: theme.bg }}>
+        <span className="flex h-6 w-6 items-center justify-center rounded-item" style={{ background: theme.bg, color: theme.text }}>
           <BoxIconInner box={box} />
         </span>
         <p className="flex-1 text-xs font-bold" style={{ color: theme.border }}>{t("edit.title")}</p>
@@ -1341,24 +1349,24 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
           <button
             type="button"
             onClick={onDuplicate}
-            className="flex h-7 items-center gap-1 rounded-md px-2 text-[10px] text-muted transition-colors hover:bg-panel hover:text-foreground"
+            className="flex h-7 items-center gap-1 rounded-item px-2 text-[10px] text-muted transition-colors hover:bg-panel hover:text-foreground"
             style={{ border: "1px solid rgb(var(--border) / 0.3)" }}
           >
             <Layers className="h-3 w-3" aria-hidden="true" />
-            Duplicate
+            {t("nodeEdit.duplicate")}
           </button>
         )}
       </div>
       {/* n8n NDV-style tabs: Settings | Output */}
       {lastOutput ? (
         <div>
-          <div className="flex gap-0.5 rounded-lg p-0.5" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.2)" }}>
-            <button type="button" onClick={() => setTab("settings")} className={`rounded-md px-3 py-1 text-[10px] font-medium transition-colors ${tab === "settings" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>⚙ Settings</button>
-            <button type="button" onClick={() => setTab("output")} className={`rounded-md px-3 py-1 text-[10px] font-medium transition-colors ${tab === "output" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>📄 Output</button>
+          <div className="flex gap-0.5 rounded-item p-0.5" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.2)" }}>
+            <button type="button" onClick={() => setTab("settings")} className={`rounded-item px-3 py-1 text-[10px] font-medium transition-colors ${tab === "settings" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>⚙ {t("nodeEdit.settings")}</button>
+            <button type="button" onClick={() => setTab("output")} className={`rounded-item px-3 py-1 text-[10px] font-medium transition-colors ${tab === "output" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>📄 Output</button>
           </div>
           {tab === "settings" ? body : (
             <div className="mt-2">
-              <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-panel p-3 text-[11px] text-foreground" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
+              <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-item bg-panel p-3 text-[11px] text-foreground" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
                 {lastOutput}
               </pre>
             </div>
@@ -1373,8 +1381,8 @@ export function BoxEditor({ box, saving, onSave, onDuplicate, lastOutput }: {
             disabled={saving || JSON.stringify(draft) === JSON.stringify(box)}
             onClick={() => onSave(draft)}
             data-testid="flow-box-save"
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-4 text-xs font-medium text-white disabled:opacity-60"
-            style={{ background: saving ? theme.bgHover : theme.bg }}
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item px-4 text-xs font-medium disabled:opacity-60"
+            style={{ background: saving ? theme.bgHover : theme.bg, color: theme.text }}
           >
             {saving ? <ThinkingIndicator size="sm" /> : <Check className="h-3.5 w-3.5" aria-hidden="true" />}
             {t("edit.save")}
@@ -1448,7 +1456,7 @@ export function RunHistory({
   if (runs.length === 0) return (
     <div className="flex flex-col items-center gap-2 py-4">
       <p className="text-xs text-muted">{t("historyEmpty")}</p>
-      <p className="text-[10px] text-muted/60">Press &quot;Run now&quot; or &quot;Try without sending&quot; above</p>
+      <p className="text-[10px] text-muted">{t("nodeEdit.runHint")}</p>
     </div>
   );
   return (
@@ -1457,7 +1465,7 @@ export function RunHistory({
         const expanded = open === run.id;
         const code = errorCode(run.error);
         return (
-          <li key={run.id} data-testid="flow-run" data-status={run.status} className="overflow-hidden rounded-lg" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
+          <li key={run.id} data-testid="flow-run" data-status={run.status} className="overflow-hidden rounded-item" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>
             <button
               type="button"
               onClick={() => setOpen(expanded ? null : run.id)}

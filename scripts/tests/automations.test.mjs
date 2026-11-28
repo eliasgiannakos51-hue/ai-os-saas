@@ -87,8 +87,9 @@ check("every way a row is not one is refused by name",
     reason([{ kind: "ai", instruction: "abc" }, { kind: "action", do: "notify" }]) === "no_start" &&
     reason([MORNING[1], MORNING[0], MORNING[3]]) === "start_not_first" &&
     reason([MORNING[0], { ...UPLOAD[0], id: "b9" }, MORNING[3]]) === "two_starts" &&
-    reason(MORNING.slice(0, 3)) === "no_action" &&
-    reason(Array.from({ length: 9 }, (_, i) => (i === 0 ? MORNING[0] : { id: `x${i}`, kind: "action", do: "notify" }))) === "too_many" &&
+    // An AI box counts as doing since 2026-11-24 (boxes.ts DOING_KINDS), so a start and a read are what has no action.
+    reason(MORNING.slice(0, 2)) === "no_action" &&
+    reason(Array.from({ length: boxes.MAX_BOXES + 1 }, (_, i) => (i === 0 ? MORNING[0] : { id: `x${i}`, kind: "action", do: "notify" }))) === "too_many" &&
     reason([MORNING[0], { kind: "action", do: "send_to_everyone" }]) === "bad_box" &&
     reason([MORNING[0], UPLOAD[1], MORNING[3]]) === "file_read_without_upload" &&
     reason([MORNING[0], { ...MORNING[3], id: "b1" }]) === "duplicate_id");
@@ -121,7 +122,7 @@ console.log("\n== 2. what the model said ==");
 // ---------------------------------------------------------------------
 check("a question is asked instead of guessing, even with boxes beside it",
   answers.readBuilt({ name: "x", boxes: MORNING, question: "Τι ώρα;", unsupported: "" }).kind === "question");
-check("an answer that is not a row is unusable, and says why", answers.readBuilt({ name: "x", boxes: MORNING.slice(0, 3), question: "" }).detail === "no_action" && answers.readBuilt(null).kind === "unusable");
+check("an answer that is not a row is unusable, and says why", answers.readBuilt({ name: "x", boxes: MORNING.slice(0, 2), question: "" }).detail === "no_action" && answers.readBuilt(null).kind === "unusable");
 const made = answers.readBuilt({ name: "  ", boxes: UPLOAD, question: "", unsupported: "Το Gmail δεν γίνεται ακόμα" });
 check("a row is kept, with a name and what could not be done", made.ok && made.name.length > 0 && made.unsupported === "Το Gmail δεν γίνεται ακόμα" && made.boxes.length === 4);
 const changed = answers.readChanged({ box: { id: "zz", kind: "start", when: "time", every: "day", at: "08:00" } }, boxes.readFlow(MORNING).boxes, "b1");
@@ -323,14 +324,17 @@ check("both words are on screen at once, and neither is ever shortened",
 // ONE VISUAL: BoxRow (n8n-style cards) is used in BOTH Simple and Pro.
 // FlowSteps still exists for template preview cards but the main flow
 // always shows BoxRow. The editor opens when you click a box in either mode.
-const boxRowCall = /<BoxRow boxes=\{(shown\.boxes)\}/.exec(shell);
+// Since «Clean UI» (2026-11-23) both levels draw the canvas, so the one call
+// that takes the boxes is <FlowCanvasView boxes={shown.boxes}> — the list view
+// (BoxRow, FlowSteps) is still the template gallery's and the tests below read it there.
+const boxRowCall = /<FlowCanvasView\s+boxes=\{(shown\.boxes)\}/.exec(shell);
 check("Simple and Pro are drawn from the same boxes, not two stores",
   Boolean(boxRowCall) && boxRowCall[1] === "shown.boxes");
 check("Simple shows EVERY step: it maps the array whole, with no filter and no cap",
   /boxes\.map\(\(box, i\) => \{/.test(flowBoxes.slice(flowBoxes.indexOf("export function FlowSteps"))) &&
   !/boxes\.(filter|slice)\(/.test(flowBoxes.slice(flowBoxes.indexOf("export function FlowSteps"), flowBoxes.indexOf("export function BoxEditor"))));
 check("Pro keeps the boxes AND the per-box editor it always had",
-  /chosenBox \?/.test(shell) && /<BoxEditor key=/.test(shell));
+  /chosenBox \?/.test(shell) && /<BoxEditor\s+key=/.test(shell));
 
 // WITHOUT THE SWITCH THE SCREEN IS WHAT IT WAS. `level` is Pro whenever
 // the reader does not have the flag, so a half-built Simple can never
@@ -358,8 +362,11 @@ check("the level is remembered in the browser alone — no column, no migration"
   /window\.localStorage\.setItem\("ionexa\.automationMode", next\)/.test(shell) &&
   !/mode/.test(readFileSync("src/lib/automations/flow-access.ts", "utf8").match(/FLOW_COLUMNS[^;]*/s)?.[0] ?? "") &&
   readdirSync("supabase/migrations").every((f) => f === "20261123000000_automation_mode.sql" || !/automation.*mode|mode.*automation/i.test(f)));
+// The editor opens in BOTH levels since 2026-11-23 (the person clicks a node
+// and edits it), so the chosen box is no longer tied to Pro; what stays is
+// that choosing Simple clears it and the box is looked up in the shown flow.
 check("leaving Pro clears the chosen box, so its editor cannot reopen under nothing",
-  /if \(next === "simple"\) setChosen\(null\);/.test(shell) && /const chosenBox = level === "pro" &&/.test(shell));
+  /if \(next === "simple"\) setChosen\(null\);/.test(shell) && /const chosenBox = shown && chosen \?/.test(shell));
 
 // A STEP THAT NEEDS A CONNECTION STILL SAYS SO IN SIMPLE. It is the reason
 // «Ενεργοποίηση» would do nothing, not mechanism to hide at this level.
@@ -385,8 +392,12 @@ console.log("\n== 10. «Όταν → Αν → Κάνε»: Simple says the senten
 // list reads top to bottom as one sentence. Presentation over the same
 // boxes: nothing stored changes.
 const KINDS = ["start", "read", "ai", "condition", "approval", "action"];
+// Six kinds when this was written, fifty-one since the node library of
+// 2026-11-24 — so the set is read off the type declarations, not pinned here.
+const declaredKinds = [...new Set([...code("src/lib/automations/boxes.ts").matchAll(/id: string; kind: "([a-z_]+)"/g)].map((m) => m[1]))];
 check("every kind of box has a part of the sentence, and no other key is there",
-  JSON.stringify(Object.keys(boxes.SENTENCE_PART).sort()) === JSON.stringify([...KINDS].sort()));
+  declaredKinds.length >= 6 && JSON.stringify(Object.keys(boxes.SENTENCE_PART).sort()) === JSON.stringify(declaredKinds.sort()) &&
+    Object.values(boxes.SENTENCE_PART).every((v) => ["when", "if", "do"].includes(v)));
 check("the start is «Όταν»; the condition and the approval are «Αν»; read, AI and action are «Κάνε»",
   boxes.SENTENCE_PART.start === "when" &&
     boxes.SENTENCE_PART.condition === "if" && boxes.SENTENCE_PART.approval === "if" &&
@@ -398,9 +409,10 @@ check("it is a way of saying the row, not part of it: a box read back carries no
     !/part/.test(code("src/lib/automations/flow-access.ts").match(/FLOW_COLUMNS = "[^"]*"/)?.[0] ?? "x"));
 const stepsBlock = flowBoxes.slice(flowBoxes.indexOf("export function FlowSteps"), flowBoxes.indexOf("export function BoxEditor"));
 check("Simple draws each step's part, from the box's own kind, before its sentence",
-  /data-part=\{partOf\(box\)\}/.test(stepsBlock) &&
-    /data-testid="flow-step-part"[\s\S]{0,400}\{part\[partOf\(box\)\]\}/.test(stepsBlock) &&
-    stepsBlock.indexOf("{part[partOf(box)]}") < stepsBlock.indexOf("{sentence(box)}"));
+  // The «Όταν / Αν / Κάνε» word was removed from the card with «Clean UI»; the
+  // card now carries the box's kind label above its sentence (SENTENCE_PART stays in boxes.ts).
+  /data-testid="flow-step-part"[\s\S]{0,400}\{kind\[box\.kind\]\}/.test(stepsBlock) &&
+    stepsBlock.indexOf("{kind[box.kind]}") < stepsBlock.indexOf("{sentence(box)}"));
 check("…the three words are literal keys, so the message slicer sees them",
   /const part: Record<SentencePart, string> = \{ when: t\("parts\.when"\), if: t\("parts\.if"\), do: t\("parts\.do"\) \};/.test(flowBoxes));
 for (const file of LOCALES) {
@@ -447,7 +459,9 @@ check("while its own press is in flight it follows the run that was NOT there be
 check("…and an approval follows the run it approved", progressLib.followedRun(history, { known: [], runId: "older" })?.id === "older");
 
 const runnerSrc = code("src/lib/automations/runner.ts");
-const progressFn = runnerSrc.slice(runnerSrc.indexOf("async function reportProgress"), runnerSrc.indexOf("export async function runFlow"));
+// reportProgress and nothing after it: other functions (pickNextBoxes, storeStepOutput) now sit between it and runFlow.
+const progressStart = runnerSrc.indexOf("async function reportProgress");
+const progressFn = runnerSrc.slice(progressStart, runnerSrc.indexOf("\n}\n", progressStart) + 3);
 check("the runner writes what it has done before each box it starts — the real state the canvas reads",
   /for \(let i = ctx\.resume\?\.at \?\? 0; i < boxes\.length; i\+\+\) \{\s*const box = boxes\[i\];\s*if \(steps\.length > 0\) await reportProgress\(ctx, steps\);\s*if \(box\.kind === "start"\)/.test(runnerSrc));
 check("…only onto the person's own row while it is still running, never bringing a closed run back",
@@ -459,12 +473,13 @@ check("the canvas is alive only behind the switch, and only in Pro",
 check("…it asks how the run is going only while one is going (or its own press is in flight), once a second",
   /const pollId = shown && open === "flow" && alive && \(\(watch && watch\.flowId === shown\.id\) \|\| isLive\(followed\)\) \? shown\.id : null;/.test(shell) &&
     /if \(!pollId\) return;/.test(shell) && /window\.setInterval\(tick, PROGRESS_POLL_MS\)/.test(shell) && /window\.clearInterval\(timer\)/.test(shell) && progressLib.PROGRESS_POLL_MS === 1000);
-check("…and the boxes get it", /<BoxRow boxes=\{shown\.boxes\}[^\n]{0,200}? progress=\{progress\} \/>/.test(shell));
+check("…and the boxes get it", /<FlowCanvasView\s+boxes=\{shown\.boxes\}[\s\S]{0,400}?progress=\{progress\}/.test(shell));
 const rowBlock = flowBoxes.slice(flowBoxes.indexOf("export function BoxRow"), flowBoxes.indexOf("export function FlowSteps"));
 check("without progress the row is drawn exactly as before: the short still line",
-  /\{i > 0 && \(progress[\s\S]{0,50}<FlowLine state=\{progress\.lines\[i - 1\] \?\? "idle"\}/.test(rowBlock) && /NodeConnector/.test(rowBlock));
+  /\{i > 0 && \(progress \? <FlowLine state=\{progress\.lines\[i - 1\] \?\? "idle"\} \/> : <VArrow \/>\)\}/.test(rowBlock));
 check("the failed box is marked in the danger colour, with the reason in words",
-  /state === "failed" \? "ring-1 ring-danger"/.test(rowBlock) && /data-testid="flow-failed" className="[^"]*text-danger"/.test(rowBlock) && /t\("failedHere", \{ reason: noteWords\(/.test(rowBlock));
+  // The red ✕ badge on the card (the ring-danger ring went with «Clean UI»), and the reason below it.
+  /state === "failed" && <span[^>]*>✕<\/span>/.test(rowBlock) && /data-testid="flow-failed" className="[^"]*text-danger"/.test(rowBlock) && /t\("failedHere", \{ reason: noteWords\(/.test(rowBlock));
 const css = readFileSync("src/app/globals.css", "utf8");
 const flowCss = css.slice(css.indexOf(".flow-line {"), css.indexOf("@media (prefers-reduced-motion: reduce) {\n  html:not([data-motion=\"full\"]) .flow-dot"));
 check("the lines are the palette's own: border when idle, the text colour when lit — never the signal",
@@ -479,14 +494,19 @@ check("reduced motion, asked for either way: no dots at all, and the active line
 console.log("\n== 12. ready-made automations, one press, then the person's own (2026-11-05) ==");
 // ---------------------------------------------------------------------
 const templates = await loadTs("src/lib/automations/templates.ts");
-check("six ready: finance, e-commerce, support, marketing, sales templates", templates.TEMPLATE_IDS.join() === "finance_daily,finance_weekly,ecommerce_daily,support_triage,content_repurpose,lead_enrich");
+// Six at the start (2026-11-05), sixteen since the node-library templates of
+// 2026-11-24: the list is pinned whole, so a «Σύντομα» id cannot slip into it.
+check("the ready templates are exactly these sixteen", templates.TEMPLATE_IDS.join() === "finance_daily,finance_weekly,ecommerce_daily,support_triage,content_repurpose,lead_enrich,data_pipeline,customer_onboarding,social_monitor,invoice_processor,competitor_tracker,report_generator,webhook_processor,crm_sync,content_pipeline,alert_system");
 for (const file of LOCALES) {
   const words = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.automations?.templates ?? {};
   for (const id of templates.TEMPLATE_IDS) {
     const w = words[id] ?? {};
     const flow = boxes.readFlow(templates.templateBoxes(id, w.instruction ?? ""));
     check(`${file} ${id}: a whole row with the reader's own words, as the route writes it`,
-      flow.ok && templates.templateFlow(id, w.instruction) !== null && flow.boxes.find((b) => b.kind === "ai")?.instruction === String(w.instruction).trim() &&
+      flow.ok && templates.templateFlow(id, w.instruction) !== null &&
+        // Only a template that has an AI box carries the reader's words in it;
+        // the node-library ones (data_pipeline, crm_sync …) are built from other boxes.
+        (!flow.boxes.some((b) => b.kind === "ai") || flow.boxes.find((b) => b.kind === "ai")?.instruction === String(w.instruction).trim()) &&
         [w.name, w.description].every((x) => typeof x === "string" && x.trim().length > 0) && w.name.length <= 60,
       JSON.stringify(flow));
   }

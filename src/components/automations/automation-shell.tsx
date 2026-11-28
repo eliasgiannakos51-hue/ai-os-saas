@@ -62,6 +62,8 @@ export function AutomationShell({
   initialSaid,
   simplePro = false,
   templates = false,
+  canvasCards = false,
+  groupsSubflows = false,
   initialMinutesSaved = null,
   initialDoneRuns = 0,
   initialModes = null,
@@ -95,6 +97,12 @@ export function AutomationShell({
    *  switch "automation-templates"): the «Έτοιμες αυτοματοποιήσεις»
    *  option under the field, and the gallery it opens. */
   templates?: boolean;
+  /** The switch "automation-canvas-cards" (read in app/dashboard/[module]/page.tsx):
+   *  closed, the canvas gets no saved edges and no saved positions and draws
+   *  from the order of the boxes, as before. */
+  canvasCards?: boolean;
+  /** The switch "automation-groups-subflows": closed, no group is drawn. */
+  groupsSubflows?: boolean;
   /** The minutes each automation saves, as typed — or null when the switch
    *  "automation-time-saved" is closed to this reader or the database has
    *  no such column yet (lib/automations/page-data.ts): then neither the
@@ -219,9 +227,7 @@ export function AutomationShell({
   // every box (lib/automations/runner.ts), and while the run is going this
   // screen reads them back once a second. When it is not going, nothing
   // is asked and nothing moves.
-  // Live run progress works in BOTH modes — the user should see which
-  // box is running regardless of Simple/Pro.
-  const alive = true;
+  const alive = simplePro && level === "pro";
   const shownRuns = shown ? runs.filter((r) => r.flowId === shown.id) : [];
   const followed = shown ? followedRun(shownRuns, watch && watch.flowId === shown.id ? watch : null) : null;
   const progress = shown && alive ? runProgress(shown.boxes, followed) : null;
@@ -619,9 +625,9 @@ export function AutomationShell({
                   onChoose={(id) => setChosen((c) => (c === id ? null : id))}
                   connected={connected}
                   progress={progress}
-                  graphEdges={shown.edges}
-                  savedLayout={shown.layout}
-                  groups={shown.groups}
+                  graphEdges={canvasCards ? shown.edges : null}
+                  savedLayout={canvasCards ? shown.layout : null}
+                  groups={groupsSubflows ? shown.groups : null}
                   onDelete={(boxId) => {
                     const boxes = shown.boxes.filter((b) => b.id !== boxId && b.kind !== "start" ? true : b.kind === "start");
                     if (boxes.length < 2) return;
@@ -889,25 +895,25 @@ export function AutomationShell({
                 {/* Row 1: START → READ → AI STEP */}
                 <div className="flex items-center justify-center gap-0">
                   {([
-                    { icon: <Zap className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.start"), bg: "#1e3a5f", color: "#60a5fa", hint: t("landing.tpl.scheduleReport") },
-                    { icon: <FileUp className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.read"), bg: "#1e3a5f", color: "#60a5fa", hint: t("landing.tpl.formSheet") },
-                    { icon: <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.ai"), bg: "#2d1b69", color: "#a78bfa", hint: t("landing.tpl.aiClassify") },
+                    { icon: <Zap className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.start"), bg: "rgb(var(--panel-hover))", color: "rgb(var(--foreground))", hint: t("landing.tpl.scheduleReport") },
+                    { icon: <FileUp className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.read"), bg: "rgb(var(--panel-hover))", color: "rgb(var(--foreground))", hint: t("landing.tpl.formSheet") },
+                    { icon: <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />, label: t("kinds.ai"), bg: "rgb(var(--panel-hover))", color: "rgb(var(--foreground))", hint: t("landing.tpl.aiClassify") },
                   ] as const).map((node, idx) => (
                     <div key={node.label} className="flex items-center">
                       {idx > 0 && (
                         <svg width="20" height="10" viewBox="0 0 20 10" aria-hidden="true">
-                          <circle cx="2" cy="5" r="2" fill="#374151" stroke="#4b5563" strokeWidth="1" />
-                          <line x1="4" y1="5" x2="16" y2="5" stroke="#4b5563" strokeWidth="2" />
-                          <circle cx="18" cy="5" r="2" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+                          <circle cx="2" cy="5" r="2" fill="rgb(var(--panel-hover))" stroke="rgb(var(--border))" strokeWidth="1" />
+                          <line x1="4" y1="5" x2="16" y2="5" stroke="rgb(var(--border))" strokeWidth="2" />
+                          <circle cx="18" cy="5" r="2" fill="rgb(var(--panel-hover))" stroke="rgb(var(--border))" strokeWidth="1" />
                         </svg>
                       )}
                       <button
                         type="button"
                         onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }}
-                        className="flex overflow-hidden rounded-lg transition-all hover:ring-2 hover:ring-foreground/30"
-                        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.12)", border: "1px solid rgb(var(--border) / 0.4)" }}
+                        className="flex overflow-hidden rounded-item transition-all hover:ring-2 hover:ring-foreground/30"
+                        style={{ border: "1px solid rgb(var(--border) / 0.4)" }}
                       >
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md" style={{ background: node.bg }}>
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-item" style={{ background: node.bg }}>
                           <span style={{ color: node.color }}>{node.icon}</span>
                         </div>
                         <span className="px-2 text-[9px] font-semibold uppercase tracking-wider" style={{ color: node.color }}>{node.label}</span>
@@ -917,31 +923,31 @@ export function AutomationShell({
                 </div>
                 {/* Vertical connector */}
                 <svg width="14" height="22" viewBox="0 0 14 22" aria-hidden="true">
-                  <circle cx="7" cy="3" r="2" fill="#374151" stroke="#4b5563" strokeWidth="1" />
-                  <path d="M7 5 C7 9, 7 13, 7 17" stroke="#4b5563" strokeWidth="1.5" fill="none" />
-                  <circle cx="7" cy="19" r="2" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+                  <circle cx="7" cy="3" r="2" fill="rgb(var(--panel-hover))" stroke="rgb(var(--border))" strokeWidth="1" />
+                  <path d="M7 5 C7 9, 7 13, 7 17" stroke="rgb(var(--border))" strokeWidth="1.5" fill="none" />
+                  <circle cx="7" cy="19" r="2" fill="rgb(var(--panel-hover))" stroke="rgb(var(--border))" strokeWidth="1" />
                 </svg>
                 {/* Row 2: CONDITION → ACTION */}
                 <div className="flex items-center justify-center gap-0">
                   {([
-                    { icon: <svg width="12" height="12" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>, label: t("kinds.condition"), bg: "#1e3a5f", color: "#60a5fa", hint: t("landing.tpl.leadEmail") },
-                    { icon: <ArrowRight className="h-3 w-3" aria-hidden="true" />, label: t("kinds.action"), bg: "#1e3a5f", color: "#60a5fa", hint: t("landing.tpl.orderSlack") },
+                    { icon: <svg width="12" height="12" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>, label: t("kinds.condition"), bg: "rgb(var(--panel-hover))", color: "rgb(var(--foreground))", hint: t("landing.tpl.leadEmail") },
+                    { icon: <ArrowRight className="h-3 w-3" aria-hidden="true" />, label: t("kinds.action"), bg: "rgb(var(--panel-hover))", color: "rgb(var(--foreground))", hint: t("landing.tpl.orderSlack") },
                   ] as const).map((node, idx) => (
                     <div key={node.label} className="flex items-center">
                       {idx > 0 && (
                         <svg width="18" height="8" viewBox="0 0 18 8" aria-hidden="true">
-                          <circle cx="2" cy="4" r="1.5" fill="#374151" stroke="#4b5563" strokeWidth="1" />
-                          <line x1="3.5" y1="4" x2="14.5" y2="4" stroke="#4b5563" strokeWidth="1.5" />
-                          <circle cx="16" cy="4" r="1.5" fill="#374151" stroke="#4b5563" strokeWidth="1" />
+                          <circle cx="2" cy="4" r="1.5" fill="rgb(var(--panel-hover))" stroke="rgb(var(--border))" strokeWidth="1" />
+                          <line x1="3.5" y1="4" x2="14.5" y2="4" stroke="rgb(var(--border))" strokeWidth="1.5" />
+                          <circle cx="16" cy="4" r="1.5" fill="rgb(var(--panel-hover))" stroke="rgb(var(--border))" strokeWidth="1" />
                         </svg>
                       )}
                       <button
                         type="button"
                         onClick={() => { composerRef.current?.setText?.(node.hint); composerRef.current?.focus(); }}
-                        className="flex items-center gap-1.5 rounded-lg bg-panel px-2.5 py-1.5 transition-all hover:ring-2 hover:ring-foreground/30"
-                        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.12)", border: "1px solid rgb(var(--border) / 0.4)" }}
+                        className="flex items-center gap-1.5 rounded-item bg-panel px-2.5 py-1.5 transition-all hover:ring-2 hover:ring-foreground/30"
+                        style={{ border: "1px solid rgb(var(--border) / 0.4)" }}
                       >
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md" style={{ background: node.bg }}>
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-item" style={{ background: node.bg }}>
                           <span style={{ color: node.color }}>{node.icon}</span>
                         </div>
                         <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: node.color }}>{node.label}</span>

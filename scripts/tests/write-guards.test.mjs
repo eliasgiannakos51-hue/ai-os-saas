@@ -198,7 +198,10 @@ const genSrc = readFileSync(
   path.join(ROOT, "src/app/api/websites/generate/process/route.ts"),
   "utf8"
 );
-const genChain = updateChains(genSrc).find((c) => /attempt_count/.test(c));
+// The claim is the update that SETS attempt_count — an earlier update (the
+// retry-limit stop) only names the column in its message text, so a bare
+// /attempt_count/ matched it first and the guards read as missing.
+const genChain = updateChains(genSrc).find((c) => /attempt_count\s*:\s*website\.attempt_count/.test(c));
 check("the attempt_count update was found", genChain !== undefined, true);
 
 const genRest = (genChain ?? "").slice((genChain ?? "").indexOf(")"));

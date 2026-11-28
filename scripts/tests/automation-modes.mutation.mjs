@@ -55,8 +55,8 @@ const MUTANTS = [
   {
     name: "runFlow applies the supervised transform regardless of mode — auto automations get an uninvited approval gate",
     file: RUNNER,
-    from: 'const boxes: Box[] = mode === "supervised" ? withSupervisedApprovals(flow.boxes) : flow.boxes;',
-    to: "const boxes: Box[] = withSupervisedApprovals(flow.boxes);",
+    from: 'const boxes: Box[] = mode === "supervised" ? withSupervisedApprovals(decryptedBoxes) : decryptedBoxes;',
+    to: "const boxes: Box[] = withSupervisedApprovals(decryptedBoxes);",
     expect: "the transform runs only for \"supervised\"",
   },
   {

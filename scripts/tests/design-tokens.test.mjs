@@ -91,6 +91,8 @@ const LITERAL_ALLOWED = {
   "src/components/auth/social-auth-buttons.tsx": "a third party's sign-in mark, drawn in the colours its owner requires",
   "src/components/website-builder/design-controls.tsx": "the colour picker's starting value for the USER'S website palette — their content, not the app",
   "src/components/projects/project-detail.tsx": "the colour picker's fallback value for a PROJECT'S own two colours (20261025000000_projects_colours.sql) — the user's content, not the app's",
+  "src/components/automations/flow-boxes.tsx": "the node-category colours of the automation editor (blue triggers and data, purple AI, orange flow control, green results) — each kind of box keeps the colour a person who has used a node editor expects, and the app palette has no such set",
+  "src/components/automations/flow-canvas.tsx": "the same node-category colours on the canvas cards, edges and status badges (green for true, red for false, orange while running)",
   "src/app/opengraph-image.tsx": "rendered to a PNG at the edge, where there is no stylesheet and no variable",
   "src/app/manifest.ts": "the browser reads theme_color and background_color as literals",
   "src/app/layout.tsx": "viewport.themeColor is read by the browser as a literal",

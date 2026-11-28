@@ -740,4 +740,19 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261127000000_payments_subscriptions.sql",
     breaks: "the payments dashboard subscriptions tab shows nothing, recurring product checkout fails to record the subscription, and webhook handlers for subscription lifecycle events silently lose data",
   },
+  // n8n canvas (2026-11-26). The two switches that read these are
+  // "automation-canvas-cards" (edges, layout) and "automation-run-outputs".
+  {
+    kind: "column",
+    table: "automation_flows",
+    column: "edges",
+    migration: "20261126000000_automation_graph.sql",
+    breaks: "saving a flow with branches fails at the save, and the canvas draws every flow as a straight line whatever the person connected",
+  },
+  {
+    kind: "table",
+    table: "automation_run_step_outputs",
+    migration: "20261126100000_automation_run_step_outputs.sql",
+    breaks: "the input/output panels of a run stay empty; the run itself still works, because a failed output write is logged and never fails the run",
+  },
 ];

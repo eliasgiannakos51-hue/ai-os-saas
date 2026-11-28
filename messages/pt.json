@@ -3810,7 +3810,27 @@
         "clickup_tasks": "Tarefas do ClickUp",
         "stripe_payments": "Pagamentos do Stripe",
         "typeform_responses": "Respostas do Typeform",
-        "google_forms": "Respostas do Google Forms"
+        "google_forms": "Respostas do Google Forms",
+        "salesforce_records": "Registros de Salesforce",
+        "pipedrive_deals": "Negócios de Pipedrive",
+        "zoho_records": "Registros de Zoho CRM",
+        "monday_items": "Itens de Monday.com",
+        "linear_issues": "Problemas de Linear",
+        "baserow_rows": "Linhas de Baserow",
+        "mysql_query": "Consulta de MySQL",
+        "postgres_query": "Consulta de PostgreSQL",
+        "mongodb_query": "Consulta de MongoDB",
+        "elasticsearch_query": "Consulta de Elasticsearch",
+        "bigquery_query": "Consulta de BigQuery",
+        "dropbox_files": "Arquivos de Dropbox",
+        "onedrive_files": "Arquivos de OneDrive",
+        "box_files": "Arquivos de Box",
+        "zendesk_tickets": "Tickets de Zendesk",
+        "intercom_conversations": "Conversas de Intercom",
+        "freshdesk_tickets": "Tickets de Freshdesk",
+        "google_analytics": "Dados de Google Analytics",
+        "mixpanel_events": "Eventos de Mixpanel",
+        "woocommerce_orders": "Pedidos de WooCommerce"
       },
       "condition": "Se algo foi encontrado, continua",
       "conditionElse": "senão: para aqui, sem cobrança",
@@ -3862,7 +3882,32 @@
         "supabase_insert": "Insere no Supabase",
         "redis_set": "Define chave Redis",
         "mqtt_publish": "Publica mensagem MQTT",
-        "s3_upload": "Faz upload no S3"
+        "s3_upload": "Faz upload no S3",
+        "salesforce_create": "Cria em Salesforce",
+        "pipedrive_create": "Cria em Pipedrive",
+        "zoho_create": "Cria em Zoho CRM",
+        "monday_create": "Cria um item em Monday.com",
+        "linear_create": "Cria um problema em Linear",
+        "baserow_create": "Cria uma linha em Baserow",
+        "mysql_insert": "Insere em MySQL",
+        "postgres_insert": "Insere em PostgreSQL",
+        "mongodb_insert": "Insere em MongoDB",
+        "elasticsearch_index": "Indexa em Elasticsearch",
+        "bigquery_insert": "Insere em BigQuery",
+        "dropbox_upload": "Envia para Dropbox",
+        "onedrive_upload": "Envia para OneDrive",
+        "box_upload": "Envia para Box",
+        "zendesk_create": "Cria um ticket em Zendesk",
+        "intercom_send": "Envia via Intercom",
+        "freshdesk_create": "Cria um ticket em Freshdesk",
+        "teams_send": "Envia para Microsoft Teams",
+        "google_chat_send": "Envia para Google Chat",
+        "woocommerce_update": "Atualiza WooCommerce",
+        "paypal_send": "Envia via PayPal",
+        "quickbooks_create": "Cria em QuickBooks",
+        "xero_create": "Cria em Xero",
+        "deepl_translate": "Traduz com DeepL",
+        "openai_generate": "Gera com OpenAI"
       },
       "needsConnection": "Precisa de uma conexão: {name}",
       "connect": "Conectar",
@@ -4020,7 +4065,10 @@
           "ecommerce": "E-commerce",
           "support": "Suporte ao cliente",
           "marketing": "Marketing de conteúdo",
-          "sales": "Pipeline de vendas"
+          "sales": "Pipeline de vendas",
+          "data": "Dados",
+          "operations": "Operações",
+          "monitoring": "Monitorização"
         },
         "finance_daily": {
           "name": "Resumo financeiro toda manhã",
@@ -4061,6 +4109,56 @@
           "name": "Pontuação semanal de leads",
           "description": "Toda segunda-feira: pontue seus contatos do HubSpot e atualize-os.",
           "instruction": "Pontue cada contato com base em seus dados de engajamento. Atribua uma pontuação 1-100 e uma categoria (quente/morno/frio). Liste os 5 melhores leads para acompanhamento esta semana."
+        },
+        "data_pipeline": {
+          "name": "Fluxo diário de dados",
+          "description": "Todos os dias às 06:00: lê uma página web, limpa e ordena os itens, resume-os e envia o resultado para uma planilha e para o Slack.",
+          "instruction": "Resuma os itens abaixo em cinco linhas curtas: o que é novo, o que mudou e o que precisa de atenção. Use apenas o que está nos dados."
+        },
+        "customer_onboarding": {
+          "name": "Integração de clientes",
+          "description": "Quando chega um novo cliente: extrai os dados, escreve uma mensagem de boas-vindas, envia por e-mail, cria uma tarefa e atualiza o CRM.",
+          "instruction": "Escreva uma mensagem de boas-vindas curta e calorosa para este novo cliente, usando apenas os dados abaixo. Mencione o próximo passo."
+        },
+        "social_monitor": {
+          "name": "Monitor de menções",
+          "description": "Todos os dias às 09:00: lê as menções recentes, avalia o sentimento, classifica-as e envia as importantes para o Slack.",
+          "instruction": "Resuma as menções de hoje: o que elogiam, do que reclamam e quais precisam de resposta. Use apenas as menções abaixo."
+        },
+        "invoice_processor": {
+          "name": "Processamento de faturas",
+          "description": "Quando chega um e-mail com fatura: extrai fornecedor, valor e data, verifica, adiciona à planilha e à contabilidade e avisa a equipa.",
+          "instruction": "Verifique os dados da fatura abaixo: diga em duas linhas curtas se algo falta ou parece errado (valor, data, fornecedor)."
+        },
+        "competitor_tracker": {
+          "name": "Acompanhamento de concorrentes",
+          "description": "Todos os dias às 07:30: lê a página de um concorrente, encontra o que mudou e envia-lhe uma nota curta por e-mail.",
+          "instruction": "Descreva em três linhas curtas o que mudou nesta página em relação a antes e por que pode importar. Use apenas o texto abaixo."
+        },
+        "report_generator": {
+          "name": "Relatório semanal",
+          "description": "Todas as segundas às 08:00: lê a sua planilha, soma os números, escreve a análise e envia em PDF para o e-mail, o Drive e o Slack.",
+          "instruction": "Escreva um relatório semanal curto com os números abaixo: os totais, o que mais mudou e uma coisa a acompanhar. Use apenas os números fornecidos."
+        },
+        "webhook_processor": {
+          "name": "Processador de webhooks",
+          "description": "Quando outro sistema envia um evento: extrai os campos, escreve uma nota curta, guarda na sua base de dados, responde ao remetente e avisa o Slack.",
+          "instruction": "Escreva uma frase clara dizendo o que é este evento e o que, se for preciso, deve ser feito. Use apenas os dados abaixo."
+        },
+        "crm_sync": {
+          "name": "Sincronização de CRM",
+          "description": "Todos os dias às 06:30: encontra novos contactos, remove duplicados, escreve uma nota curta para cada um e atualiza o seu CRM.",
+          "instruction": "Para cada novo contacto abaixo, escreva uma linha dizendo quem é e qual deve ser o próximo passo. Use apenas os dados fornecidos."
+        },
+        "content_pipeline": {
+          "name": "Fluxo de conteúdo",
+          "description": "Todos os dias às 10:00: lê um feed, escolhe os melhores itens, escreve publicações para LinkedIn, X e Facebook e aguarda a sua aprovação antes de publicar.",
+          "instruction": "Escreva uma publicação curta e clara sobre o item mais interessante abaixo, em tom amigável. Não invente factos."
+        },
+        "alert_system": {
+          "name": "Alertas de disponibilidade",
+          "description": "Todas as noites: verifica um endereço web e, se algo falhar, avalia a gravidade, avisa-o no Slack e por e-mail e cria uma tarefa.",
+          "instruction": "Diga em duas linhas curtas o que parece errado na verificação abaixo e quão urgente é. Use apenas os dados fornecidos."
         }
       },
       "timeSaved": {
@@ -4100,6 +4198,43 @@
           "socialPost": "Todos os dias às 12, leia as últimas notícias RSS e crie um post para redes sociais"
         },
         "paste": "Cole qualquer coisa"
+      },
+      "nodeEdit": {
+        "settings": "Configurações",
+        "transformInstruction": "Instrução de transformação",
+        "noteText": "Texto da nota",
+        "onError": "Em caso de erro",
+        "errContinue": "Continuar",
+        "errStop": "Parar o fluxo",
+        "errRetry": "Tentar novamente",
+        "retryCount": "Número de tentativas",
+        "retryDelay": "Espera entre tentativas (segundos)",
+        "maxIterations": "Iterações máximas",
+        "batchSize": "Tamanho do lote",
+        "mergeMode": "Modo de mesclagem",
+        "chooseBranch": "Escolher ramo",
+        "maxItems": "Itens máximos",
+        "dedupeField": "Remover duplicados por campo",
+        "routeField": "Rotear por campo",
+        "findNew": "Encontrar itens novos",
+        "findRemoved": "Encontrar itens removidos",
+        "findChanged": "Encontrar itens alterados",
+        "add": "Adicionar",
+        "attrOptional": "Atributo (opcional)",
+        "categories": "Categorias (uma por linha)",
+        "sentimentInfo": "Analisa o sentimento do texto. Retorna positivo, negativo ou neutro.",
+        "fieldsToExtract": "Campos a extrair (um por linha)",
+        "statusCode": "Código de status",
+        "responseBody": "Corpo da resposta",
+        "duplicate": "Duplicar",
+        "runHint": "Toque em «Executar agora» ou «Testar sem enviar» acima",
+        "notePlaceholder": "Adicione uma nota sobre esta parte do fluxo",
+        "transformPlaceholder": "Extraia nome, e-mail e telefone de cada item",
+        "canvasSearch": "Buscar nós...",
+        "canvasNone": "Nenhum nó encontrado",
+        "canvasTidy": "Organizar",
+        "canvasKeys": "Del · Ctrl+D · 1: ajustar · 0: 100%",
+        "conditionHint": "ex.: os dados contêm «urgente»"
       }
     },
     "flows": {

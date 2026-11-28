@@ -200,7 +200,14 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // useTranslations() with no namespace — same shape as above.
     // 75 -> 76 on 2026-11-11: payments-dashboard.tsx's `t()` with a
     // template-literal key for error messages (`errors.${data.error}`).
-    unbounded: 76,
+    // 76 -> 78 on 2026-11-27: the n8n canvas (2026-11-26) —
+    // flow-canvas.tsx reaches `t(\`sources.${key}\`)` and `t(\`actions.${key}\`)`
+    // (the source and action names of the fifty-one box kinds) and
+    // automation-shell.tsx a template-literal key of its own, the way
+    // sidebar.tsx's is over its sections. Measured with
+    // node scripts/tests/message-slices.test.mjs; a literal-key map of the
+    // names would bound them and is the way to bring this back down.
+    unbounded: 78,
   },
   {
     name: "onboarding",

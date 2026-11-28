@@ -358,7 +358,7 @@
     "contactSales": "Contact Sales",
     "getPlan": "Get {plan}",
     "teamBannerTitle": "Building with a team?",
-    "teamBannerBody": "Each member gets your plan. Professional: +{price}/member/month. Ultimate and Enterprise: unlimited seats included.",
+    "teamBannerBody": "Give your team your plan: each member signs in on their own account and gets your plan's level. Work is not shared between accounts yet. Professional: +{price}/member/month. Ultimate and Enterprise: unlimited seats included.",
     "comparePlans": "Compare plans",
     "feature": "Feature",
     "backToHome": "← Back to Ionexa AI",
@@ -4065,7 +4065,10 @@
           "ecommerce": "E-commerce",
           "support": "Customer Support",
           "marketing": "Content Marketing",
-          "sales": "Sales Pipeline"
+          "sales": "Sales Pipeline",
+          "data": "Data",
+          "operations": "Operations",
+          "monitoring": "Monitoring"
         },
         "finance_daily": {
           "name": "Morning finance summary",
@@ -4106,6 +4109,56 @@
           "name": "Weekly lead scoring",
           "description": "Every Monday: score your HubSpot contacts and update them.",
           "instruction": "Score each contact based on their engagement data. Assign a score 1-100 and a category (hot/warm/cold). List the top 5 leads to follow up with this week."
+        },
+        "data_pipeline": {
+          "name": "Daily data pipeline",
+          "description": "Every day at 06:00: reads a web page, cleans and sorts the items, summarises them, and sends the result to a sheet and to Slack.",
+          "instruction": "Summarise the items below in five short lines: what is new, what changed, and anything that needs attention. Use only what is in the data."
+        },
+        "customer_onboarding": {
+          "name": "Customer onboarding",
+          "description": "When a new customer arrives: extracts their details, writes a welcome message, sends it by email, creates a task, and updates the CRM.",
+          "instruction": "Write a short, warm welcome message for this new customer using only the details below. Mention the next step."
+        },
+        "social_monitor": {
+          "name": "Social mentions monitor",
+          "description": "Every day at 09:00: reads recent mentions, rates the sentiment, sorts them into categories, and sends the important ones to Slack.",
+          "instruction": "Summarise today’s mentions: what people praise, what they complain about, and which ones need a reply. Use only the mentions below."
+        },
+        "invoice_processor": {
+          "name": "Invoice processing",
+          "description": "When an invoice email arrives: extracts vendor, amount and date, checks it, adds it to your sheet and your accounting, and notifies the team.",
+          "instruction": "Check the invoice details below: say if anything is missing or looks wrong (amount, date, vendor), in two short lines."
+        },
+        "competitor_tracker": {
+          "name": "Competitor tracker",
+          "description": "Every day at 07:30: reads a competitor’s page, finds what changed, and emails you a short note about it.",
+          "instruction": "Describe in three short lines what changed on this page compared with before, and why it might matter. Use only the text below."
+        },
+        "report_generator": {
+          "name": "Weekly figures summary",
+          "description": "Every Monday at 08:00: reads your sheet, totals the numbers, writes the analysis, and sends it as a PDF to your email, Drive and Slack.",
+          "instruction": "Write a short summary of the week from the figures below: the totals, what moved most, and one thing to watch. Use only the numbers given."
+        },
+        "webhook_processor": {
+          "name": "Webhook processor",
+          "description": "When another system sends an event: extracts the fields, writes a short note, saves it to your database, replies to the sender and tells Slack.",
+          "instruction": "Write one clear sentence saying what this event is and what, if anything, should be done. Use only the data below."
+        },
+        "crm_sync": {
+          "name": "CRM sync",
+          "description": "Every day at 06:30: finds new contacts, removes duplicates, writes a short note for each, and updates your CRM.",
+          "instruction": "For each new contact below, write one line saying who they are and what the next step should be. Use only the data given."
+        },
+        "content_pipeline": {
+          "name": "Content pipeline",
+          "description": "Every day at 10:00: reads a feed, picks the top items, writes posts for LinkedIn, X and Facebook, and waits for your approval before publishing.",
+          "instruction": "Write a short, clear post about the most interesting item below, in a friendly tone. Do not invent facts."
+        },
+        "alert_system": {
+          "name": "Uptime alerts",
+          "description": "Every night: checks a web address, and if something is wrong, rates how serious it is and alerts you on Slack and email and creates a task.",
+          "instruction": "Say in two short lines what looks wrong in the check below and how urgent it is. Use only the data given."
         }
       },
       "timeSaved": {
@@ -4145,6 +4198,43 @@
           "socialPost": "Every day at 12:00, read the latest news from RSS and create a social media post"
         },
         "paste": "Paste anything"
+      },
+      "nodeEdit": {
+        "settings": "Settings",
+        "transformInstruction": "Transform instruction",
+        "noteText": "Note text",
+        "onError": "On error",
+        "errContinue": "Continue",
+        "errStop": "Stop workflow",
+        "errRetry": "Retry",
+        "retryCount": "Retry count",
+        "retryDelay": "Retry delay (seconds)",
+        "maxIterations": "Max iterations",
+        "batchSize": "Batch size",
+        "mergeMode": "Merge mode",
+        "chooseBranch": "Choose branch",
+        "maxItems": "Max items",
+        "dedupeField": "Deduplicate by field",
+        "routeField": "Route by field",
+        "findNew": "Find new items",
+        "findRemoved": "Find removed items",
+        "findChanged": "Find changed items",
+        "add": "Add",
+        "attrOptional": "Attribute (optional)",
+        "categories": "Categories (one per line)",
+        "sentimentInfo": "Analyzes the sentiment of the input text. Returns positive, negative, or neutral.",
+        "fieldsToExtract": "Fields to extract (one per line)",
+        "statusCode": "Status code",
+        "responseBody": "Response body",
+        "duplicate": "Duplicate",
+        "runHint": "Press “Run now” or “Try without sending” above",
+        "notePlaceholder": "Add a note about this part of the workflow",
+        "transformPlaceholder": "Extract name, email, and phone from each item",
+        "canvasSearch": "Search nodes...",
+        "canvasNone": "No nodes found",
+        "canvasTidy": "Tidy up",
+        "canvasKeys": "Del · Ctrl+D · 1: fit · 0: 100%",
+        "conditionHint": "e.g. data contains ‘urgent’"
       }
     },
     "flows": {

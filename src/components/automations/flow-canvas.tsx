@@ -21,6 +21,7 @@ import {
   ReactFlow,
   Background,
   BackgroundVariant,
+  MarkerType,
   Controls,
   MiniMap,
   type Node,
@@ -39,6 +40,7 @@ import { useTranslations } from "next-intl";
 import { AlertTriangle, ArrowUpDown, BarChart3, Calendar, Check, Clock, Code2, FileOutput, Filter, GitBranch, GitCompare, GitMerge, Globe, Hash, Heart, FileText, Layers, List, ListFilter, PauseCircle, RefreshCw, Reply, Scissors, Send, Sparkles, Split, Table2, Terminal, Timer, Type, X as XIcon, Zap, Play, Mail, Database, Webhook, ChevronRight, Plus, Search } from "lucide-react";
 import type { Box, StartBox, FlowEdge, FlowGroup, NodePosition } from "@/lib/automations/boxes";
 import type { Connected } from "@/components/automations/flow-boxes";
+import { matchesSearch } from "@/lib/text/search-match";
 import type { BoxState, RunProgress } from "@/lib/automations/run-progress";
 import type { ShownFlow } from "@/lib/automations/flow-view";
 
@@ -98,12 +100,16 @@ const THEME: Record<Box["kind"], { accent: string }> = {
   no_op:             { accent: "#78909c" },
 };
 
-/** Nodes that are placeholder only — show "soon" badge. */
+/** Nodes that are placeholder only — show "soon" badge. Checked against
+ *  lib/automations/runner.ts on 2026-11-27: "switch" (routes by its rules
+ *  when the graph switch is on) and the four AI nodes (ai_agent, llm_chain,
+ *  retrieval_qa, summarization_chain → runAi) do real work, so they carry no
+ *  badge, and so do limit / sort / remove_duplicates / set while the switch
+ *  "automation-real-logic" is open (lib/automations/transforms.ts); everything left here only passes its data through. */
 const SOON_KINDS = new Set<Box["kind"]>([
   "code", "execute_command", "ssh", "loop", "split", "merge", "delay",
-  "sort", "limit", "remove_duplicates", "switch", "set", "compare",
-  "aggregate", "split_out", "rename_keys", "ai_agent", "llm_chain",
-  "retrieval_qa", "summarization_chain",
+  "compare",
+  "aggregate", "split_out", "rename_keys",
 ]);
 
 /** Branching nodes that get extra output handles. */
@@ -291,7 +297,7 @@ function AutomationNode({ data, selected }: NodeProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "grab", width: 96 }}
-      title={`${kindName}: ${description}`}>
+      title={description && description !== kindName ? `${kindName}: ${description}` : kindName}>
 
       {/* The square card — 96×96 per spec Γ1 */}
       <div style={{
@@ -303,7 +309,7 @@ function AutomationNode({ data, selected }: NodeProps) {
           ? `0 0 0 3px ${accent}25, 0 4px 14px rgba(0,0,0,0.18)`
           : "0 1px 4px rgba(0,0,0,0.08)",
         position: "relative",
-        transition: "box-shadow 0.15s, border-color 0.15s",
+        transition: "all 0.15s",
       }}>
 
         {/* Trigger badge ⚡ — top left */}
@@ -382,6 +388,7 @@ function AutomationNode({ data, selected }: NodeProps) {
 /* ───────────────────── "+" ADD NODE ───────────────────── */
 
 function AddNode({ data }: NodeProps) {
+  const t = useTranslations("dashboard.automations");
   const { onAdd, kindNames, themes } = data as {
     onAdd: (kind: Box["kind"]) => void;
     kindNames: Record<string, string>;
@@ -407,9 +414,9 @@ function AddNode({ data }: NodeProps) {
   ];
 
   const allKinds = CATEGORIES.flatMap((c) => c.kinds);
-  const q = search.trim().toLowerCase();
+  const q = search.trim();
   const cats = q
-    ? [{ label: "Results", kinds: allKinds.filter((k) => (kindNames[k] ?? k).toLowerCase().includes(q)) }]
+    ? [{ label: "Results", kinds: allKinds.filter((k) => matchesSearch(kindNames[k] ?? k, q)) }]
     : CATEGORIES;
 
   return (
@@ -425,7 +432,7 @@ function AddNode({ data }: NodeProps) {
           <div style={{ padding: "8px 8px 4px", borderBottom: "1px solid rgb(var(--border) / 0.15)" }}>
             <div style={{ position: "relative" }}>
               <Search style={{ position: "absolute", left: 7, top: 6, width: 13, height: 13, color: "rgb(var(--foreground) / 0.3)" }} />
-              <input ref={inputRef} type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search nodes..."
+              <input ref={inputRef} type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("nodeEdit.canvasSearch")}
                 style={{ width: "100%", padding: "5px 8px 5px 26px", borderRadius: 6, border: "1px solid rgb(var(--border) / 0.3)", background: "rgb(var(--background))", color: "rgb(var(--foreground))", fontSize: 11, outline: "none" }} />
             </div>
           </div>
@@ -455,7 +462,7 @@ function AddNode({ data }: NodeProps) {
               );
             })}
             {q && cats[0]?.kinds.length === 0 && (
-              <div style={{ padding: "14px 10px", textAlign: "center", fontSize: 11, color: "rgb(var(--foreground) / 0.4)" }}>No nodes found</div>
+              <div style={{ padding: "14px 10px", textAlign: "center", fontSize: 11, color: "rgb(var(--foreground) / 0.4)" }}>{t("nodeEdit.canvasNone")}</div>
             )}
           </div>
         </div>
@@ -600,7 +607,8 @@ function graphToEdges(graphEdges: FlowEdge[] | null, boxes: Box[], positions: { 
         animated: false,
         label: ge.fromPort !== "main" ? ge.fromPort : undefined,
         labelStyle: { fontSize: 8, fontWeight: 600, fill: strokeColor },
-        style: { stroke: strokeColor, strokeWidth: 2, opacity: 0.55 },
+        style: { stroke: strokeColor, strokeWidth: 2, opacity: 0.85 },
+        markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14, color: strokeColor },
       };
     });
   }
@@ -616,7 +624,8 @@ function graphToEdges(graphEdges: FlowEdge[] | null, boxes: Box[], positions: { 
       target: connected[i + 1].id, targetHandle: "left",
       type: goesLeft ? "smoothstep" : "default",
       animated: false,
-      style: { stroke: "#9ca3af", strokeWidth: 2, opacity: 0.5 },
+      style: { stroke: "#9ca3af", strokeWidth: 2, opacity: 0.85 },
+      markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14, color: "#9ca3af" },
     };
   });
 }
@@ -635,6 +644,7 @@ function FlowCanvasInner({
   savedLayout?: Record<string, NodePosition> | null;
   groups?: FlowGroup[] | null;
 }) {
+  const t = useTranslations("dashboard.automations");
   const kindNames = useKindNames();
   const describe = useDescribe();
 
@@ -702,7 +712,7 @@ function FlowCanvasInner({
         minZoom={0.3} panOnDrag zoomOnScroll panOnScroll
         proOptions={{ hideAttribution: true }} style={{ background: "transparent" }}
         deleteKeyCode={null} defaultEdgeOptions={{ type: "default" }}>
-        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgb(var(--foreground) / 0.06)" />
+        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgb(var(--foreground) / 0.16)" />
         <Controls showInteractive={false} style={{ background: "rgb(var(--panel))", border: "1px solid rgb(var(--border) / 0.2)", borderRadius: 8, boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }} />
         {/* Minimap only when canvas is bigger than viewport (spec #15) */}
         {boxes.length > 8 && (
@@ -741,9 +751,9 @@ function FlowCanvasInner({
             reactFlowInstance.setNodes(newNodes.map((n) => ({ ...n, selected: n.id === chosen })));
             setTimeout(() => reactFlowInstance.fitView({ padding: 0.08, duration: 300, minZoom: 0.7 }), 50);
           }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 9, color: "rgb(var(--foreground) / 0.4)", textDecoration: "underline" }}>
-            Tidy up
+            {t("nodeEdit.canvasTidy")}
           </button>
-          <span>Del · Ctrl+D · 1: fit · 0: 100%</span>
+          <span>{t("nodeEdit.canvasKeys")}</span>
         </div>
       </div>
     </div>

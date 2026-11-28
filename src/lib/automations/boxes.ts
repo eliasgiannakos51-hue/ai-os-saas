@@ -1,3 +1,4 @@
+// BOUNDARY-FORMAT: html
 /**
  * AN AUTOMATION IS A ROW OF BOXES (MASTER 16, package 30, for everybody
  * since 2026-10-23; the plan is docs/automations-plan-2026-10-04.md).
@@ -582,7 +583,7 @@ export const SOURCE_CONFIG: Partial<Record<ReadSource, ConfigField[]>> = {
   ],
   database_query: [
     { key: "connection_string", label: "Connection String", type: "password", placeholder: "postgresql://...", required: true },
-    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM ...", required: true },
+    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM table_name", required: true },
   ],
   discord_messages: [
     { key: "bot_token", label: "Bot Token", type: "password", placeholder: "MTIz...", required: true },
@@ -619,11 +620,11 @@ export const SOURCE_CONFIG: Partial<Record<ReadSource, ConfigField[]>> = {
   ],
   mysql_query: [
     { key: "connection_string", label: "MySQL Connection", type: "password", placeholder: "mysql://user:pass@host/db", required: true },
-    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM ...", required: true },
+    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM table_name", required: true },
   ],
   postgres_query: [
     { key: "connection_string", label: "PostgreSQL Connection", type: "password", placeholder: "postgresql://user:pass@host/db", required: true },
-    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM ...", required: true },
+    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM table_name", required: true },
   ],
   mongodb_query: [
     { key: "connection_string", label: "MongoDB URI", type: "password", placeholder: "mongodb+srv://...", required: true },
@@ -635,7 +636,7 @@ export const SOURCE_CONFIG: Partial<Record<ReadSource, ConfigField[]>> = {
   ],
   bigquery_query: [
     { key: "api_key", label: "Service Account JSON", type: "textarea", placeholder: '{"type":"service_account",...}', required: true },
-    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM ...", required: true },
+    { key: "query", label: "SQL Query", type: "textarea", placeholder: "SELECT * FROM table_name", required: true },
   ],
   dropbox_files: [
     { key: "api_key", label: "Dropbox Access Token", type: "password", placeholder: "sl.B...", required: true },
@@ -946,7 +947,10 @@ export function readFlow(raw: unknown): FlowVerdict {
   const boxes: Box[] = [];
   for (const [i, item] of raw.entries()) {
     const box = readBox(item, `b${i + 1}`);
-    if (!box) continue; // Skip unparseable boxes instead of failing the whole flow
+    // A box that cannot be read is refused BY NAME, never dropped: dropping it
+    // saved a row that was quietly shorter than the one the person (or the
+    // AI builder) wrote — a step gone with nothing on screen saying so.
+    if (!box) return { ok: false, reason: "bad_box" };
     boxes.push(box);
   }
   if (new Set(boxes.map((b) => b.id)).size !== boxes.length) return { ok: false, reason: "duplicate_id" };

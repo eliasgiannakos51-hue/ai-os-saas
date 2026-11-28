@@ -3810,7 +3810,27 @@
         "clickup_tasks": "مهام ClickUp",
         "stripe_payments": "مدفوعات Stripe",
         "typeform_responses": "ردود Typeform",
-        "google_forms": "ردود Google Forms"
+        "google_forms": "ردود Google Forms",
+        "salesforce_records": "سجلات Salesforce",
+        "pipedrive_deals": "صفقات Pipedrive",
+        "zoho_records": "سجلات Zoho CRM",
+        "monday_items": "عناصر Monday.com",
+        "linear_issues": "مشكلات Linear",
+        "baserow_rows": "صفوف Baserow",
+        "mysql_query": "استعلام MySQL",
+        "postgres_query": "استعلام PostgreSQL",
+        "mongodb_query": "استعلام MongoDB",
+        "elasticsearch_query": "استعلام Elasticsearch",
+        "bigquery_query": "استعلام BigQuery",
+        "dropbox_files": "ملفات Dropbox",
+        "onedrive_files": "ملفات OneDrive",
+        "box_files": "ملفات Box",
+        "zendesk_tickets": "تذاكر Zendesk",
+        "intercom_conversations": "محادثات Intercom",
+        "freshdesk_tickets": "تذاكر Freshdesk",
+        "google_analytics": "بيانات Google Analytics",
+        "mixpanel_events": "أحداث Mixpanel",
+        "woocommerce_orders": "طلبات WooCommerce"
       },
       "condition": "إذا وُجد شيء، تابع",
       "conditionElse": "وإلا: تتوقف هنا، دون رسوم",
@@ -3862,7 +3882,32 @@
         "supabase_insert": "يدرج في Supabase",
         "redis_set": "يعين مفتاح Redis",
         "mqtt_publish": "ينشر رسالة MQTT",
-        "s3_upload": "يرفع إلى S3"
+        "s3_upload": "يرفع إلى S3",
+        "salesforce_create": "ينشئ في Salesforce",
+        "pipedrive_create": "ينشئ في Pipedrive",
+        "zoho_create": "ينشئ في Zoho CRM",
+        "monday_create": "ينشئ عنصرًا في Monday.com",
+        "linear_create": "ينشئ مشكلة في Linear",
+        "baserow_create": "ينشئ صفًا في Baserow",
+        "mysql_insert": "يُدرج في MySQL",
+        "postgres_insert": "يُدرج في PostgreSQL",
+        "mongodb_insert": "يُدرج في MongoDB",
+        "elasticsearch_index": "يفهرس في Elasticsearch",
+        "bigquery_insert": "يُدرج في BigQuery",
+        "dropbox_upload": "يرفع إلى Dropbox",
+        "onedrive_upload": "يرفع إلى OneDrive",
+        "box_upload": "يرفع إلى Box",
+        "zendesk_create": "ينشئ تذكرة في Zendesk",
+        "intercom_send": "يرسل عبر Intercom",
+        "freshdesk_create": "ينشئ تذكرة في Freshdesk",
+        "teams_send": "يرسل إلى Microsoft Teams",
+        "google_chat_send": "يرسل إلى Google Chat",
+        "woocommerce_update": "يحدّث WooCommerce",
+        "paypal_send": "يرسل عبر PayPal",
+        "quickbooks_create": "ينشئ في QuickBooks",
+        "xero_create": "ينشئ في Xero",
+        "deepl_translate": "يترجم باستخدام DeepL",
+        "openai_generate": "ينشئ باستخدام OpenAI"
       },
       "needsConnection": "تحتاج إلى اتصال: {name}",
       "connect": "اتصال",
@@ -4020,7 +4065,10 @@
           "ecommerce": "التجارة الإلكترونية",
           "support": "دعم العملاء",
           "marketing": "تسويق المحتوى",
-          "sales": "خط المبيعات"
+          "sales": "خط المبيعات",
+          "data": "البيانات",
+          "operations": "العمليات",
+          "monitoring": "المراقبة"
         },
         "finance_daily": {
           "name": "ملخص مالي كل صباح",
@@ -4061,6 +4109,56 @@
           "name": "تقييم العملاء المحتملين الأسبوعي",
           "description": "كل اثنين: قيّم جهات اتصال HubSpot وحدّثها.",
           "instruction": "قيّم كل جهة اتصال بناءً على بيانات التفاعل. امنح درجة 1-100 وفئة (ساخن/دافئ/بارد). اذكر أفضل 5 عملاء محتملين للمتابعة هذا الأسبوع."
+        },
+        "data_pipeline": {
+          "name": "مسار البيانات اليومي",
+          "description": "كل يوم عند 06:00: يقرأ صفحة ويب وينظّف العناصر ويرتّبها ويلخّصها ثم يرسل النتيجة إلى جدول وإلى Slack.",
+          "instruction": "لخّص العناصر أدناه في خمسة أسطر قصيرة: ما الجديد وما الذي تغيّر وما يحتاج إلى انتباه. استخدم ما في البيانات فقط."
+        },
+        "customer_onboarding": {
+          "name": "استقبال العملاء الجدد",
+          "description": "عند وصول عميل جديد: يستخرج بياناته ويكتب رسالة ترحيب ويرسلها بالبريد ويُنشئ مهمة ويحدّث نظام CRM.",
+          "instruction": "اكتب رسالة ترحيب قصيرة ودافئة لهذا العميل الجديد باستخدام التفاصيل أدناه فقط، واذكر الخطوة التالية."
+        },
+        "social_monitor": {
+          "name": "مراقبة الإشارات",
+          "description": "كل يوم عند 09:00: يقرأ الإشارات الأخيرة ويقيّم المشاعر ويصنّفها ويرسل المهمة منها إلى Slack.",
+          "instruction": "لخّص إشارات اليوم: ما يمدحه الناس وما يشكون منه وما يحتاج إلى رد. استخدم الإشارات أدناه فقط."
+        },
+        "invoice_processor": {
+          "name": "معالجة الفواتير",
+          "description": "عند وصول بريد فاتورة: يستخرج المورّد والمبلغ والتاريخ ويتحقق منها ويضيفها إلى الجدول والمحاسبة ويُبلغ الفريق.",
+          "instruction": "تحقق من بيانات الفاتورة أدناه: اذكر في سطرين قصيرين إن كان شيء ناقصًا أو يبدو خاطئًا (المبلغ أو التاريخ أو المورّد)."
+        },
+        "competitor_tracker": {
+          "name": "متابعة المنافسين",
+          "description": "كل يوم عند 07:30: يقرأ صفحة منافس ويجد ما تغيّر ويرسل لك ملاحظة قصيرة بالبريد.",
+          "instruction": "صِف في ثلاثة أسطر قصيرة ما تغيّر في هذه الصفحة مقارنةً بالسابق ولماذا قد يهم. استخدم النص أدناه فقط."
+        },
+        "report_generator": {
+          "name": "التقرير الأسبوعي",
+          "description": "كل اثنين عند 08:00: يقرأ جدولك ويجمع الأرقام ويكتب التحليل ويرسله بصيغة PDF إلى بريدك وDrive وSlack.",
+          "instruction": "اكتب تقريرًا أسبوعيًا قصيرًا من الأرقام أدناه: الإجماليات وما تحرّك أكثر وأمرًا واحدًا يستحق المتابعة. استخدم الأرقام المعطاة فقط."
+        },
+        "webhook_processor": {
+          "name": "معالج Webhook",
+          "description": "عندما يرسل نظام آخر حدثًا: يستخرج الحقول ويكتب ملاحظة قصيرة ويحفظها في قاعدة بياناتك ويردّ على المرسل ويُعلم Slack.",
+          "instruction": "اكتب جملة واضحة تبيّن ما هذا الحدث وما الذي ينبغي فعله إن لزم. استخدم البيانات أدناه فقط."
+        },
+        "crm_sync": {
+          "name": "مزامنة CRM",
+          "description": "كل يوم عند 06:30: يجد جهات اتصال جديدة ويزيل المكرر ويكتب ملاحظة قصيرة لكل منها ويحدّث نظام CRM.",
+          "instruction": "لكل جهة اتصال جديدة أدناه، اكتب سطرًا يبيّن من هي وما الخطوة التالية. استخدم البيانات المعطاة فقط."
+        },
+        "content_pipeline": {
+          "name": "مسار المحتوى",
+          "description": "كل يوم عند 10:00: يقرأ خلاصة ويختار أبرز العناصر ويكتب منشورات لـ LinkedIn وX وFacebook وينتظر موافقتك قبل النشر.",
+          "instruction": "اكتب منشورًا قصيرًا وواضحًا عن أكثر العناصر إثارة للاهتمام أدناه بنبرة ودّية. لا تختلق معلومات."
+        },
+        "alert_system": {
+          "name": "تنبيهات التوفر",
+          "description": "كل ليلة: يفحص عنوان ويب، وإن وُجد خلل يقيّم خطورته وينبّهك عبر Slack والبريد ويُنشئ مهمة.",
+          "instruction": "اذكر في سطرين قصيرين ما يبدو خاطئًا في الفحص أدناه ومدى إلحاحه. استخدم البيانات المعطاة فقط."
         }
       },
       "timeSaved": {
@@ -4100,6 +4198,43 @@
           "socialPost": "كل يوم الساعة 12، اقرأ آخر أخبار RSS وأنشئ منشوراً لوسائل التواصل"
         },
         "paste": "الصق أي شيء"
+      },
+      "nodeEdit": {
+        "settings": "الإعدادات",
+        "transformInstruction": "تعليمات التحويل",
+        "noteText": "نص الملاحظة",
+        "onError": "عند حدوث خطأ",
+        "errContinue": "متابعة",
+        "errStop": "إيقاف المسار",
+        "errRetry": "إعادة المحاولة",
+        "retryCount": "عدد المحاولات",
+        "retryDelay": "مدة الانتظار بين المحاولات (ثوانٍ)",
+        "maxIterations": "الحد الأقصى للتكرارات",
+        "batchSize": "حجم الدفعة",
+        "mergeMode": "طريقة الدمج",
+        "chooseBranch": "اختيار فرع",
+        "maxItems": "الحد الأقصى للعناصر",
+        "dedupeField": "إزالة التكرارات حسب الحقل",
+        "routeField": "توجيه حسب الحقل",
+        "findNew": "العثور على عناصر جديدة",
+        "findRemoved": "العثور على العناصر المحذوفة",
+        "findChanged": "العثور على العناصر المتغيرة",
+        "add": "إضافة",
+        "attrOptional": "السمة (اختياري)",
+        "categories": "الفئات (واحدة في كل سطر)",
+        "sentimentInfo": "يحلل مشاعر النص المُدخل ويعيد إيجابي أو سلبي أو محايد.",
+        "fieldsToExtract": "الحقول المراد استخراجها (حقل في كل سطر)",
+        "statusCode": "رمز الحالة",
+        "responseBody": "نص الاستجابة",
+        "duplicate": "تكرار",
+        "runHint": "اضغط «تشغيل الآن» أو «جرّب دون إرسال» أعلاه",
+        "notePlaceholder": "أضف ملاحظة عن هذا الجزء من المسار",
+        "transformPlaceholder": "استخرج الاسم والبريد الإلكتروني والهاتف من كل عنصر",
+        "canvasSearch": "ابحث عن العقد...",
+        "canvasNone": "لم يتم العثور على عقد",
+        "canvasTidy": "ترتيب",
+        "canvasKeys": "Del · Ctrl+D · 1: ملاءمة · 0: 100%",
+        "conditionHint": "مثال: تحتوي البيانات على «عاجل»"
       }
     },
     "flows": {

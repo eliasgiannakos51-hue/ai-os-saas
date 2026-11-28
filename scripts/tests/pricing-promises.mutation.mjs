@@ -31,7 +31,7 @@ const MUTANTS = [
   {
     name: "the team banner stops saying nothing is shared",
     file: EN,
-    from: "Work is not shared between accounts yet — each person keeps their own. ",
+    from: "Work is not shared between accounts yet. ",
     to: "",
     expect: "teamBannerBody says work is not shared yet",
   },

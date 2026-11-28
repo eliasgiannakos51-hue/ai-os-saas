@@ -3810,7 +3810,27 @@
         "clickup_tasks": "ClickUpタスク",
         "stripe_payments": "Stripe決済",
         "typeform_responses": "Typeform回答",
-        "google_forms": "Google Forms回答"
+        "google_forms": "Google Forms回答",
+        "salesforce_records": "Salesforce レコード",
+        "pipedrive_deals": "Pipedrive 商談",
+        "zoho_records": "Zoho CRM レコード",
+        "monday_items": "Monday.com アイテム",
+        "linear_issues": "Linear 課題",
+        "baserow_rows": "Baserow 行",
+        "mysql_query": "MySQL クエリ",
+        "postgres_query": "PostgreSQL クエリ",
+        "mongodb_query": "MongoDB クエリ",
+        "elasticsearch_query": "Elasticsearch クエリ",
+        "bigquery_query": "BigQuery クエリ",
+        "dropbox_files": "Dropbox ファイル",
+        "onedrive_files": "OneDrive ファイル",
+        "box_files": "Box ファイル",
+        "zendesk_tickets": "Zendesk チケット",
+        "intercom_conversations": "Intercom 会話",
+        "freshdesk_tickets": "Freshdesk チケット",
+        "google_analytics": "Google Analytics データ",
+        "mixpanel_events": "Mixpanel イベント",
+        "woocommerce_orders": "WooCommerce 注文"
       },
       "condition": "何か見つかったら続ける",
       "conditionElse": "見つからなければ:ここで停止、料金なし",
@@ -3862,7 +3882,32 @@
         "supabase_insert": "Supabaseに挿入",
         "redis_set": "Redisキー設定",
         "mqtt_publish": "MQTTメッセージ発行",
-        "s3_upload": "S3にアップロード"
+        "s3_upload": "S3にアップロード",
+        "salesforce_create": "Salesforce に作成",
+        "pipedrive_create": "Pipedrive に作成",
+        "zoho_create": "Zoho CRM に作成",
+        "monday_create": "Monday.com にアイテムを作成",
+        "linear_create": "Linear に課題を作成",
+        "baserow_create": "Baserow に行を作成",
+        "mysql_insert": "MySQL に挿入",
+        "postgres_insert": "PostgreSQL に挿入",
+        "mongodb_insert": "MongoDB に挿入",
+        "elasticsearch_index": "Elasticsearch にインデックス登録",
+        "bigquery_insert": "BigQuery に挿入",
+        "dropbox_upload": "Dropbox にアップロード",
+        "onedrive_upload": "OneDrive にアップロード",
+        "box_upload": "Box にアップロード",
+        "zendesk_create": "Zendesk にチケットを作成",
+        "intercom_send": "Intercom 経由で送信",
+        "freshdesk_create": "Freshdesk にチケットを作成",
+        "teams_send": "Microsoft Teams に送信",
+        "google_chat_send": "Google Chat に送信",
+        "woocommerce_update": "WooCommerce を更新",
+        "paypal_send": "PayPal 経由で送信",
+        "quickbooks_create": "QuickBooks に作成",
+        "xero_create": "Xero に作成",
+        "deepl_translate": "DeepL で翻訳",
+        "openai_generate": "OpenAI で生成"
       },
       "needsConnection": "接続が必要です:{name}",
       "connect": "接続",
@@ -4020,7 +4065,10 @@
           "ecommerce": "ECサイト",
           "support": "カスタマーサポート",
           "marketing": "コンテンツマーケティング",
-          "sales": "セールスパイプライン"
+          "sales": "セールスパイプライン",
+          "data": "データ",
+          "operations": "運用",
+          "monitoring": "モニタリング"
         },
         "finance_daily": {
           "name": "毎朝の財務サマリー",
@@ -4061,6 +4109,56 @@
           "name": "週次リードスコアリング",
           "description": "毎週月曜日：HubSpotの連絡先をスコアリングして更新。",
           "instruction": "各連絡先をエンゲージメントデータに基づいてスコアリングしてください。1-100のスコアとカテゴリ（ホット/ウォーム/コールド）を割り当て、今週フォローアップすべきトップ5のリードをリストアップしてください。"
+        },
+        "data_pipeline": {
+          "name": "毎日のデータ処理",
+          "description": "毎日06:00に、Webページを読み取り、項目を整理して並べ替え、要約して、スプレッドシートとSlackに送ります。",
+          "instruction": "以下の項目を5行以内で要約してください：新しいこと、変わったこと、注意が必要なこと。データにある内容だけを使ってください。"
+        },
+        "customer_onboarding": {
+          "name": "新規顧客の受け入れ",
+          "description": "新しい顧客が来たら、情報を抽出し、ウェルカムメッセージを書いてメールで送り、タスクを作成してCRMを更新します。",
+          "instruction": "以下の情報だけを使って、この新規顧客への短くて温かいウェルカムメッセージを書いてください。次のステップにも触れてください。"
+        },
+        "social_monitor": {
+          "name": "SNSメンション監視",
+          "description": "毎日09:00に、最近のメンションを読み取り、感情を判定してカテゴリに分け、重要なものをSlackに送ります。",
+          "instruction": "今日のメンションを要約してください：評価されている点、不満の点、返信が必要なもの。以下のメンションだけを使ってください。"
+        },
+        "invoice_processor": {
+          "name": "請求書の処理",
+          "description": "請求書メールが届いたら、取引先・金額・日付を抽出して確認し、スプレッドシートと会計に追加して、チームに通知します。",
+          "instruction": "以下の請求書の内容を確認し、不足や誤りがないか（金額・日付・取引先）を2行で簡潔に述べてください。"
+        },
+        "competitor_tracker": {
+          "name": "競合ウォッチ",
+          "description": "毎日07:30に、競合のページを読み取り、変更点を見つけて、短いメモをメールで送ります。",
+          "instruction": "このページが以前から何が変わったか、なぜ重要かもしれないかを3行で説明してください。以下のテキストだけを使ってください。"
+        },
+        "report_generator": {
+          "name": "週次レポート",
+          "description": "毎週月曜08:00に、スプレッドシートを読み取って数値を合計し、分析を書いて、PDFにしてメール・Drive・Slackに送ります。",
+          "instruction": "以下の数値から短い週次レポートを書いてください：合計、最も動いた点、注意すべき点を1つ。与えられた数値だけを使ってください。"
+        },
+        "webhook_processor": {
+          "name": "Webhook処理",
+          "description": "他のシステムからイベントが届いたら、項目を抽出して短いメモを書き、データベースに保存し、送信元に応答してSlackに知らせます。",
+          "instruction": "このイベントが何であり、必要なら何をすべきかを、わかりやすい1文で書いてください。以下のデータだけを使ってください。"
+        },
+        "crm_sync": {
+          "name": "CRM同期",
+          "description": "毎日06:30に、新しい連絡先を見つけて重複を除き、それぞれに短いメモを書いてCRMを更新します。",
+          "instruction": "以下の新しい連絡先ごとに、誰であるかと次のステップを1行で書いてください。与えられたデータだけを使ってください。"
+        },
+        "content_pipeline": {
+          "name": "コンテンツ配信フロー",
+          "description": "毎日10:00に、フィードを読み取り、注目の項目を選び、LinkedIn・X・Facebook向けの投稿を書いて、公開前にあなたの承認を待ちます。",
+          "instruction": "以下で最も興味深い項目について、親しみやすい口調で短くわかりやすい投稿を書いてください。事実を作り出さないでください。"
+        },
+        "alert_system": {
+          "name": "稼働監視アラート",
+          "description": "毎晩、Webアドレスを確認し、問題があれば深刻度を判定して、Slackとメールでお知らせしタスクも作成します。",
+          "instruction": "以下のチェックで何がおかしいか、どれほど緊急かを2行で述べてください。与えられたデータだけを使ってください。"
         }
       },
       "timeSaved": {
@@ -4100,6 +4198,43 @@
           "socialPost": "毎日12時にRSSの最新ニュースを読み、SNS投稿を作成して"
         },
         "paste": "何でも貼り付け"
+      },
+      "nodeEdit": {
+        "settings": "設定",
+        "transformInstruction": "変換の指示",
+        "noteText": "メモの内容",
+        "onError": "エラー時",
+        "errContinue": "続行",
+        "errStop": "フローを停止",
+        "errRetry": "再試行",
+        "retryCount": "再試行回数",
+        "retryDelay": "再試行の間隔（秒）",
+        "maxIterations": "最大繰り返し回数",
+        "batchSize": "バッチサイズ",
+        "mergeMode": "マージ方法",
+        "chooseBranch": "ブランチを選択",
+        "maxItems": "最大アイテム数",
+        "dedupeField": "フィールドで重複を除去",
+        "routeField": "フィールドで振り分け",
+        "findNew": "新しいアイテムを検出",
+        "findRemoved": "削除されたアイテムを検出",
+        "findChanged": "変更されたアイテムを検出",
+        "add": "追加",
+        "attrOptional": "属性（任意）",
+        "categories": "カテゴリ（1行に1つ）",
+        "sentimentInfo": "入力テキストの感情を分析し、ポジティブ・ネガティブ・ニュートラルのいずれかを返します。",
+        "fieldsToExtract": "抽出するフィールド（1行に1つ）",
+        "statusCode": "ステータスコード",
+        "responseBody": "レスポンス本文",
+        "duplicate": "複製",
+        "runHint": "上の「今すぐ実行」または「送信せずに試す」を押してください",
+        "notePlaceholder": "フローのこの部分についてのメモを追加",
+        "transformPlaceholder": "各アイテムから名前・メール・電話番号を抽出",
+        "canvasSearch": "ノードを検索...",
+        "canvasNone": "ノードが見つかりません",
+        "canvasTidy": "整列",
+        "canvasKeys": "Del · Ctrl+D · 1: 全体表示 · 0: 100%",
+        "conditionHint": "例：データに「緊急」が含まれる"
       }
     },
     "flows": {

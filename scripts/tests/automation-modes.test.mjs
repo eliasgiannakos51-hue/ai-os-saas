@@ -100,7 +100,10 @@ const action2 = { id: "b6", kind: "action", do: "send_telegram" };
   check("idempotent on a row that already has its gates (resume rebuilds the SAME array)", JSON.stringify(once) === JSON.stringify(boxes.withSupervisedApprovals(once)));
   check("applying it twice in a row from scratch still lands on the one-gate shape (sanity, not a real call pattern)", twice.filter((b) => b.kind === "approval").length === 1);
 }
-check("MAX_BOXES (8) bounds what is STORED, not what supervised walks through", boxes.withSupervisedApprovals([start, read, action, { id: "b7", kind: "action", do: "notify" }, { id: "b8", kind: "action", do: "send_email" }]).length > boxes.MAX_BOXES - 1);
+// MAX_BOXES was 8 when this was written and is 1000 now, so the old five-box
+// input proved nothing. A row of MAX_BOXES action boxes is the worst case:
+// every one gets its own gate, and the walk is longer than what was stored.
+check("MAX_BOXES bounds what is STORED, not what supervised walks through", boxes.withSupervisedApprovals([start, ...Array.from({ length: boxes.MAX_BOXES - 1 }, (_, n) => ({ id: `a${n}`, kind: "action", do: "notify" }))]).length > boxes.MAX_BOXES);
 
 // ---------------------------------------------------------------------
 console.log("\n== 4. the runner applies the transform from ctx.flow.mode, and bounds the resume ==");
@@ -109,7 +112,7 @@ check("imports withSupervisedApprovals and DEFAULT_FLOW_MODE from boxes.ts, not 
   /import \{[^}]*withSupervisedApprovals[^}]*DEFAULT_FLOW_MODE[^}]*\} from "@\/lib\/automations\/boxes"/.test(runnerSrc) ||
   /import \{[^}]*DEFAULT_FLOW_MODE[^}]*withSupervisedApprovals[^}]*\} from "@\/lib\/automations\/boxes"/.test(runnerSrc));
 check("FlowRow carries an optional mode", /mode\?:\s*FlowMode/.test(runnerSrc));
-check("the transform runs only for \"supervised\"", /mode === "supervised" \? withSupervisedApprovals\(flow\.boxes\) : flow\.boxes/.test(runnerSrc));
+check("the transform runs only for \"supervised\"", /mode === "supervised" \? withSupervisedApprovals\(decryptedBoxes\) : decryptedBoxes/.test(runnerSrc));
 check("a resume past the rebuilt length fails the run instead of reading boxes[i] out of bounds",
   /ctx\.resume && ctx\.resume\.at > boxes\.length/.test(runnerSrc) && /resume_mismatch/.test(runnerSrc));
 

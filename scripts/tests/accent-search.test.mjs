@@ -253,6 +253,12 @@ check("no component compares user text with toLowerCase().includes()", offenders
   //                              for any non-ASCII domain, so there is
   //                              no accent left to fold by the time it
   //                              is read.
+  //   lib/automations/boxes.ts   (added 2026-11-26) a URL's .hostname
+  //                              against localhost / .local / the cloud
+  //                              metadata host before an MCP URL is stored.
+  //                              URL.hostname is punycode for any
+  //                              non-ASCII domain, the same case as
+  //                              seo/facts.ts above.
   //   lib/seo/head.ts            an HTML attribute NAME ("description",
   //                              "og:title") against the fixed list of
   //                              tags the SEO pass owns. These are
@@ -298,6 +304,7 @@ check("no component compares user text with toLowerCase().includes()", offenders
     "src/lib/import/paste.ts",
     "src/lib/publishing/subdomain.ts",
     "src/lib/seo/facts.ts",
+    "src/lib/automations/boxes.ts",
     "src/lib/seo/head.ts",
     "src/lib/website-boxes.ts",
     "src/lib/website-invented-numbers-repair.ts",

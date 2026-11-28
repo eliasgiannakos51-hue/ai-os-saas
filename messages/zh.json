@@ -3810,7 +3810,27 @@
         "clickup_tasks": "ClickUp任务",
         "stripe_payments": "Stripe支付",
         "typeform_responses": "Typeform回复",
-        "google_forms": "Google Forms回复"
+        "google_forms": "Google Forms回复",
+        "salesforce_records": "Salesforce 记录",
+        "pipedrive_deals": "Pipedrive 交易",
+        "zoho_records": "Zoho CRM 记录",
+        "monday_items": "Monday.com 条目",
+        "linear_issues": "Linear 问题",
+        "baserow_rows": "Baserow 行",
+        "mysql_query": "MySQL 查询",
+        "postgres_query": "PostgreSQL 查询",
+        "mongodb_query": "MongoDB 查询",
+        "elasticsearch_query": "Elasticsearch 查询",
+        "bigquery_query": "BigQuery 查询",
+        "dropbox_files": "Dropbox 文件",
+        "onedrive_files": "OneDrive 文件",
+        "box_files": "Box 文件",
+        "zendesk_tickets": "Zendesk 工单",
+        "intercom_conversations": "Intercom 对话",
+        "freshdesk_tickets": "Freshdesk 工单",
+        "google_analytics": "Google Analytics 数据",
+        "mixpanel_events": "Mixpanel 事件",
+        "woocommerce_orders": "WooCommerce 订单"
       },
       "condition": "如果找到了内容,就继续",
       "conditionElse": "否则:在这里停止,不收费",
@@ -3862,7 +3882,32 @@
         "supabase_insert": "插入Supabase",
         "redis_set": "设置Redis键",
         "mqtt_publish": "发布MQTT消息",
-        "s3_upload": "上传到S3"
+        "s3_upload": "上传到S3",
+        "salesforce_create": "在 Salesforce 中创建",
+        "pipedrive_create": "在 Pipedrive 中创建",
+        "zoho_create": "在 Zoho CRM 中创建",
+        "monday_create": "在 Monday.com 中创建条目",
+        "linear_create": "在 Linear 中创建问题",
+        "baserow_create": "在 Baserow 中创建行",
+        "mysql_insert": "插入到 MySQL",
+        "postgres_insert": "插入到 PostgreSQL",
+        "mongodb_insert": "插入到 MongoDB",
+        "elasticsearch_index": "在 Elasticsearch 中建立索引",
+        "bigquery_insert": "插入到 BigQuery",
+        "dropbox_upload": "上传到 Dropbox",
+        "onedrive_upload": "上传到 OneDrive",
+        "box_upload": "上传到 Box",
+        "zendesk_create": "在 Zendesk 中创建工单",
+        "intercom_send": "通过 Intercom 发送",
+        "freshdesk_create": "在 Freshdesk 中创建工单",
+        "teams_send": "发送到 Microsoft Teams",
+        "google_chat_send": "发送到 Google Chat",
+        "woocommerce_update": "更新 WooCommerce",
+        "paypal_send": "通过 PayPal 发送",
+        "quickbooks_create": "在 QuickBooks 中创建",
+        "xero_create": "在 Xero 中创建",
+        "deepl_translate": "使用 DeepL 翻译",
+        "openai_generate": "使用 OpenAI 生成"
       },
       "needsConnection": "需要连接:{name}",
       "connect": "连接",
@@ -4020,7 +4065,10 @@
           "ecommerce": "电子商务",
           "support": "客户支持",
           "marketing": "内容营销",
-          "sales": "销售管道"
+          "sales": "销售管道",
+          "data": "数据",
+          "operations": "运营",
+          "monitoring": "监控"
         },
         "finance_daily": {
           "name": "每天早上的财务摘要",
@@ -4061,6 +4109,56 @@
           "name": "每周线索评分",
           "description": "每周一：为您的HubSpot联系人评分并更新。",
           "instruction": "根据互动数据为每个联系人评分。分配1-100的分数和类别（热门/温和/冷淡）。列出本周需要跟进的前5个线索。"
+        },
+        "data_pipeline": {
+          "name": "每日数据流程",
+          "description": "每天 06:00：读取网页，整理并排序条目，生成摘要，并发送到表格和 Slack。",
+          "instruction": "请用五行以内总结以下条目：有什么新内容、有什么变化、哪些需要注意。只使用数据中的内容。"
+        },
+        "customer_onboarding": {
+          "name": "新客户引导",
+          "description": "有新客户时：提取其信息，撰写欢迎消息并通过邮件发送，创建任务并更新 CRM。",
+          "instruction": "仅根据以下信息，为这位新客户写一条简短而热情的欢迎消息，并说明下一步。"
+        },
+        "social_monitor": {
+          "name": "社交提及监测",
+          "description": "每天 09:00：读取最近的提及，判断情感，分类整理，并把重要的发送到 Slack。",
+          "instruction": "请总结今天的提及：大家称赞什么、抱怨什么、哪些需要回复。只使用下面的提及内容。"
+        },
+        "invoice_processor": {
+          "name": "发票处理",
+          "description": "收到发票邮件时：提取供应商、金额和日期，核对后加入表格和账务系统，并通知团队。",
+          "instruction": "请检查下面的发票信息，用两行简短说明是否有缺失或错误（金额、日期、供应商）。"
+        },
+        "competitor_tracker": {
+          "name": "竞争对手跟踪",
+          "description": "每天 07:30：读取竞争对手的页面，找出变化，并通过邮件发给你一条简短说明。",
+          "instruction": "请用三行简短说明此页面与之前相比有哪些变化，以及为什么可能重要。只使用下面的文本。"
+        },
+        "report_generator": {
+          "name": "每周报告",
+          "description": "每周一 08:00：读取你的表格，汇总数字，撰写分析，并以 PDF 发送到邮箱、Drive 和 Slack。",
+          "instruction": "请根据下面的数字写一份简短的每周报告：总计、变化最大的部分，以及一件需要关注的事。只使用给出的数字。"
+        },
+        "webhook_processor": {
+          "name": "Webhook 处理",
+          "description": "当其他系统发来事件时：提取字段，写一条简短说明，保存到你的数据库，回复发送方并通知 Slack。",
+          "instruction": "请用一句清晰的话说明这个事件是什么，以及（如有）需要做什么。只使用下面的数据。"
+        },
+        "crm_sync": {
+          "name": "CRM 同步",
+          "description": "每天 06:30：找出新联系人，去除重复，为每人写一条简短备注，并更新你的 CRM。",
+          "instruction": "请为下面每位新联系人写一行：他们是谁，下一步应该做什么。只使用给出的数据。"
+        },
+        "content_pipeline": {
+          "name": "内容发布流程",
+          "description": "每天 10:00：读取订阅源，挑出重点内容，为 LinkedIn、X 和 Facebook 撰写帖子，并在发布前等待你的批准。",
+          "instruction": "请就下面最有趣的一条内容写一则简短清晰、语气友好的帖子。不要编造事实。"
+        },
+        "alert_system": {
+          "name": "可用性告警",
+          "description": "每晚检查一个网址，如有异常，评估严重程度，通过 Slack 和邮件提醒你并创建任务。",
+          "instruction": "请用两行简短说明下面检查结果中哪里有问题，以及紧急程度。只使用给出的数据。"
         }
       },
       "timeSaved": {
@@ -4100,6 +4198,43 @@
           "socialPost": "每天12点阅读RSS最新新闻并创建社交媒体帖子"
         },
         "paste": "粘贴任何内容"
+      },
+      "nodeEdit": {
+        "settings": "设置",
+        "transformInstruction": "转换指令",
+        "noteText": "备注内容",
+        "onError": "出错时",
+        "errContinue": "继续",
+        "errStop": "停止流程",
+        "errRetry": "重试",
+        "retryCount": "重试次数",
+        "retryDelay": "重试间隔（秒）",
+        "maxIterations": "最大迭代次数",
+        "batchSize": "批次大小",
+        "mergeMode": "合并方式",
+        "chooseBranch": "选择分支",
+        "maxItems": "最大条目数",
+        "dedupeField": "按字段去重",
+        "routeField": "按字段分流",
+        "findNew": "查找新增条目",
+        "findRemoved": "查找已删除条目",
+        "findChanged": "查找已更改条目",
+        "add": "添加",
+        "attrOptional": "属性（可选）",
+        "categories": "类别（每行一个）",
+        "sentimentInfo": "分析输入文本的情感，返回正面、负面或中性。",
+        "fieldsToExtract": "要提取的字段（每行一个）",
+        "statusCode": "状态码",
+        "responseBody": "响应内容",
+        "duplicate": "复制",
+        "runHint": "请点击上方的“立即运行”或“试运行（不发送）”",
+        "notePlaceholder": "为流程的这一部分添加备注",
+        "transformPlaceholder": "从每个条目中提取姓名、邮箱和电话",
+        "canvasSearch": "搜索节点...",
+        "canvasNone": "未找到节点",
+        "canvasTidy": "整理",
+        "canvasKeys": "Del · Ctrl+D · 1：适应 · 0：100%",
+        "conditionHint": "例如：数据包含“紧急”"
       }
     },
     "flows": {

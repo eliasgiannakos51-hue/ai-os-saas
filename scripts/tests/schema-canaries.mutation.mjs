@@ -125,9 +125,9 @@ const MUTANTS = [
     // (20261108), a file with a table well inside the window.
     name: "a migration in the window loses its canary — the state all three new screens were in",
     file: CANARIES,
-    from: "  {\n    kind: \"table\",\n    table: \"pending_deletions\",\n    migration: \"20261108000000_pending_deletions.sql\",\n    breaks: \"With the switch \\\"deferred-deletion\\\" on, confirming an account deletion fails at its last step: scheduleDeletion's insert fails, the link is given back, and the person sees «Something went wrong» every time they try; Settings cannot show or cancel a scheduled deletion and api/cron/execute-deletions finds nothing to run\",\n  },\n",
+    from: "  {\n    kind: \"table\",\n    table: \"automation_run_step_outputs\",\n    migration: \"20261126100000_automation_run_step_outputs.sql\",\n    breaks: \"the input/output panels of a run stay empty; the run itself still works, because a failed output write is logged and never fails the run\",\n  },\n",
     to: "",
-    expect: "20261108000000_pending_deletions.sql",
+    expect: "20261126100000_automation_run_step_outputs.sql",
   },
   {
     // 8b. AND THE CLAUSE THE OLD MUTANT WAS ACTUALLY DRIVING, kept —
@@ -145,12 +145,12 @@ const MUTANTS = [
     // that add nothing a probe can see; pointed at a file that DOES add
     // something, it is a way to make section 3 green by declaring the
     // question uninteresting.
-    // RE-ANCHORED 2026-11-04 to pending_deletions for the same reason as 8:
+    // RE-ANCHORED 2026-11-28 to automation_run_step_outputs (the window slid past pending_deletions when two migrations landed); earlier 2026-11-04 to pending_deletions for the same reason as 8:
     // an excuse for a file outside the window is red on the window clause.
     name: "a migration that really does add a table is excused as unprobeable",
     file: GATE,
     from: 'const NOT_PROBEABLE = {',
-    to: 'const NOT_PROBEABLE = {\n  "20261108000000_pending_deletions.sql": "excused by a mutation, with a reason long enough to clear the length check",',
+    to: 'const NOT_PROBEABLE = {\n  "20261126100000_automation_run_step_outputs.sql": "excused by a mutation, with a reason long enough to clear the length check",',
     expect: "it really adds nothing canaried",
   },
   {

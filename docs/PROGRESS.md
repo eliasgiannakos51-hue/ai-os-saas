@@ -13198,3 +13198,7 @@ The owner's screenshot of «Daily Mega Pipeline» (113 nodes) showed the canvas 
 ### 2026-11-28 (fix/canvas-open-on-start) — the first-row fit ran too early
 
 After #532 the owner's screenshot showed the wrapped rows but the view still opened on the middle of the flow: the fit was in `onInit`, before React Flow had measured the cards. It now runs once from `useNodesInitialized()` in `flow-canvas.tsx`. Not looked at in a browser; `npm run gates` exit 0, 2026-11-28.
+
+### 2026-11-28 (fix/canvas-one-line-n8n) — back to one line, looked at in a browser this time
+
+The wrapped rows of #532 were a mistake: the return edge ran under the labels and the canvas no longer looked like n8n. `WRAP_COLS` is 1000 again (one line, panned), the first view fits `OPEN_NODES` (9) cards, the input handle is a round dot like the output, and the stray orange «→» beside Switch is gone. Seen, for once: a throwaway esbuild bundle of `FlowCanvasView` with a stubbed `next-intl`, 113 and 12 mock boxes, Chromium screenshots (not committed; the real page behind sign-in was not seen). `npm run gates` exit 0, 2026-11-28.

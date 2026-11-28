@@ -333,7 +333,7 @@ function AutomationNode({ data, selected }: NodeProps) {
         {/* Input port — rectangle on left (n8n style) */}
         {!isStart && (
           <Handle type="target" position={Position.Left} id="left"
-            style={{ background: "#6b7280", border: "none", width: 6, height: 14, borderRadius: 2, left: -3 }} />
+            style={{ background: "rgb(var(--foreground) / 0.4)", border: "2px solid rgb(var(--panel))", width: 10, height: 10, borderRadius: "50%", left: -5 }} />
         )}
 
         {/* Circular icon — centered, 42px for 96px card */}
@@ -358,9 +358,6 @@ function AutomationNode({ data, selected }: NodeProps) {
         )}
 
         {/* Switch: route labels */}
-        {SWITCH_KINDS.has(box.kind) && (
-          <div style={{ position: "absolute", right: -18, top: 20, fontSize: 7, fontWeight: 600, color: accent }}>→</div>
-        )}
       </div>
 
       {/* Title below — 12px per spec Γ1 */}
@@ -506,7 +503,8 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode, sti
  */
 const X_STEP = 160;     // horizontal spacing — 96px card + 64px gap
 const Y_STEP = 140;     // vertical offset for branching
-const WRAP_COLS = 8;    // cards per row before the auto-layout wraps
+const WRAP_COLS = 1000; // cards per row; one line like n8n — a long flow is panned, not wrapped
+const OPEN_NODES = 9;   // how many cards the first view fits (about a screen at a readable size)
 const ROW_STEP = 210;    // vertical distance between wrapped rows
 const CENTER_Y = 0;     // main flow Y
 const NOTE_OFFSET_Y = 250; // sticky notes go below the main flow
@@ -691,7 +689,7 @@ function FlowCanvasInner({
   useEffect(() => {
     if (!measured || fittedOnce.current) return;
     fittedOnce.current = true;
-    reactFlowInstance.fitView({ nodes: nodes.slice(0, WRAP_COLS + 1).map((n) => ({ id: n.id })), padding: 0.12, maxZoom: 1, minZoom: 0.5 });
+    reactFlowInstance.fitView({ nodes: nodes.slice(0, OPEN_NODES).map((n) => ({ id: n.id })), padding: 0.12, maxZoom: 1, minZoom: 0.5 });
   }, [measured, nodes, reactFlowInstance]);
 
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {

@@ -463,7 +463,7 @@ const runnerSrc = code("src/lib/automations/runner.ts");
 const progressStart = runnerSrc.indexOf("async function reportProgress");
 const progressFn = runnerSrc.slice(progressStart, runnerSrc.indexOf("\n}\n", progressStart) + 3);
 check("the runner writes what it has done before each box it starts — the real state the canvas reads",
-  /for \(let i = ctx\.resume\?\.at \?\? 0; i < boxes\.length; i\+\+\) \{\s*const box = boxes\[i\];\s*if \(steps\.length > 0\) await reportProgress\(ctx, steps\);\s*if \(box\.kind === "start"\)/.test(runnerSrc));
+  /for \(let i = ctx\.resume\?\.at \?\? 0; i < boxes\.length; i\+\+\) \{\s*const box = boxes\[i\];\s*if \(steps\.length > 0\) await reportProgress\(ctx, steps\);[\s\S]{0,1800}?if \(box\.kind === "start"\)/.test(runnerSrc));
 check("…only onto the person's own row while it is still running, never bringing a closed run back",
   /\.update\(\{ steps \}\)\s*\.eq\("id", ctx\.runId\)\s*\.eq\("user_id", ctx\.user\.id\)\s*\.eq\("status", "running"\);/.test(progressFn));
 check("…and a failed progress write is logged, never stops the run", /if \(error\) logApiError\("automations:run", error, \{ stage: "progress" \}\);/.test(progressFn) && !/throw|return \{/.test(progressFn));

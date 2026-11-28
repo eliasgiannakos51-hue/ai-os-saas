@@ -122,6 +122,21 @@ export async function loadMinutesSaved(supabase: SupabaseClient, userId: string)
 }
 
 /**
+ * THE CONNECTIONS AND POSITIONS of every automation (automation_flows.edges
+ * and .layout, 20261126000000), in a query OF ITS OWN and never in
+ * FLOW_COLUMNS, for the reason loadMinutesSaved gives: a missing column
+ * answers null here and the screen is a plain chain, exactly what it was.
+ */
+export async function loadGraphs(supabase: SupabaseClient, userId: string): Promise<Record<string, { edges: unknown; layout: unknown }> | null> {
+  const { data, error } = await supabase.from("automation_flows").select("id, edges, layout").eq("user_id", userId).limit(MAX_FLOWS);
+  if (error) {
+    if (!isColumnMissing(error)) logApiError("dashboard/automation", error, { stage: "graphs" });
+    return null;
+  }
+  return Object.fromEntries(((data ?? []) as { id: string; edges: unknown; layout: unknown }[]).map((row) => [row.id, { edges: row.edges, layout: row.layout }]));
+}
+
+/**
  * HOW MANY TIMES ONE AUTOMATION DID ITS JOB: finished (`done`) runs that
  * the schedule, a file or «Εκτέλεση τώρα» started — never a «Δοκιμή»
  * (lib/automations/time-saved.ts COUNTED_STARTS). Counted by the
@@ -171,7 +186,9 @@ export async function loadAutomationPage(
    *  switch Κομμάτι 1 shipped behind): closed, the mode is not even read,
    *  and no selector is drawn — a customer who cannot write the mode is
    *  never shown one that cannot save it. */
-  modeOn = false
+  modeOn = false,
+  /** Whether "automation-canvas-cards" is open to this reader: closed, the connections and positions are not even read. */
+  graphOn = false
 ): Promise<AutomationPageData> {
   const supabase = await createClient();
   const runId = runParam && UUID.test(runParam) ? runParam : null;
@@ -190,6 +207,10 @@ export async function loadAutomationPage(
   ]);
   if (flowsResult.error) logApiError("dashboard/automation", flowsResult.error, { stage: "flows" });
   const flows = (flowsResult.data ?? []) as Record<string, unknown>[];
+  if (graphOn && flows.length > 0) {
+    const graphs = await loadGraphs(supabase, user.id);
+    if (graphs) for (const flow of flows) Object.assign(flow, graphs[flow.id as string] ?? {});
+  }
 
   let openId: string | null = null;
   if (runId) {

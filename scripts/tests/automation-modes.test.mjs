@@ -114,7 +114,7 @@ check("imports withSupervisedApprovals and DEFAULT_FLOW_MODE from boxes.ts, not 
 check("FlowRow carries an optional mode", /mode\?:\s*FlowMode/.test(runnerSrc));
 check("the transform runs only for \"supervised\"", /mode === "supervised" \? withSupervisedApprovals\(decryptedBoxes\) : decryptedBoxes/.test(runnerSrc));
 check("a resume past the rebuilt length fails the run instead of reading boxes[i] out of bounds",
-  /ctx\.resume && ctx\.resume\.at > boxes\.length/.test(runnerSrc) && /resume_mismatch/.test(runnerSrc));
+  /ctx\.resume && ctx\.resume\.at > listBoxes\.length/.test(runnerSrc) && /resume_mismatch/.test(runnerSrc));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. EVERY call site uses effectiveDry — none computes dry its own way ==");
@@ -190,11 +190,11 @@ check("…answers null for the whole map on any error, including a column not th
 check("…and a row with no mode yet (or a bad value) falls to DEFAULT_FLOW_MODE, never undefined",
   /isFlowMode\(row\.mode\) \? row\.mode : DEFAULT_FLOW_MODE/.test(pageData));
 check("loadAutomationPage takes modeOn, defaulting closed, and only then reads it",
-  /modeOn = false\s*\n\)/.test(pageData) && /modeOn \? loadModes\(supabase, user\.id\) : Promise\.resolve\(null\)/.test(pageData) && /modes,/.test(pageData));
+  /modeOn = false,[\s\S]{0,200}?graphOn = false\s*\n\)/.test(pageData) && /modeOn \? loadModes\(supabase, user\.id\) : Promise\.resolve\(null\)/.test(pageData) && /modes,/.test(pageData));
 
 const dashPage = code("src/app/dashboard/[module]/page.tsx");
 check("the dashboard page reads the mode with the SAME switch it reads the selector's own write behind — one flag, not two that could disagree",
-  /loadAutomationPage\(user, searchParams\.run, searchParams\.flow, searchParams\.projectId, timeSavedOn, simplePro\)/.test(dashPage) &&
+  /loadAutomationPage\(user, searchParams\.run, searchParams\.flow, searchParams\.projectId, timeSavedOn, simplePro, canvasCardsOn\)/.test(dashPage) &&
     /initialModes=\{data\.modes\}/.test(dashPage));
 
 const shellSrc = code("src/components/automations/automation-shell.tsx");

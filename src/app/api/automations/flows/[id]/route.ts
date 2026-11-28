@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isFlowMode, readFlow } from "@/lib/automations/boxes";
+import { validateEdges, validateLayout } from "@/lib/automations/graph-edit";
+import { reconcileStoredEdges } from "@/lib/automations/graph-store";
 import { FLOW_COLUMNS, UUID, claimFlow, flowGate, isColumnMissing, refuse, releaseFlow, saveVersion, scheduleAfterChange, type FlowRecord } from "@/lib/automations/flow-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isFeatureOn } from "@/lib/flags/flags";
@@ -105,6 +107,35 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     plain.name = name;
   }
 
+  // THE CONNECTIONS AND POSITIONS of the canvas (automation_flows.edges and
+  // .layout, 20261126000000): what a person drew by hand. Checked against the
+  // boxes the flow will have (graph-edit.ts), and only behind the switch the
+  // canvas is behind. null clears them: the flow is a plain chain again.
+  let graphPatch: Record<string, unknown> | null = null;
+  if (body.edges !== undefined || body.layout !== undefined) {
+    if (!(await isFeatureOn("automation-canvas-cards", user))) return refuse("not_enabled", 403);
+    const will = readFlow(body.boxes !== undefined ? body.boxes : flow.boxes);
+    if (!will.ok) return refuse("bad_boxes", 400, { reason: will.reason });
+    const boxIds = new Set(will.boxes.map((b) => b.id));
+    graphPatch = {};
+    if (body.edges !== undefined) {
+      if (body.edges === null) graphPatch.edges = null;
+      else {
+        const verdict = validateEdges(body.edges, boxIds);
+        if (!verdict.ok) return refuse("bad_edges", 400, { reason: verdict.reason });
+        graphPatch.edges = verdict.edges;
+      }
+    }
+    if (body.layout !== undefined) {
+      if (body.layout === null) graphPatch.layout = null;
+      else {
+        const verdict = validateLayout(body.layout, boxIds);
+        if (!verdict.ok) return refuse("bad_layout", 400, { reason: verdict.reason });
+        graphPatch.layout = verdict.layout;
+      }
+    }
+  }
+
   let paused: string[] = [];
   if (body.boxes !== undefined) {
     const verdict = readFlow(body.boxes);
@@ -115,6 +146,14 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       paused = schedule.paused;
       const saved = await saveVersion({ flowId: id, userId: user.id, version: flow.version + 1, boxes: verdict.boxes, said: BY_HAND, extra: { ...schedule.patch, ...plain } });
       if (!saved) return refuse("save_failed", 500);
+      // Connections the person drew follow the boxes: a removed box takes its
+      // connections and joins its neighbours, a new box hangs after the one
+      // before it (graph-edit.ts reconcileEdges). Only when this request does
+      // not bring connections of its own.
+      if (body.edges === undefined) {
+        const before = readFlow(flow.boxes);
+        if (before.ok) await reconcileStoredEdges(id, user.id, before.boxes, verdict.boxes);
+      }
     } finally {
       await releaseFlow(id, user.id);
     }
@@ -124,8 +163,16 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       logApiError("/api/automations/flows/[id]", error, { stage: "plain" });
       return refuse("save_failed", 500);
     }
-  } else if (minutesSaved === undefined && mode === undefined) {
+  } else if (minutesSaved === undefined && mode === undefined && !graphPatch) {
     return refuse("nothing_to_change", 400);
+  }
+  if (graphPatch && Object.keys(graphPatch).length > 0) {
+    const { error } = await createAdminClient().from("automation_flows").update(graphPatch).eq("id", id).eq("user_id", user.id);
+    if (error) {
+      if (isColumnMissing(error)) return refuse("not_ready", 409);
+      logApiError("/api/automations/flows/[id]", error, { stage: "graph" });
+      return refuse("save_failed", 500);
+    }
   }
 
   const { data: row } = await supabase.from("automation_flows").select(FLOW_COLUMNS).eq("id", id).eq("user_id", user.id).maybeSingle();

@@ -88,7 +88,7 @@ export default async function ModulePage(
       isFeatureOn("automation-canvas-cards", user),
       isFeatureOn("automation-groups-subflows", user),
     ]);
-    const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn, simplePro);
+    const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn, simplePro, canvasCardsOn);
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
         <AutomationShell

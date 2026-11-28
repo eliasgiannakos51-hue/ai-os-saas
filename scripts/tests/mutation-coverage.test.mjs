@@ -339,7 +339,7 @@ console.log(
 // the first cinematic-sites style actually wired into generation — see
 // docs/PROGRESS.md 2026-11-09) on top of that — the floor is whatever this
 // rebased tree measures now.
-const RATCHET = 328;
+const RATCHET = 334;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

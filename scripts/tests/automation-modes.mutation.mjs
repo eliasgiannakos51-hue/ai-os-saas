@@ -55,14 +55,14 @@ const MUTANTS = [
   {
     name: "runFlow applies the supervised transform regardless of mode — auto automations get an uninvited approval gate",
     file: RUNNER,
-    from: 'const boxes: Box[] = mode === "supervised" ? withSupervisedApprovals(decryptedBoxes) : decryptedBoxes;',
-    to: "const boxes: Box[] = withSupervisedApprovals(decryptedBoxes);",
+    from: 'const listBoxes: Box[] = mode === "supervised" ? withSupervisedApprovals(decryptedBoxes) : decryptedBoxes;',
+    to: "const listBoxes: Box[] = withSupervisedApprovals(decryptedBoxes);",
     expect: "the transform runs only for \"supervised\"",
   },
   {
     name: "runFlow drops the resume-bounds guard — a stale index after a mode change reads boxes[i] out of bounds",
     file: RUNNER,
-    from: 'if (ctx.resume && ctx.resume.at > boxes.length) {\n    return { status: "failed", steps: [...ctx.resume.steps], credits: ctx.resume.credits, error: "flow:resume_mismatch" };\n  }',
+    from: 'if (ctx.resume && ctx.resume.at > listBoxes.length) {\n    return { status: "failed", steps: [...ctx.resume.steps], credits: ctx.resume.credits, error: "flow:resume_mismatch" };\n  }',
     to: "",
     expect: "a resume past the rebuilt length fails the run",
   },
@@ -150,8 +150,8 @@ const MUTANTS = [
   {
     name: "the dashboard page stops reading mode behind the same switch Κομμάτι 1 shipped — it reads timeSavedOn's flag for mode too, or none at all",
     file: DASH_PAGE,
-    from: "loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn, simplePro)",
-    to: "loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn)",
+    from: "loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn, simplePro, canvasCardsOn)",
+    to: "loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn, undefined, canvasCardsOn)",
     expect: "one flag, not two that could disagree",
   },
   {

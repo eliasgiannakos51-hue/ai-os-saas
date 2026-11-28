@@ -22,6 +22,8 @@ import { parseMcpUrl, isBlockedAddress } from "@/lib/mcp/ssrf";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { applyTransform, REAL_TRANSFORM_KINDS } from "@/lib/automations/transforms";
 import { matchesSearch } from "@/lib/text/search-match";
+import { isBranching, joinInputs, walkOrder } from "@/lib/automations/graph-walk";
+import { loadEdges } from "@/lib/automations/graph-store";
 import { readFlow, readEdges, deriveEdgesFromList, withSupervisedApprovals, DEFAULT_FLOW_MODE, type ActionBox, type Box, type FlowEdge, type FlowMode, type ReadBox } from "@/lib/automations/boxes";
 import { decryptFlowBoxConfigs } from "@/lib/automations/config-crypto";
 import { APPROVAL_WAIT_HOURS, type RunStep } from "@/lib/automations/run-steps";
@@ -758,11 +760,11 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
   // way on a fresh run and on a resume of it (withSupervisedApprovals's
   // own doc comment says why that has to hold).
   const mode = ctx.flow.mode ?? DEFAULT_FLOW_MODE;
-  const boxes: Box[] = mode === "supervised" ? withSupervisedApprovals(decryptedBoxes) : decryptedBoxes;
+  const listBoxes: Box[] = mode === "supervised" ? withSupervisedApprovals(decryptedBoxes) : decryptedBoxes;
   // A resume whose stored index no longer fits this rebuild — the mode
   // changed under a waiting run, or the boxes did — fails the run
   // instead of reading the wrong box at boxes[i].
-  if (ctx.resume && ctx.resume.at > boxes.length) {
+  if (ctx.resume && ctx.resume.at > listBoxes.length) {
     return { status: "failed", steps: [...ctx.resume.steps], credits: ctx.resume.credits, error: "flow:resume_mismatch" };
   }
   const steps: RunStep[] = ctx.resume ? [...ctx.resume.steps] : [];
@@ -788,7 +790,28 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
     isFeatureOn("automation-real-logic", ctx.user),
     isFeatureOn("automation-run-outputs", ctx.user),
   ]);
-  const graphEdges = realLogicOn ? readEdges(ctx.flow.edges) : null;
+  // The connections come from the database in a query of their own
+  // (lib/automations/graph-store.ts) unless the caller already has them.
+  const graphEdges = realLogicOn ? readEdges(ctx.flow.edges !== undefined ? ctx.flow.edges : await loadEdges(ctx.flow.id, ctx.flow.user_id)) : null;
+  // A flow whose connections branch or join is walked as a graph (see
+  // lib/automations/graph-walk.ts); a plain chain runs as it always did.
+  const graphMode = graphEdges !== null && isBranching(graphEdges);
+  let boxes: Box[] = listBoxes;
+  if (graphMode) {
+    const order = walkOrder(listBoxes.map((b) => b.id), graphEdges);
+    if (!order) return { status: "failed", steps: [], credits: 0, error: "flow:graph_cycle" };
+    // A run that waits for an approval is resumed from a row index and one
+    // running text; a graph has neither, so a graph never waits (yet).
+    if (ctx.resume || (!ctx.dry && listBoxes.some((b) => b.kind === "approval"))) {
+      return { status: "failed", steps: [], credits: 0, error: "flow:graph_approval_unsupported" };
+    }
+    const byId = new Map(listBoxes.map((b) => [b.id, b]));
+    boxes = order.map((id) => byId.get(id) as Box);
+  }
+  /** Graph walk: what each box that ran produced, which connections were taken, and the box that ran last. */
+  const outputs = new Map<string, { text: string; readCount: number }>();
+  const taken = new Set<string>();
+  let lastRan: Box | null = null;
   const storeOutput = async (boxId: string, output: string): Promise<void> => {
     if (runOutputsOn) await storeStepOutput(ctx, boxId, output);
   };
@@ -797,6 +820,21 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
   for (let i = ctx.resume?.at ?? 0; i < boxes.length; i++) {
     const box = boxes[i];
     if (steps.length > 0) await reportProgress(ctx, steps);
+    if (graphMode && graphEdges) {
+      // What the box that ran last produced, and which of its connections
+      // that opens (a condition opens one of its two, a switch one rule's).
+      if (lastRan) {
+        outputs.set(lastRan.id, { text, readCount });
+        const out = graphEdges.filter((e) => e.from === lastRan!.id);
+        const nextIds = lastRan.kind === "loop" ? out.filter((e) => e.fromPort !== "loop").map((e) => e.to) : pickNextBoxes(lastRan, text, readCount, graphEdges, loopCounters).nextIds;
+        for (const e of out) if (nextIds.includes(e.to)) taken.add(e.id);
+      }
+      const fed = graphEdges.filter((e) => e.to === box.id && taken.has(e.id));
+      // Not reached: the other side of a condition, or a box nothing leads to.
+      if (box.kind !== "start" && fed.length === 0) continue;
+      lastRan = box;
+      if (fed.length > 0) ({ text, readCount } = joinInputs(fed.map((e) => e.from), outputs));
+    }
     if (box.kind === "start") {
       steps.push({ box: box.id, status: "ok", note: "started" });
       continue;
@@ -818,7 +856,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
       steps.push({ box: box.id, status: empty ? "stopped" : "ok", note: empty ? "condition_empty" : "condition_met" });
       // With graph edges: follow the true/false port to the right box.
       // Without graph edges (linear): stop if empty (original behavior).
-      if (graphEdges) {
+      if (graphEdges && !graphMode) {
         const edges: FlowEdge[] = graphEdges;
         const { nextIds } = pickNextBoxes(box, text, readCount, edges, loopCounters);
         if (nextIds.length > 0) {
@@ -829,6 +867,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
         // No target: stop
         return { status: empty ? "stopped" : "done", steps, credits };
       }
+      if (graphMode) continue; // the walk opens the true or the false connection at the next box
       if (empty) return { status: "stopped", steps, credits };
       continue;
     }
@@ -932,6 +971,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
     if (box.kind === "filter") {
       const hasData = text.trim().length > 0;
       steps.push({ box: box.id, status: hasData ? "ok" : "stopped", note: hasData ? "condition_met" : "condition_empty" });
+      if (graphMode) continue;
       if (graphEdges) {
         const { nextIds } = pickNextBoxes(box, text, readCount, graphEdges, loopCounters);
         if (nextIds.length > 0) {
@@ -984,7 +1024,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
     // n8n advanced nodes (2026-11-24):
     if (box.kind === "error_handler") {
       steps.push({ box: box.id, status: "ok", note: "error_handler_set" });
-      if (graphEdges) {
+      if (graphEdges && !graphMode) {
         const { nextIds } = pickNextBoxes(box, text, readCount, graphEdges, loopCounters);
         if (nextIds.length > 0) { const idx = boxes.findIndex((b) => b.id === nextIds[0]); if (idx >= 0) { i = idx - 1; continue; } }
       }
@@ -992,7 +1032,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
     }
     if (box.kind === "loop") {
       // Loop: with graph edges, follow loop/done port based on counter
-      if (graphEdges) {
+      if (graphEdges && !graphMode) {
         const { port, nextIds } = pickNextBoxes(box, text, readCount, graphEdges, loopCounters);
         steps.push({ box: box.id, status: "ok", note: port === "done" ? "loop_done" : "loop_started" });
         if (nextIds.length > 0) { const idx = boxes.findIndex((b) => b.id === nextIds[0]); if (idx >= 0) { i = idx - 1; continue; } }
@@ -1024,7 +1064,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
         : port === "route_2" ? "switch_route_2" as const
         : "switch_route_3" as const;
       steps.push({ box: box.id, status: "ok", note: switchNote });
-      if (nextIds.length > 0) { const idx = boxes.findIndex((b) => b.id === nextIds[0]); if (idx >= 0) { i = idx - 1; continue; } }
+      if (nextIds.length > 0 && !graphMode) { const idx = boxes.findIndex((b) => b.id === nextIds[0]); if (idx >= 0) { i = idx - 1; continue; } }
       continue;
     }
     // limit / sort / remove_duplicates / set really change the text while

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { readFlow } from "@/lib/automations/boxes";
+import { reconcileStoredEdges } from "@/lib/automations/graph-store";
 import { FLOW_COLUMNS, UUID, claimFlow, flowGate, refuse, releaseFlow, scheduleAfterChange, type FlowRecord } from "@/lib/automations/flow-access";
 
 export const dynamic = "force-dynamic";
@@ -66,6 +67,8 @@ export async function POST(_request: Request, props: { params: Promise<{ id: str
       logApiError("/api/automations/flows/[id]/undo", error, { stage: "save" });
       return refuse("save_failed", 500);
     }
+    const before = readFlow(flow.boxes);
+    if (before.ok) await reconcileStoredEdges(id, user.id, before.boxes, verdict.boxes);
     const { data: row } = await supabase.from("automation_flows").select(FLOW_COLUMNS).eq("id", id).eq("user_id", user.id).maybeSingle();
     return NextResponse.json({ ok: true, flow: row, paused: schedule.paused });
   } finally {

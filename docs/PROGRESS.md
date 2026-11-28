@@ -13184,3 +13184,9 @@ deny-all RLS), 4 lib (`connect.ts`, `products.ts`, `checkout.ts`,
 **Έλεγχοι.** `npx tsc --noEmit` καθαρό· `npm run build:ci` πέρασε· `dependency-floors.mutation.mjs` 9 από 9 caught. `npm run gates`: 379 από 379 πέρασαν (2026-11-07, τοπικά, μία φορά· η πρώτη εκτέλεση έπεσε στο `mutation-suite-shape` γιατί τα anchors του `dependency-floors.mutation.mjs` έδειχναν την παλιά έκδοση — διορθώθηκε σε αυτό το commit).
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+### 2026-11-28 — CI on PR #528, what was and was not ours
+
+Measured 2026-11-28 from the run logs of run 46028196840 and by running the same mutation suites on a checkout of origin/main:
+- `schema-canaries.mutation.mjs` was ours: two new migrations pushed `20261108000000_pending_deletions.sql` out of the newest-12 window, so two mutants named a file outside it. Re-anchored to `20261126100000_automation_run_step_outputs.sql`. It still prints a different one-mutant miss on some runs (red with an empty message); not explained.
+- Red on origin/main too, not touched here: `gate-independence`, `integrations-copy`, `tool-shell`, `ionexa-payments` (6 mutants missed), and the `routes-smoke` browser step (the `site-design` button is not visible). `chat-opens-tools` has a red itest baseline (needs a database) and `voice-conversation` was not reproduced locally (9 of 10).

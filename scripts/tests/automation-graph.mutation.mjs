@@ -12,6 +12,8 @@ const GATE = "scripts/tests/automation-graph.test.mjs";
 const EDIT = "src/lib/automations/graph-edit.ts";
 const WALK = "src/lib/automations/graph-walk.ts";
 const RUNNER = "src/lib/automations/runner.ts";
+const CANVAS = "src/components/automations/flow-canvas.tsx";
+const PATCH = "src/app/api/automations/flows/[id]/route.ts";
 
 const MUTANTS = [
   { name: "a cycle is accepted", file: EDIT, from: "if (hasCycle(edges)) return { ok: false, reason: \"cycle\" };", to: "", expect: "a cycle is refused" },
@@ -27,6 +29,11 @@ const MUTANTS = [
   { name: "a graph run may wait for an approval", file: RUNNER, from: "if (ctx.resume || (!ctx.dry && listBoxes.some((b) => b.kind === \"approval\"))) {", to: "if (false) {", expect: "a graph never waits for an approval" },
   { name: "a box reads the last box's text, not its feeders'", file: RUNNER, from: "if (fed.length > 0) ({ text, readCount } = joinInputs(fed.map((e) => e.from), outputs));", to: "", expect: "a box reads what its feeders made" },
   { name: "a condition ends the whole graph run", file: RUNNER, from: "if (graphMode) continue; // the walk opens the true or the false connection at the next box\n", to: "", expect: "a condition does not stop the whole run" },
+  { name: "a drawn line replaces the set instead of joining it", file: CANVAS, from: "onGraphChange({ edges: [...currentEdges, { id:", to: "onGraphChange({ edges: [{ id:", expect: "a drawn line is added to the WHOLE current set" },
+  { name: "the card clips its round ports again", file: CANVAS, from: '        position: "relative",\n        transition: "all 0.15s",', to: '        position: "relative", overflow: "hidden",\n        transition: "all 0.15s",', expect: "the card does not clip its own round ports" },
+  { name: "the canvas can connect even when nothing saves", file: CANVAS, from: "nodesConnectable={Boolean(onGraphChange)}", to: "nodesConnectable", expect: "the canvas can connect only when it was given a way to save" },
+  { name: "PATCH takes connections for everyone", file: PATCH, from: 'if (!(await isFeatureOn("automation-canvas-cards", user))) return refuse("not_enabled", 403);', to: "", expect: "PATCH takes connections and positions only behind" },
+  { name: "PATCH skips the check against the boxes", file: PATCH, from: "const verdict = validateEdges(body.edges, boxIds);", to: "const verdict = { ok: true as const, edges: body.edges as never };", expect: "PATCH checks them against the boxes" },
 ];
 
-runMutations({ name: "automation-graph", gate: GATE, targets: [EDIT, WALK, RUNNER], mutants: MUTANTS.filter((m) => m.expect !== "never") });
+runMutations({ name: "automation-graph", gate: GATE, targets: [EDIT, WALK, RUNNER, CANVAS, PATCH], mutants: MUTANTS.filter((m) => m.expect !== "never") });

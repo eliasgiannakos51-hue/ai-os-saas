@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isFlowMode, readFlow } from "@/lib/automations/boxes";
 import { validateEdges, validateLayout } from "@/lib/automations/graph-edit";
-import { reconcileStoredEdges } from "@/lib/automations/graph-store";
+import { reconcileStoredEdges, withGraph } from "@/lib/automations/graph-store";
 import { FLOW_COLUMNS, UUID, claimFlow, flowGate, isColumnMissing, refuse, releaseFlow, saveVersion, scheduleAfterChange, type FlowRecord } from "@/lib/automations/flow-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isFeatureOn } from "@/lib/flags/flags";
@@ -176,7 +176,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
   }
 
   const { data: row } = await supabase.from("automation_flows").select(FLOW_COLUMNS).eq("id", id).eq("user_id", user.id).maybeSingle();
-  return NextResponse.json({ ok: true, flow: row, paused, ...(minutesSaved !== undefined ? { minutesSaved } : {}), ...(mode !== undefined ? { mode } : {}) });
+  return NextResponse.json({ ok: true, flow: await withGraph(row, id, user.id), paused, ...(minutesSaved !== undefined ? { minutesSaved } : {}), ...(mode !== undefined ? { mode } : {}) });
 }
 
 export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {

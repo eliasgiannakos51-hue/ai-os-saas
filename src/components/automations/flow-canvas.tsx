@@ -505,6 +505,8 @@ const nodeTypes: NodeTypes = { automation: AutomationNode, addNode: AddNode, sti
  */
 const X_STEP = 160;     // horizontal spacing — 96px card + 64px gap
 const Y_STEP = 140;     // vertical offset for branching
+const WRAP_COLS = 8;    // cards per row before the auto-layout wraps
+const ROW_STEP = 210;    // vertical distance between wrapped rows
 const CENTER_Y = 0;     // main flow Y
 const NOTE_OFFSET_Y = 250; // sticky notes go below the main flow
 
@@ -531,41 +533,35 @@ function boxesToNodes(
     }
   }
 
-  // Auto-layout for workflow boxes without saved positions
-  let x = 0;
-  let y = CENTER_Y;
+  // Auto-layout for workflow boxes without saved positions. A long flow is
+  // wrapped into rows of WRAP_COLS cards (reading order, left to right, then
+  // the next row down) so 113 nodes are not one 18 000 px line that can only
+  // be seen as specks; the edge that returns to the left is drawn smoothstep
+  // by graphToEdges (goesLeft).
   let noteX = 0;
-
+  let col = 0;
+  let row = 0;
+  let branchY = 0;
   for (let i = 0; i < workflowBoxes.length; i++) {
     const box = workflowBoxes[i];
-    if (positions.has(box.id)) { x = positions.get(box.id)!.x; continue; }
+    if (positions.has(box.id)) continue;
 
     const prevIsBranch = i > 0 && BRANCH_KINDS.has(workflowBoxes[i - 1].kind);
     const isMerge = box.kind === "merge" || box.kind === "aggregate";
 
-    if (i === 0) {
-      positions.set(box.id, { x: 0, y: CENTER_Y });
-      x = 0;
-    } else if (prevIsBranch) {
-      // After branch: shift down to show branching visual
-      x += X_STEP;
-      y += Math.round(Y_STEP * 0.5);
-      positions.set(box.id, { x, y });
-    } else if (isMerge) {
-      // Merge: come back to center
-      x += X_STEP;
-      y = CENTER_Y;
-      positions.set(box.id, { x, y });
-    } else {
-      x += X_STEP;
-      positions.set(box.id, { x, y });
+    if (i > 0) {
+      col += 1;
+      if (col >= WRAP_COLS) { col = 0; row += 1; branchY = 0; }
     }
+    if (prevIsBranch) branchY = Math.round(Y_STEP * 0.5);
+    else if (isMerge) branchY = 0;
+    positions.set(box.id, { x: col * X_STEP, y: CENTER_Y + row * ROW_STEP + branchY });
   }
 
   // Place note sticky notes below the flow
   for (const note of noteBoxes) {
     if (!positions.has(note.id)) {
-      positions.set(note.id, { x: noteX, y: NOTE_OFFSET_Y });
+      positions.set(note.id, { x: noteX, y: NOTE_OFFSET_Y + row * ROW_STEP });
       noteX += 180;
     }
   }
@@ -670,7 +666,7 @@ function FlowCanvasInner({
       });
     }
     return { initialNodes: nodes, initialEdges: edges };
-  }, [boxes, kindNames, describe, onAdd, progress]);
+  }, [boxes, kindNames, describe, onAdd, progress, graphEdges, savedLayout]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
@@ -707,8 +703,8 @@ function FlowCanvasInner({
         onNodeClick={(e, n) => { closeContext(); onNodeClick(e, n); }}
         onNodeDoubleClick={(_, n) => { if (n.id !== "__add__") onChoose(n.id); }}
         onNodeContextMenu={onNodeContextMenu} onPaneClick={closeContext}
-        nodeTypes={nodeTypes} fitView
-        fitViewOptions={{ padding: 0.08, maxZoom: 1, minZoom: 0.7 }}
+        nodeTypes={nodeTypes}
+        onInit={(inst) => inst.fitView({ nodes: nodes.slice(0, WRAP_COLS + 1).map((n) => ({ id: n.id })), padding: 0.12, maxZoom: 1, minZoom: 0.5 })}
         minZoom={0.3} panOnDrag zoomOnScroll panOnScroll
         proOptions={{ hideAttribution: true }} style={{ background: "transparent" }}
         deleteKeyCode={null} defaultEdgeOptions={{ type: "default" }}>
